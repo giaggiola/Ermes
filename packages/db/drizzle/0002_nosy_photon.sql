@@ -1,0 +1,1 @@
+ALTER TABLE "email_flow" ADD COLUMN IF NOT EXISTS "tags" jsonb;

@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Builds
+.next/
+dist/
+coverage/
+backups/
+artifacts/
+*.tsbuildinfo
+
+# Runtime and local env
+.env
+.env.*
+!.env*.example
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,5 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@ermes/ui/styles.css";
+@import "./ermes.css";
+@source "../../../../packages/ui/src";

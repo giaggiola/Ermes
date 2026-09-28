@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Setup help and discussion
+    url: https://github.com/giaggiola/Ermes/discussions
+    about: Ask questions and discuss ideas with the community.
+  - name: Report a security vulnerability
+    url: https://github.com/giaggiola/Ermes/security/advisories/new
+    about: Report vulnerabilities privately; do not include them in public issues.

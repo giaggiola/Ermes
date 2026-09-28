@@ -1,0 +1,65 @@
+# syntax=docker/dockerfile:1
+
+FROM node:22-alpine AS deps
+WORKDIR /app
+
+COPY package*.json ./
+COPY apps/web/package*.json apps/web/
+COPY apps/worker/package*.json apps/worker/
+COPY packages/core/package*.json packages/core/
+COPY packages/db/package*.json packages/db/
+COPY packages/ui/package*.json packages/ui/
+
+RUN --mount=type=cache,target=/root/.npm npm ci
+
+FROM node:22-alpine AS builder
+WORKDIR /app
+
+ENV NEXT_TELEMETRY_DISABLED=1
+
+COPY --from=deps /app ./
+COPY . .
+
+RUN npm run build --workspace=@ermes/core \
+  && npm run build --workspace=@ermes/db \
+  && npm run build --workspace=@ermes/web \
+  && npm prune --omit=dev
+
+FROM node:22-alpine AS runner
+WORKDIR /app
+
+ENV HOSTNAME=0.0.0.0
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+
+LABEL org.opencontainers.image.source="https://github.com/giaggiola/Ermes"
+LABEL org.opencontainers.image.licenses="AGPL-3.0-only"
+
+RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
+
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/package-lock.json ./package-lock.json
+COPY --from=builder --chown=nextjs:nodejs /app/LICENSE /app/THIRD_PARTY_NOTICES.md ./
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/packages ./packages
+COPY --from=builder --chown=nextjs:nodejs /app/packages/core/package.json ./packages/core/package.json
+COPY --from=builder --chown=nextjs:nodejs /app/packages/core/dist ./packages/core/dist
+COPY --from=builder --chown=nextjs:nodejs /app/packages/db/package.json ./packages/db/package.json
+COPY --from=builder --chown=nextjs:nodejs /app/packages/db/dist ./packages/db/dist
+COPY --from=builder --chown=nextjs:nodejs /app/packages/db/drizzle ./packages/db/drizzle
+
+USER nextjs
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || exit 1
+
+# Migrations run on boot via apps/web/src/instrumentation.ts (Next bundles the migrator
+# because the app imports it), so the start command just serves. The drizzle/ folder is
+# copied above so the migrator can find the SQL at <cwd>/packages/db/drizzle.
+CMD ["node", "apps/web/server.js"]

@@ -1,0 +1,40 @@
+{
+  "name": "ermes",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Self-hosted Shopify email marketing and automation",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build:packages && npm run build -w @ermes/web && npm run build -w @ermes/worker",
+    "db:generate": "npm run db:generate --workspace=@ermes/db",
+    "db:migrate": "npm run db:migrate --workspace=@ermes/db",
+    "dev:web": "npm run dev --workspace=@ermes/web",
+    "dev:worker": "npm run dev --workspace=@ermes/worker",
+    "test": "npm run build --workspace=@ermes/core && npm run build --workspace=@ermes/db && node --experimental-strip-types --test --test-concurrency=1 tests/*.test.ts",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "setup": "node scripts/setup.mjs",
+    "build:packages": "npm run build -w @ermes/core && npm run build -w @ermes/db",
+    "test:ui": "node --experimental-strip-types --test tests/ui-boundary.test.ts",
+    "test:database": "node scripts/test-database.mjs"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "license": "AGPL-3.0-only",
+  "devDependencies": {
+    "@playwright/test": "^1.62.0",
+    "prettier": "^3.9.9"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/giaggiola/Ermes.git"
+  },
+  "homepage": "https://github.com/giaggiola/Ermes#readme",
+  "bugs": {
+    "url": "https://github.com/giaggiola/Ermes/issues"
+  }
+}

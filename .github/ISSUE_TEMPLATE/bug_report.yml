@@ -1,0 +1,31 @@
+name: Bug report
+description: Report a reproducible problem with Ermes
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Use synthetic data. Never attach .env, provider keys or customer records. Report vulnerabilities through the Security tab."
+  - type: input
+    id: version
+    attributes:
+      label: Commit or version
+      description: Include your Docker/Compose version and operating system if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: behaviour
+    attributes:
+      label: Expected and actual behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs or screenshots
+      description: Remove secrets and customer information before posting.

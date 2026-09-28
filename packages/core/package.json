@@ -1,0 +1,93 @@
+{
+  "name": "@ermes/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./signup-form-schema": {
+      "types": "./dist/signup-form-schema.d.ts",
+      "default": "./dist/signup-form-schema.js"
+    },
+    "./env": {
+      "types": "./dist/env.d.ts",
+      "default": "./dist/env.js"
+    },
+    "./events": {
+      "types": "./dist/events.d.ts",
+      "default": "./dist/events.js"
+    },
+    "./email-templates": {
+      "types": "./dist/email-templates.d.ts",
+      "default": "./dist/email-templates.js"
+    },
+    "./flow-types": {
+      "types": "./dist/flow-types.d.ts",
+      "default": "./dist/flow-types.js"
+    },
+    "./flow-recipes": {
+      "types": "./dist/flow-recipes.d.ts",
+      "default": "./dist/flow-recipes.js"
+    },
+    "./http-signing": {
+      "types": "./dist/http-signing.d.ts",
+      "default": "./dist/http-signing.js"
+    },
+    "./idempotency": {
+      "types": "./dist/idempotency.d.ts",
+      "default": "./dist/idempotency.js"
+    },
+    "./queue": {
+      "types": "./dist/queue.d.ts",
+      "default": "./dist/queue.js"
+    },
+    "./render-template": {
+      "types": "./dist/render-template.d.ts",
+      "default": "./dist/render-template.js"
+    },
+    "./trigger-catalog": {
+      "types": "./dist/trigger-catalog.d.ts",
+      "default": "./dist/trigger-catalog.js"
+    },
+    "./validation": {
+      "types": "./dist/validation.d.ts",
+      "default": "./dist/validation.js"
+    },
+    "./installation": {
+      "types": "./dist/installation.d.ts",
+      "default": "./dist/installation.js"
+    },
+    "./secret-box": {
+      "types": "./dist/secret-box.d.ts",
+      "default": "./dist/secret-box.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "handlebars": "4.7.9",
+    "pg-boss": "12.19.1",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "typescript": "6.0.3"
+  },
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/giaggiola/Ermes.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/giaggiola/Ermes#readme",
+  "bugs": {
+    "url": "https://github.com/giaggiola/Ermes/issues"
+  }
+}

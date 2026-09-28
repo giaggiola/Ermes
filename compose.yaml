@@ -1,0 +1,44 @@
+name: ermes
+x-runtime: &runtime
+  NODE_ENV: production
+  APP_URL: ${APP_URL:-http://localhost:3025}
+  DATABASE_URL: postgresql://ermes:${POSTGRES_PASSWORD:?Run node scripts/setup.mjs}@db:5432/ermes
+  ERMES_ENCRYPTION_KEY: ${ERMES_ENCRYPTION_KEY:?Run node scripts/setup.mjs}
+  OPS_MESSAGING_SHARED_SECRET: ${OPS_MESSAGING_SHARED_SECRET:?Run node scripts/setup.mjs}
+  COMMERCE_EVENT_WEBHOOK_SECRET: ${COMMERCE_EVENT_WEBHOOK_SECRET:?Run node scripts/setup.mjs}
+  PREFERENCE_TOKEN_SECRET: ${PREFERENCE_TOKEN_SECRET:?Run node scripts/setup.mjs}
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ermes
+      POSTGRES_DB: ermes
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run node scripts/setup.mjs}
+    volumes: [database:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U ermes -d ermes]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    restart: unless-stopped
+    environment:
+      <<: *runtime
+      ERMES_SETUP_TOKEN: ${ERMES_SETUP_TOKEN:-}
+    ports: ["127.0.0.1:${ERMES_PORT:-3025}:3000"]
+    depends_on:
+      db: { condition: service_healthy }
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    restart: unless-stopped
+    environment: *runtime
+    depends_on:
+      web: { condition: service_healthy }
+volumes:
+  database:
