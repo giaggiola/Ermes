@@ -1,0 +1,79 @@
+{% assign popup_id = 'ermes-welcome-' | append: block.id %}
+
+<div
+  class="ermes-welcome"
+  data-customer-logged-in="{% if customer %}true{% else %}false{% endif %}"
+  data-ermes-welcome
+  data-storage-prefix="ermes-welcome-popup"
+  id="{{ popup_id }}"
+  hidden
+>
+  <div
+    aria-hidden="true"
+    class="ermes-welcome__backdrop"
+    data-ermes-welcome-backdrop
+  ></div>
+  <section
+    aria-label="Newsletter signup"
+    aria-modal="true"
+    class="ermes-welcome__dialog"
+    role="dialog"
+  >
+    <button
+      aria-label="Close newsletter signup"
+      class="ermes-welcome__close"
+      data-ermes-welcome-close-button
+      type="button"
+    >
+      <span aria-hidden="true">&times;</span>
+    </button>
+
+    <img
+      alt=""
+      class="ermes-welcome__image"
+      data-ermes-welcome-image
+      hidden
+      height="900"
+      loading="lazy"
+      width="900"
+    >
+
+    <div class="ermes-welcome__content">
+      <form
+        class="ermes-welcome__form"
+        data-ermes-welcome-form
+        novalidate
+      ></form>
+      <p
+        aria-live="polite"
+        class="ermes-welcome__message"
+        data-ermes-welcome-message
+      ></p>
+    </div>
+  </section>
+</div>
+
+<aside
+  class="ermes-welcome-teaser"
+  data-ermes-welcome-teaser="{{ popup_id }}"
+  hidden
+>
+  <div data-ermes-welcome-teaser-content></div>
+  <button
+    aria-controls="{{ popup_id }}"
+    aria-label="Open newsletter signup"
+    class="ermes-welcome-teaser__action"
+    data-ermes-welcome-teaser-open
+    type="button"
+  ></button>
+</aside>
+
+{% schema %}
+{
+  "name": "Welcome popup",
+  "target": "body",
+  "javascript": "welcome-popup.js",
+  "stylesheet": "welcome-popup.css",
+  "settings": []
+}
+{% endschema %}

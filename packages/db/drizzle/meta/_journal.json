@@ -92,6 +92,27 @@
       "when": 1790553600000,
       "tag": "0012_ermes_installation",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790667004829,
+      "tag": "0013_slippery_pride",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1790667917865,
+      "tag": "0014_image_assets",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1790668273536,
+      "tag": "0015_organic_prowler",
+      "breakpoints": true
     }
   ]
 }

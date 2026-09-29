@@ -47,3 +47,11 @@ Optional image-processing packages include sharp/libvips components with Apache,
 MIT and LGPL notices. Preserve those notices and the relevant source/relinking
 information when redistributing image-processing binaries. The public source
 repository does not vendor dependency binaries.
+
+## Storefront HTML sanitization
+
+The Shopify theme asset bundles DOMPurify, copyright Cure53 and other contributors,
+available under Apache-2.0 or MPL-2.0. Its original license banner is preserved in
+the generated asset. The full license text is included at
+`shopify-app/licenses/DOMPurify-LICENSE`; source and package versions are recorded
+in `shopify-app/package-lock.json` and https://github.com/cure53/DOMPurify.

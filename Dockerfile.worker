@@ -9,6 +9,7 @@ COPY apps/worker/package*.json apps/worker/
 COPY packages/core/package*.json packages/core/
 COPY packages/db/package*.json packages/db/
 COPY packages/ui/package*.json packages/ui/
+COPY packages/shopify/package*.json packages/shopify/
 
 RUN --mount=type=cache,target=/root/.npm npm ci
 
@@ -20,6 +21,7 @@ COPY . .
 
 RUN npm run build --workspace=@ermes/core \
   && npm run build --workspace=@ermes/db \
+  && npm run build --workspace=@ermes/shopify \
   && npm run build --workspace=@ermes/worker \
   && npm prune --omit=dev
 

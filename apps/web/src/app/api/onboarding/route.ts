@@ -8,6 +8,7 @@ import {
 } from "@ermes/db";
 import { authenticateBrowser } from "@/lib/session";
 import { verifyShopifyConnection } from "@/lib/shopify-connection";
+import { setConnectorEnabled } from "@ermes/shopify";
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
@@ -34,8 +35,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(await saveMerchant(value));
     if (action === "integrations")
       return NextResponse.json(await saveIntegrations(value));
+    if (action === "import-shopify-store")
+      return NextResponse.json(await verifyShopifyConnection(true));
     if (action === "verify-shopify")
       return NextResponse.json(await verifyShopifyConnection());
+    if (action === "shopify-sync") {
+      if (typeof value?.enabled !== "boolean")
+        throw new Error("Choose a sync setting");
+      await setConnectorEnabled(value.enabled);
+      return NextResponse.json(await installationStatus());
+    }
     if (action === "delivery") {
       if (typeof value?.enabled !== "boolean")
         throw new Error("Choose a delivery setting");

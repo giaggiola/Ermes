@@ -27,6 +27,9 @@ Do not bind a development instance to a real merchant database.
 npm test
 npm run typecheck
 npm run build
+npm ci --prefix shopify-app
+npm run build --prefix shopify-app
+npm test --prefix shopify-app
 ```
 
 Without `TEST_DATABASE_URL`, database integration tests are skipped. To run them
@@ -45,12 +48,20 @@ Browser checks require a **fresh disposable installation with no owner account**
 ```sh
 npm run build:packages
 npx playwright install --with-deps chromium
-node --env-file=.env tests/browser-smoke.mjs
+ERMES_TEST_URL=http://127.0.0.1:3027 node --env-file=/path/to/disposable.env tests/browser-smoke.mjs
 ```
 
-Use `ERMES_TEST_URL` to match a different application origin and
+`ERMES_TEST_URL` is required and must match the disposable application origin. Use
 `ERMES_ARTIFACT_DIR` for screenshots. The test creates a synthetic owner, store,
 credentials and draft content; it does not enable sending or call Shopify/Resend.
+
+For the extended Shopify browser path, use a separate database named exactly
+`ermes_shopify_browser`, preload `tests/fixtures/shopify-fetch.mjs` in both web and
+worker with `NODE_OPTIONS=--import=/absolute/path/to/that/file`, and set
+`ERMES_SHOPIFY_FIXTURE=true` when running the browser test. The preload rejects any
+other database and replaces only the synthetic Shopify host. This exercises the
+real import API, connector activation, form editor, signed storefront proxy and
+theme asset without contacting Shopify. Never preload fixtures in production.
 Never run it against a merchant installation. Stop and remove your disposable
 test installation when finished; do not reuse its synthetic settings.
 

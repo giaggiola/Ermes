@@ -19,6 +19,9 @@ const digest = (value: string) =>
 const credentialKeys = [
   "resendApiKey",
   "resendWebhookSecret",
+  "cloudinaryCloudName",
+  "cloudinaryApiKey",
+  "cloudinaryApiSecret",
   "shopifyClientId",
   "shopifyClientSecret",
 ] as const;
@@ -32,6 +35,36 @@ export async function installationRow() {
 }
 export async function installationStatus(): Promise<InstallationStatus> {
   const row = await installationRow();
+  const state = (
+    await getPool().query(
+      "SELECT * FROM shopify_connector WHERE shop_domain=$1",
+      [row.shop_domain],
+    )
+  ).rows[0];
+  const counts = state
+    ? (
+        await getPool().query(
+          "SELECT kind,count(*)::int AS count FROM shopify_object WHERE shop_domain=$1 GROUP BY kind",
+          [row.shop_domain],
+        )
+      ).rows
+    : [];
+  const jobs = state
+    ? (
+        await getPool().query(
+          "SELECT count(*) FILTER(WHERE state='pending')::int AS pending,count(*) FILTER(WHERE state='pending' AND attempts>0)::int AS failed FROM shopify_webhook WHERE shop_domain=$1",
+          [row.shop_domain],
+        )
+      ).rows[0]
+    : null;
+  const commands = state
+    ? (
+        await getPool().query(
+          "SELECT count(*)::int AS failed FROM shopify_command WHERE shop_domain=$1 AND state='pending' AND attempts>0",
+          [row.shop_domain],
+        )
+      ).rows[0]
+    : null;
   return {
     merchant: row.merchant,
     credentials: Object.fromEntries(
@@ -40,7 +73,21 @@ export async function installationStatus(): Promise<InstallationStatus> {
     shopDomain: row.shop_domain,
     deliveryEnabled: row.delivery_enabled,
     shopifyVerifiedAt: row.shopify_verified_at?.toISOString() ?? null,
-    shopifyConnectorActive: false,
+    shopifyConnectorActive: Boolean(state?.enabled),
+    shopifySync: state
+      ? {
+          counts: Object.fromEntries(counts.map((r) => [r.kind, r.count])),
+          completed: ["customers", "products", "orders"].filter(
+            (k) => state.cursors[k]?.completedAt,
+          ),
+          pendingWebhooks: jobs.pending,
+          failedJobs: jobs.failed + commands.failed,
+          lastWebhookAt: state.last_webhook_at?.toISOString() ?? null,
+          lastSyncAt: state.last_sync_at?.toISOString() ?? null,
+          lastRecoveryAt: state.last_recovery_at?.toISOString() ?? null,
+          error: state.last_error,
+        }
+      : null,
   };
 }
 export async function saveMerchant(input: unknown) {
@@ -58,6 +105,18 @@ export async function saveMerchant(input: unknown) {
 }
 export async function saveIntegrations(input: unknown) {
   const parsed = integrationInputSchema.parse(input);
+  if (parsed.shopDomain) {
+    const previous = await installationRow();
+    if (
+      previous.shop_domain &&
+      parsed.shopDomain !== previous.shop_domain &&
+      (await getPool().query("SELECT 1 FROM shopify_connector LIMIT 1"))
+        .rowCount
+    )
+      throw new Error(
+        "This installation is linked to one store. Use a separate Ermes installation for another store.",
+      );
+  }
   const credentials: Record<string, string> = {};
   for (const key of credentialKeys)
     if (parsed[key]) credentials[key] = seal(parsed[key], key);

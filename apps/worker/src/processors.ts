@@ -154,6 +154,8 @@ async function processCommerceEvent(
     return;
   }
 
+  if (event.processed_at) return;
+
   const envelope = commerceEventEnvelopeSchema.parse(event.payload) as CommerceEventEnvelope;
 
   if (envelope.type === "discount.redeemed") {
@@ -169,7 +171,13 @@ async function processCommerceEvent(
   let newsletterWelcomeEligible = true;
   if (envelope.type === "newsletter.subscribed") {
     const email = getEventRecipient(envelope);
-    if (email) {
+    if (email && envelope.payload.subscription_recorded === true) {
+      // Native storefront subscriptions and their outbox event commit together.
+      // Replaying that event must never resubscribe a later opt-out.
+      const current = (await service.listEmailSubscribers({email}))[0];
+      newsletterWelcomeEligible = Boolean(current?.subscribed &&
+        new Date(String(current.subscribed_at)).getTime() === new Date(String(envelope.payload.subscribed_at)).getTime());
+    } else if (email) {
       const subscribed = await service.subscribeWithStatus(email, {
         first_name: stringValue(envelope.context.first_name) ?? stringValue(envelope.payload.first_name),
         source:

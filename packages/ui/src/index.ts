@@ -13,3 +13,6 @@ export { default as SuppressionsPage } from "./features/messaging/screens/suppre
 export { default as EventsPage } from "./features/messaging/screens/events/EventsPage";
 export { default as RuntimePage } from "./features/messaging/screens/runtime/RuntimePage";
 export { default as FlowEditorPage } from "./features/messaging/editors/flow/FlowEditorPage";
+
+export { default as FormsPage } from "./features/messaging/screens/forms/FormsPage";
+export { default as FormEditorPage } from "./features/messaging/editors/form/FormEditorPage";

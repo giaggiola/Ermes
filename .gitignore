@@ -23,3 +23,7 @@ yarn-error.log*
 .DS_Store
 .idea/
 .vscode/
+
+# Merchant-specific Shopify app identity
+shopify-app/shopify.app.toml
+shopify-app/.shopify/

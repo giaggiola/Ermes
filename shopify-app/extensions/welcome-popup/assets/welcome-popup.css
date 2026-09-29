@@ -1,0 +1,240 @@
+.ermes-welcome[hidden] {
+  display: none !important;
+}
+
+.ermes-welcome-teaser[hidden] {
+  display: none !important;
+}
+
+.ermes-welcome {
+  align-items: center;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: clamp(0.75rem, 3vw, 1rem);
+  position: fixed;
+  /* Keep Shopify's privacy banner (z-index 2000000+) actionable. */
+  z-index: 1999999;
+}
+
+.ermes-welcome[data-form-type="flyout"] {
+  align-items: flex-end;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.ermes-welcome[data-form-type="flyout"] .ermes-welcome__dialog {
+  inline-size: min(100%, var(--ermes-welcome-max-width, 24rem));
+  pointer-events: auto;
+}
+
+.ermes-welcome__backdrop {
+  background: rgba(0, 0, 0, 0.48);
+  border: 0;
+  cursor: default;
+  inset: 0;
+  padding: 0;
+  position: absolute;
+}
+
+.ermes-welcome__backdrop[hidden] {
+  display: none;
+}
+
+.ermes-welcome-teaser {
+  background: var(--ermes-welcome-background, #ffffff);
+  border: 0;
+  bottom: 1rem;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.18);
+  color: var(--ermes-welcome-text, #111111);
+  cursor: pointer;
+  inline-size: min(calc(100vw - 2rem), 18rem);
+  padding: 1rem;
+  position: fixed;
+  right: 1rem;
+  z-index: 1999998;
+}
+
+.ermes-welcome-teaser__action {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  inset: 0;
+  padding: 0;
+  position: absolute;
+}
+
+.ermes-welcome-teaser__action:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -3px;
+}
+
+.ermes-welcome-teaser :last-child {
+  margin-bottom: 0 !important;
+}
+
+.ermes-welcome__dialog {
+  background: var(--ermes-welcome-background);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18);
+  color: var(--ermes-welcome-text);
+  container-type: inline-size;
+  display: grid;
+  inline-size: min(100%, var(--ermes-welcome-max-width, 30rem));
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  position: relative;
+}
+
+.ermes-welcome__image {
+  height: 100%;
+  max-height: 42rem;
+  object-fit: cover;
+  width: 100%;
+}
+
+.ermes-welcome__image[hidden] {
+  display: none;
+}
+
+.ermes-welcome__content {
+  align-self: center;
+  padding: clamp(1.25rem, 6cqi, 1.75rem);
+}
+
+.ermes-welcome[data-form-mode="html"] .ermes-welcome__content {
+  padding: 0;
+}
+
+.ermes-welcome__close {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  font-size: 2rem;
+  height: 2.75rem;
+  justify-content: center;
+  line-height: 1;
+  position: absolute;
+  right: 0.5rem;
+  top: 0.5rem;
+  width: 2.75rem;
+  z-index: 1;
+}
+
+.ermes-welcome__close[hidden] {
+  display: none;
+}
+
+.ermes-welcome__eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+}
+
+.ermes-welcome__title {
+  color: inherit;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.02;
+  margin: 0;
+}
+
+.ermes-welcome__body {
+  font-size: 1rem;
+  line-height: 1.55;
+  margin-top: 1rem;
+}
+
+.ermes-welcome__form {
+  display: block;
+  margin: 0;
+}
+
+.ermes-welcome__form input {
+  font: inherit;
+}
+
+.ermes-welcome__form button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.ermes-welcome__message {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  margin: 0.65rem 0 0;
+}
+
+.ermes-welcome__message:empty {
+  display: none;
+}
+
+.ermes-welcome__honeypot {
+  left: -10000px !important;
+  opacity: 0 !important;
+  position: absolute !important;
+}
+
+.ermes-welcome-open {
+  overflow: hidden;
+}
+
+@media (min-width: 750px) {
+  .ermes-welcome__dialog:has(.ermes-welcome__image:not([hidden])) {
+    grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+  }
+}
+
+@media (max-width: 749px) {
+  .ermes-welcome {
+    align-items: flex-end;
+  }
+
+  .ermes-welcome__dialog {
+    inline-size: min(100%, 21.25rem, var(--ermes-welcome-max-width, 30rem));
+    max-height: 92dvh;
+  }
+
+  .ermes-welcome[data-form-type="flyout"] {
+    padding: 0.75rem;
+  }
+
+  .ermes-welcome[data-form-type="flyout"] .ermes-welcome__dialog {
+    inline-size: 100%;
+  }
+
+  .ermes-welcome__image {
+    height: 10rem;
+    max-height: 10rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ermes-welcome__dialog {
+    animation: ermes-welcome-in 180ms ease-out;
+  }
+
+  @keyframes ermes-welcome-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+  }
+
+  .ermes-welcome[data-form-type="flyout"] .ermes-welcome__dialog {
+    animation-name: ermes-welcome-flyout-in;
+  }
+
+  .ermes-welcome-teaser {
+    animation: ermes-welcome-flyout-in 180ms ease-out;
+  }
+
+  @keyframes ermes-welcome-flyout-in {
+    from {
+      opacity: 0;
+      transform: translateX(0.75rem);
+    }
+  }
+}

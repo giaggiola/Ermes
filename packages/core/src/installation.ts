@@ -46,6 +46,17 @@ export const integrationInputSchema = z
   .object({
     resendApiKey: z.string().trim().min(10).max(512).optional(),
     resendWebhookSecret: z.string().trim().min(16).max(512).optional(),
+    cloudinaryCloudName: z
+      .string()
+      .trim()
+      .regex(/^[a-z0-9_-]{1,128}$/)
+      .optional(),
+    cloudinaryApiKey: z
+      .string()
+      .trim()
+      .regex(/^[0-9]{5,64}$/)
+      .optional(),
+    cloudinaryApiSecret: z.string().trim().min(16).max(512).optional(),
     shopDomain: z
       .string()
       .trim()
@@ -64,4 +75,14 @@ export interface InstallationStatus {
   deliveryEnabled: boolean;
   shopifyVerifiedAt: string | null;
   shopifyConnectorActive: boolean;
+  shopifySync?: {
+    counts: Record<string, number>;
+    completed: string[];
+    pendingWebhooks: number;
+    failedJobs: number;
+    lastWebhookAt: string | null;
+    lastSyncAt: string | null;
+    lastRecoveryAt: string | null;
+    error: string | null;
+  } | null;
 }

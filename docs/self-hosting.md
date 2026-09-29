@@ -78,6 +78,13 @@ management are not implemented in this preview.
 Back up the database and `.env` together, and protect both. A database backup alone
 cannot decrypt saved provider credentials without the original encryption key.
 
+Uploaded image files live in the configured Cloudinary account. PostgreSQL stores
+their library records and URLs, not the files themselves. Retain and back up those
+assets separately; restoring Ermes cannot restore an image deleted in Cloudinary.
+Uploads require outbound HTTPS to Cloudinary, with no extra container or local
+storage volume. If your reverse proxy limits request size, allow at least 11 MB for
+the multipart request; Ermes limits each image to 10 MB.
+
 For a backup taken while application writes are stopped:
 
 ```sh

@@ -15,7 +15,9 @@ Password recovery and additional users are not available yet.
 
 ## 2. Add store and sender details
 
-Enter your store name, HTTPS storefront URL, sender name, sender email, timezone
+Choose **Import from Shopify** to connect your app and review its store name, URL,
+timezone and suggested sender. Importing does not save or enable delivery. You can
+also enter your store name, HTTPS storefront URL, sender name, sender email, timezone
 and optional HTTPS logo URL. The store name and URL personalise template content;
 the sender name and address identify outgoing email. The timezone is stored with
 your profile; existing campaign scheduling uses explicit dates and UTC storage.
@@ -40,17 +42,37 @@ You can skip provider setup while exploring templates and draft flows.
 
 ## 4. Prepare Shopify credentials
 
-Create an app in your Shopify organisation's Dev Dashboard, request the
-`read_orders`, `read_customers` and `read_products` scopes, and install it on your
-store. Enter the store's `myshopify.com` domain plus the app's client ID and secret.
-Save, then choose **Verify connection**.
+Follow [Shopify setup](shopify.md) to create your app, configure the required
+permissions, publish webhook subscriptions and install the theme extension.
+Save your `myshopify.com` domain and the installed app's client ID/secret, then
+choose **Verify connection** and **Start Shopify sync**. Import progress, cached
+record counts, the latest webhook, checkout scanning and retry errors appear here.
 
-The app and store must belong to the same Shopify organisation for this grant.
-See [Shopify's setup guide](https://shopify.dev/docs/apps/build/authentication-authorization/client-credentials-grant).
-Ermes verifies the store and scopes; it does not start Shopify event syncing in
-this preview. Abandoned-cart and checkout flows still need the planned connector.
+The app and store must belong to the same Shopify organisation for the
+[client-credentials grant](https://shopify.dev/docs/apps/build/authentication-authorization/client-credentials-grant).
+Sync activation is separate from email delivery. Customers/products and the last
+60 days of orders import without starting historical automations. New events can
+start published flows. Checkout recovery considers activity since activation.
 
-## 5. Review before enabling delivery
+## 5. Connect image storage
+
+Open **Image storage** in setup and enter your Cloudinary cloud name, API key and
+API secret from the [Cloudinary console](https://console.cloudinary.com/). These
+credentials are encrypted using the installation key; blank fields preserve saved
+values. Your first upload checks the connection.
+
+In the signup form editor, choose an image block or the form's side image and click
+**Choose**. The picker can upload JPEG, PNG, GIF and WebP images up to 10 MB, or
+search and reuse images already uploaded to this Ermes installation. Sender settings
+use the same library for the email logo. Uploaded images have public HTTPS URLs;
+only the authenticated owner can upload or browse the library.
+
+You can skip Cloudinary and paste existing image URLs. The library shows images
+uploaded through Ermes, not every asset in your Cloudinary account. Keep those
+Cloudinary assets available while forms or sent emails reference them. Changing
+credentials does not move existing images to another account.
+
+## 6. Review before enabling delivery
 
 Create a template, preview it, save your flow as a draft and review your audience.
 Only enable sending after your sender domain is verified. Published flows and due
@@ -74,6 +96,8 @@ Password reset, additional users and account administration are future work.
 | Store name, storefront URL, timezone            | Setup UI                                 | PostgreSQL                              |
 | Sender name/address and logo URL                | Setup UI or sender settings              | PostgreSQL                              |
 | Resend key/webhook signing secret               | Setup UI                                 | AES-256-GCM encrypted PostgreSQL fields |
+| Cloudinary cloud name/API key/API secret        | Image storage setup                     | AES-256-GCM encrypted PostgreSQL fields |
+| Uploaded images / library metadata              | Image picker                            | Cloudinary / PostgreSQL                |
 | Shopify shop domain/client ID/client secret     | Setup UI                                 | Domain plus encrypted credential fields |
 | Delivery enabled                                | Explicit owner action after sender setup | PostgreSQL, disabled initially          |
 
@@ -82,14 +106,10 @@ back to the browser. Encryption authenticates each field's purpose to prevent
 substituting one credential for another. Do not rotate `ERMES_ENCRYPTION_KEY` by
 simply replacing it; an explicit re-encryption workflow is required first.
 
-Shopify verification uses the supported client-credentials grant for apps and stores
-in the same organisation. The returned short-lived token is used only for a read-only
-shop/scopes request and is not returned to the browser. Different-organisation OAuth
-installs need a later authorization-code flow. The preview checks basic read scopes;
-the final connector must request the complete minimal scopes for enabled features.
-
-The setup UI explicitly distinguishes credential verification from event ingestion.
-The connection status never claims the standalone Shopify connector is active.
+Shopify uses short-lived access tokens held only in server memory. Different-organisation
+OAuth installs need a future authorization-code flow; this version uses your own app.
+Starting sync verifies the complete permission set listed in the Shopify guide.
+Pause Shopify ingestion and outbound email delivery independently in setup.
 
 Resend's sender domain must be verified separately. The owner acknowledges that
 before enabling delivery. Every outbound email path uses the stored sending gate,
@@ -105,8 +125,9 @@ and one-click POST routes stay available independently of sending.
   your browser and run `docker compose up -d web worker`.
 - **Shopify verification fails:** check the domain, app installation, scopes and
   that the app/store belong to the same organisation.
-- **No Shopify activity after verification:** expected in this preview; event
-  syncing is on the roadmap.
+- **No Shopify activity after verification:** choose **Start Shopify sync**, check
+  the worker and confirm the published webhook destination is reachable over HTTPS.
+  For signup forms, also enable the Ermes theme embed and publish a popup/flyout.
 - **Email delivery is disabled:** configure your sender and Resend key, verify the
   domain in Resend, then explicitly enable delivery in setup.
 

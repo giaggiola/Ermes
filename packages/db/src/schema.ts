@@ -43,6 +43,22 @@ export const ermesLoginAttempt = pgTable("ermes_login_attempt", {
   windowStart: timestamp("window_start", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const ermesImageAssets = pgTable("ermes_image_asset", {
+  id: uuid("id").primaryKey(),
+  cloudName: text("cloud_name").notNull(),
+  publicId: text("public_id").notNull(),
+  url: text("url").notNull(),
+  filename: text("filename").notNull(),
+  mimeType: text("mime_type").notNull(),
+  bytes: integer("bytes").notNull(),
+  width: integer("width").notNull(),
+  height: integer("height").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, table => [
+  uniqueIndex("ermes_image_asset_source").on(table.cloudName, table.publicId),
+  index("ermes_image_asset_created").on(table.createdAt, table.id),
+]);
+
 export const deliveryProvider = pgEnum("delivery_provider", ["resend", "medusa"]);
 export const discountType = pgEnum("discount_type", ["percentage", "fixed"]);
 export const emailCampaignStatus = pgEnum("email_campaign_status", [
@@ -706,4 +722,72 @@ export const runtimeSettings = pgTable("runtime_setting", {
   key: text("key").primaryKey(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   value: jsonb("value").notNull(),
+});
+
+// Connector state is per shop so a changed installation can never replay another
+// store's cursors, webhook jobs or recovery identities.
+export const shopifyConnectors = pgTable("shopify_connector", {
+  shopDomain: text("shop_domain").primaryKey(),
+  enabled: boolean("enabled").notNull().default(false),
+  startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+  cursors: jsonb("cursors").notNull().default({}),
+  lastWebhookAt: timestamp("last_webhook_at", { withTimezone: true }),
+  lastSyncAt: timestamp("last_sync_at", { withTimezone: true }),
+  lastRecoveryAt: timestamp("last_recovery_at", { withTimezone: true }),
+  lastError: text("last_error"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export const shopifyWebhooks = pgTable("shopify_webhook", {
+  id: text("id").primaryKey(),
+  shopDomain: text("shop_domain").notNull(),
+  topic: text("topic").notNull(),
+  payload: jsonb("payload").notNull(),
+  state: text("state").notNull().default("pending"),
+  attempts: integer("attempts").notNull().default(0),
+  nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }).notNull().defaultNow(),
+  lastError: text("last_error"),
+  receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
+  processedAt: timestamp("processed_at", { withTimezone: true }),
+}, t => [index("shopify_webhook_ready").on(t.state, t.nextAttemptAt)]);
+export const shopifyObjects = pgTable("shopify_object", {
+  id: text("id").primaryKey(),
+  shopDomain: text("shop_domain").notNull(),
+  kind: text("kind").notNull(),
+  externalId: text("external_id").notNull(),
+  payload: jsonb("payload").notNull(),
+  sourceUpdatedAt: timestamp("source_updated_at", { withTimezone: true }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, t => [uniqueIndex("shopify_object_source").on(t.shopDomain, t.kind, t.externalId)]);
+export const shopifyRecoveries = pgTable("shopify_recovery", {
+  id: text("id").primaryKey(),
+  shopDomain: text("shop_domain").notNull(),
+  kind: text("kind").notNull(),
+  sourceKey: text("source_key").notNull(),
+  cartKey: text("cart_key"),
+  email: text("email"),
+  customerId: text("customer_id"),
+  state: text("state").notNull().default("watching"),
+  snapshot: jsonb("snapshot").notNull().default({}),
+  lastActivityAt: timestamp("last_activity_at", { withTimezone: true }).notNull().defaultNow(),
+  nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }).notNull().defaultNow(),
+  emittedAt: timestamp("emitted_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, t => [uniqueIndex("shopify_recovery_source").on(t.shopDomain, t.kind, t.sourceKey), index("shopify_recovery_ready").on(t.state,t.nextAttemptAt), index("shopify_recovery_email").on(t.shopDomain,t.email)]);
+export const shopifyCommands = pgTable("shopify_command", {
+  id: text("id").primaryKey(),
+  shopDomain: text("shop_domain").notNull(),
+  kind: text("kind").notNull(),
+  payload: jsonb("payload").notNull(),
+  result: jsonb("result"),
+  state: text("state").notNull().default("pending"),
+  attempts: integer("attempts").notNull().default(0),
+  nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }).notNull().defaultNow(),
+  lastError: text("last_error"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, t => [index("shopify_command_ready").on(t.state,t.nextAttemptAt)]);
+export const shopifyFormEvents = pgTable("shopify_form_event", {
+  id: text("id").primaryKey(),
+  formId: text("form_id").notNull(),
+  eventType: text("event_type").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

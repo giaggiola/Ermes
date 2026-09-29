@@ -5,3 +5,4 @@ export * from "./service.js";
 export * from "./standard-email-templates.js";
 
 export * from "./installation.js";
+export * from "./assets.js";

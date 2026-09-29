@@ -5,16 +5,15 @@ import { useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import {
-  ErmesProvider,
   MessagingContractProvider,
-  type ErmesHost,
 } from "@ermes/ui";
-const host: ErmesHost = { apiBase: "/api/admin" };
+import { StandaloneErmesProvider } from "./image-picker";
 const links = [
   ["", "Overview"],
   ["templates", "Templates"],
   ["campaigns", "Campaigns"],
   ["flows", "Flows"],
+  ["forms", "Signup forms"],
   ["profiles", "Subscribers"],
   ["segments", "Segments"],
   ["events", "Activity"],
@@ -36,10 +35,10 @@ export function Workspace({
   );
   const path = usePathname(),
     router = useRouter();
-  const editor = /\/messaging\/(flows|templates)\/[^/]+$/.test(path);
+  const editor = /\/messaging\/(flows|templates|forms)\/[^/]+$/.test(path);
   return (
     <QueryClientProvider client={client}>
-      <ErmesProvider host={host}>
+      <StandaloneErmesProvider>
         <MessagingContractProvider>
           <div className="workspace">
             <aside className="workspace-nav">
@@ -93,7 +92,7 @@ export function Workspace({
           </div>
           <Toaster richColors />
         </MessagingContractProvider>
-      </ErmesProvider>
+      </StandaloneErmesProvider>
     </QueryClientProvider>
   );
 }

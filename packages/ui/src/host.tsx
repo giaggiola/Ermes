@@ -12,6 +12,7 @@ export interface ErmesHost {
   /** Same-origin base path; no service credentials belong in browser code. */
   apiBase: string;
   fetch?: typeof globalThis.fetch;
+  formExperiments?: boolean;
   pickImage?: () => Promise<string | undefined>;
 }
 const Host = createContext<ErmesHost>({ apiBase: "/api/admin" });

@@ -1,22 +1,55 @@
+import {
+  checkRecoveryEligibility,
+  createShopifyPromotion,
+} from "@ermes/shopify";
 import { createEilishSignature } from "@ermes/core";
 
-export async function checkShopifyRecoveryEligibility(recoveryId: string, email: string, activityAt: string) {
+export async function checkShopifyRecoveryEligibility(
+  recoveryId: string,
+  email: string,
+  activityAt: string,
+) {
   const baseUrl = process.env.COMMERCE_COMMAND_URL?.replace(/\/$/, "");
   const secret = process.env.COMMERCE_COMMAND_SHARED_SECRET;
-  if (!baseUrl || !secret) throw new Error("Shopify recovery eligibility integration is required");
-  const body = JSON.stringify({ recovery_id: recoveryId, email, activity_at: activityAt });
-  const timestamp = Math.floor(Date.now() / 1000).toString();
-  const response = await fetch(`${baseUrl}/internal/shopify/recovery/eligibility`, {
-    method: "POST", body, signal: AbortSignal.timeout(15000),
-    headers: {
-      "content-type": "application/json",
-      "x-eilish-timestamp": timestamp,
-      "x-eilish-signature": createEilishSignature({ body, secret, timestamp }),
-    },
+  if (!baseUrl && !secret)
+    return checkRecoveryEligibility(recoveryId, email, activityAt);
+  if (!baseUrl || !secret)
+    throw new Error(
+      "Both external Shopify recovery integration settings are required",
+    );
+  const body = JSON.stringify({
+    recovery_id: recoveryId,
+    email,
+    activity_at: activityAt,
   });
-  if (!response.ok) throw new Error(`Shopify recovery eligibility unavailable (${response.status})`);
-  const result = await response.json() as { allowed?: boolean; reason?: string };
-  if (typeof result.allowed !== "boolean") throw new Error("Invalid Shopify recovery eligibility response");
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const response = await fetch(
+    `${baseUrl}/internal/shopify/recovery/eligibility`,
+    {
+      method: "POST",
+      body,
+      signal: AbortSignal.timeout(15000),
+      headers: {
+        "content-type": "application/json",
+        "x-eilish-timestamp": timestamp,
+        "x-eilish-signature": createEilishSignature({
+          body,
+          secret,
+          timestamp,
+        }),
+      },
+    },
+  );
+  if (!response.ok)
+    throw new Error(
+      `Shopify recovery eligibility unavailable (${response.status})`,
+    );
+  const result = (await response.json()) as {
+    allowed?: boolean;
+    reason?: string;
+  };
+  if (typeof result.allowed !== "boolean")
+    throw new Error("Invalid Shopify recovery eligibility response");
   return result;
 }
 
@@ -41,8 +74,11 @@ export async function createCommercePromotion(
 ): Promise<PromotionResult> {
   const baseUrl = process.env.COMMERCE_COMMAND_URL?.replace(/\/$/, "");
   const secret = process.env.COMMERCE_COMMAND_SHARED_SECRET;
+  if (!baseUrl && !secret) return createShopifyPromotion(input);
   if (!baseUrl || !secret) {
-    throw new Error("Commerce command integration is required for discount delivery");
+    throw new Error(
+      "Both external commerce command integration settings are required",
+    );
   }
 
   const body = JSON.stringify({

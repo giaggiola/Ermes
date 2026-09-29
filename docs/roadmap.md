@@ -1,25 +1,24 @@
 # Roadmap
 
-Ermes is an early developer preview. This roadmap describes planned work, not
-features already available or promised delivery dates.
+Ermes is an early developer preview. Shipped capabilities are listed separately
+from future work; no delivery dates are promised.
 
-## Shopify automation
+## Shipped in the developer preview
 
-- Signed webhook ingestion for order, customer and product events.
-- Idempotent event processing, retries and reconciliation.
-- Abandoned-checkout ingestion and a final eligibility check before recovery sends.
-- Cancellation when a customer completes checkout or withdraws consent.
-- Discount creation and consent synchronisation.
-- Storefront identification, cart tracking and a storefront extension.
+- Shopify store-detail import, resumable customer/product/order sync and signed webhooks.
+- Checkout reconciliation, identified-cart tracking and recovery checks before sends.
+- Shopify discount creation and consent synchronisation with retries.
+- Signup form editor, pinned published versions and a popup/flyout theme extension.
+- Basic consent-gated form impression and submission counters, plus connection health.
+- Optional Cloudinary uploads and a reusable image library.
 
-Cart tracking before checkout needs its own identification and consent flow.
-Shopify credential verification alone does not provide that information.
+See [Shopify setup and limits](shopify.md). These are implemented capabilities;
+live-store validation remains part of each operator's installation.
 
 ## Merchant experience
 
-- A standalone signup form editor, preview and publishing flow.
-- Form analytics, asset uploads and experiments.
-- Clear connection health and setup diagnostics.
+- Public OAuth installation across different Shopify organisations.
+- Embedded/full-page storefront form placements, advanced analytics and experiments.
 - Owner password recovery and account administration.
 - Guided provider credential removal and encryption-key rotation.
 

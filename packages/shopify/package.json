@@ -1,0 +1,40 @@
+{
+  "name": "@ermes/shopify",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@ermes/core": "*",
+    "@ermes/db": "*",
+    "zod": "4.4.3",
+    "pg": "8.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "typescript": "6.0.3",
+    "@types/pg": "8.20.0"
+  },
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/giaggiola/Ermes.git",
+    "directory": "packages/shopify"
+  },
+  "homepage": "https://github.com/giaggiola/Ermes#readme",
+  "bugs": {
+    "url": "https://github.com/giaggiola/Ermes/issues"
+  },
+  "description": "Shopify connection, storefront and recovery services for Ermes",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  }
+}

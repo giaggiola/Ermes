@@ -2,10 +2,12 @@ import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 import { chromium, expect, request } from "@playwright/test";
+import { checkShopifyBrowser } from "./shopify-browser.mjs";
 import { createPreferenceToken } from "../packages/core/dist/index.js";
 
 // Run only against a fresh, disposable installation. Never enables sending.
-const baseURL = process.env.ERMES_TEST_URL ?? "http://localhost:3025";
+const baseURL = process.env.ERMES_TEST_URL;
+if (!baseURL) throw new Error("Set ERMES_TEST_URL to a disposable installation");
 const setupToken = process.env.ERMES_SETUP_TOKEN;
 const artifacts = process.env.ERMES_ARTIFACT_DIR ?? "/tmp/ermes-browser-smoke";
 await mkdir(artifacts, { recursive: true });
@@ -137,7 +139,7 @@ try {
     .fill("re_synthetic_browser_key_never_send");
   await page.getByRole("button", { name: "Save and continue" }).click();
   await expect(
-    page.getByRole("heading", { name: "Bring your Shopify app." }),
+    page.getByRole("heading", { name: "Connect your Shopify store." }),
   ).toBeVisible();
   await page
     .locator('[name="shopDomain"]')
@@ -158,7 +160,8 @@ try {
     JSON.stringify(status),
     /re_synthetic|synthetic-shopify-secret/,
   );
-  await page.getByRole("button", { name: "Continue to workspace" }).click();
+  await page.getByRole("button", { name: "Continue to image storage" }).click();
+  await page.getByRole("button", { name: "Save and continue" }).click();
   await page.getByRole("link", { name: "Open your workspace" }).click();
   await expect(page).toHaveURL(/\/messaging$/);
 
@@ -171,6 +174,7 @@ try {
     "events",
     "suppressions",
     "runtime",
+    "forms",
     "flows",
   ]) {
     await page.goto(`/messaging${route ? `/${route}` : ""}`);
@@ -263,6 +267,8 @@ try {
   assert.equal(unsubscribed.email_subscriber.subscribed, false);
   await page.goto("/messaging");
 
+  if (process.env.ERMES_SHOPIFY_FIXTURE === "true") await checkShopifyBrowser({page,context,owner,api,artifacts,baseURL});
+  await page.goto("/messaging");
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
   assert.equal(
@@ -277,7 +283,7 @@ try {
   assert.deepEqual(pageErrors, []);
   assert.deepEqual(failedAPI, []);
   console.log(
-    "Browser smoke passed: setup, auth, CSRF, encrypted settings, 9 screens, draft flow persistence, logout and login. Delivery stayed disabled.",
+    "Browser smoke passed: setup, auth, CSRF, encrypted settings, 10 screens, draft flow persistence, logout and login. Delivery stayed disabled.",
   );
   await owner.dispose();
 } catch (error) {

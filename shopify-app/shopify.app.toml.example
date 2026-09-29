@@ -1,0 +1,23 @@
+# Copy to shopify.app.toml; replace the client ID and every example URL.
+client_id = "YOUR_SHOPIFY_CLIENT_ID"
+name = "Ermes"
+application_url = "https://ermes.example.com/onboarding"
+embedded = false
+
+[access_scopes]
+scopes = "read_orders,read_customers,write_customers,read_products,read_inventory,read_discounts,write_discounts,write_app_proxy"
+
+[auth]
+redirect_urls = ["https://ermes.example.com/onboarding"]
+
+[webhooks]
+api_version = "2026-07"
+
+[[webhooks.subscriptions]]
+topics = ["carts/create", "carts/update", "checkouts/create", "checkouts/update", "checkouts/delete", "orders/create", "orders/paid", "orders/updated", "orders/cancelled", "refunds/create", "fulfillments/create", "fulfillments/update", "customers/create", "customers/update", "customers/delete", "customers/email_marketing_consent/update", "products/create", "products/update", "products/delete", "inventory_levels/update", "inventory_levels/connect", "inventory_levels/disconnect", "app/uninstalled"]
+uri = "/api/shopify/webhooks"
+
+[app_proxy]
+url = "https://ermes.example.com/api/shopify/storefront"
+subpath = "ermes"
+prefix = "apps"

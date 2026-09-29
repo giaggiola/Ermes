@@ -25,6 +25,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm ci --prefix shopify-app
+      - run: npm run build --prefix shopify-app
+      - run: npm test --prefix shopify-app
+      - run: git diff --exit-code -- shopify-app/extensions/welcome-popup/assets/welcome-popup.js
       - run: npm test
       - run: npm run typecheck
       - run: npm run build

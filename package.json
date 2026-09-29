@@ -14,10 +14,10 @@
     "db:migrate": "npm run db:migrate --workspace=@ermes/db",
     "dev:web": "npm run dev --workspace=@ermes/web",
     "dev:worker": "npm run dev --workspace=@ermes/worker",
-    "test": "npm run build --workspace=@ermes/core && npm run build --workspace=@ermes/db && node --experimental-strip-types --test --test-concurrency=1 tests/*.test.ts",
+    "test": "npm run build --workspace=@ermes/core && npm run build --workspace=@ermes/db && npm run build -w @ermes/shopify && node --experimental-strip-types --test --test-concurrency=1 tests/*.test.ts",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "setup": "node scripts/setup.mjs",
-    "build:packages": "npm run build -w @ermes/core && npm run build -w @ermes/db",
+    "build:packages": "npm run build -w @ermes/core && npm run build -w @ermes/db && npm run build -w @ermes/shopify",
     "test:ui": "node --experimental-strip-types --test tests/ui-boundary.test.ts",
     "test:database": "node scripts/test-database.mjs"
   },

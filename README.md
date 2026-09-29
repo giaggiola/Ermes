@@ -13,11 +13,11 @@ data on infrastructure you control.
 One workspace for your audience, templates, campaigns and flows. Your own email
 provider. A community project you can inspect, extend and run yourself.
 
-> **Early developer preview.** The messaging workspace and engine are available.
-> Shopify credentials can be saved and verified, but automatic Shopify event
-> syncing is still in development. Abandoned-cart and checkout automations do not
-> receive Shopify activity yet. See [current capabilities](#current-capabilities)
-> and the [roadmap](docs/roadmap.md) before planning a production installation.
+> **Early developer preview.** The frontend, messaging engine and Shopify connector
+> are available. Shopify syncing, storefront forms and email delivery require your
+> own app/provider setup. This is a self-hosted project, not a Shopify App Store
+> listing. See [Shopify setup](docs/shopify.md) and the
+> [roadmap](docs/roadmap.md) before planning a production installation.
 
 ![Ermes visual flow editor](docs/images/flow-editor.png)
 
@@ -49,11 +49,12 @@ provider. A community project you can inspect, extend and run yourself.
 | Resend sending and signed delivery-event webhooks        | Available; requires your provider configuration                 |
 | Consent records, preferences and unsubscribe endpoints   | Available                                                       |
 | Encrypted integration credentials and a sending pause    | Available                                                       |
+| Image uploads and reusable image library                 | Available; requires your Cloudinary account                     |
 | Shopify app credential verification                      | Available for an app and store in the same Shopify organisation |
-| Shopify order/customer/product syncing                   | Planned                                                         |
-| Shopify abandoned-checkout ingestion and recovery checks | Planned                                                         |
-| Storefront visitor identification and cart tracking      | Planned                                                         |
-| Signup form editor and storefront extension              | Planned                                                         |
+| Shopify order/customer/product syncing                   | Available; resumable imports and signed webhooks                                                         |
+| Shopify abandoned-checkout ingestion and recovery checks | Available; current consent and purchase checks                                                         |
+| Storefront visitor identification and cart tracking      | Available for identified, consenting shoppers                                                         |
+| Signup form editor and storefront extension              | Available; published popup/flyout forms                                                         |
 | SMS, multiple stores and hosted Ermes accounts           | Not included                                                    |
 
 The preview supports one store and one owner account per installation. It is not
@@ -107,17 +108,18 @@ exact browser-facing origin. See [self-hosting](docs/self-hosting.md).
    12 characters. Registration closes automatically once the owner exists.
    Complete this step locally or through your SSH tunnel before exposing a new
    installation publicly.
-2. **Add your store identity.** Enter the store name, HTTPS storefront URL, sender
-   name/address, timezone and optional logo URL.
+2. **Import your store from Shopify, or enter details manually.** Import the store
+   name, URL, timezone and suggested sender, then review before saving. Your logo
+   stays optional; verify the sender address with your email provider.
 3. **Connect email delivery.** Verify your sending domain in Resend, then enter
    your API key. Configure the webhook at
    `https://your-ermes-domain/api/resend/webhook` and save its signing secret.
    A local-only installation can explore the UI without these credentials.
-4. **Prepare Shopify.** Enter your `your-store.myshopify.com` domain and your
-   installed app's client ID and secret. Verification currently checks
-   `read_orders`, `read_customers` and `read_products`. The app and store must be
-   in the same Shopify organisation. This verifies credentials; syncing is not
-   active in this preview.
+4. **Connect Shopify and start syncing.** Follow the [Shopify guide](docs/shopify.md)
+   to configure your own app, permissions, webhooks and storefront extension.
+   Enter the app's client ID/secret and store domain, verify, then choose **Start
+   Shopify sync**. The app and store must belong to the same Shopify organisation.
+   Historical imports do not start welcome or order flows.
 5. **Explore with sending paused.** Create templates, organise subscribers and
    save your first flow as a draft. Credentials are encrypted before storage and
    are never displayed again; blank credential fields preserve saved values.
@@ -130,6 +132,10 @@ exact browser-facing origin. See [self-hosting](docs/self-hosting.md).
 Read the [onboarding guide](docs/onboarding.md) for provider setup, configuration
 ownership and troubleshooting. Password reset, additional users and guided key
 rotation are not available yet.
+
+To upload form images and sender logos, connect your Cloudinary account in the
+**Image storage** setup step. The image picker supports uploads and reuse from your
+Ermes image library. You can also keep using existing public image URLs.
 
 ## Configuration
 
@@ -162,6 +168,8 @@ apps/worker    Background automation and delivery workers
 packages/core Flow contracts, templates, signing and queue definitions
 packages/db   PostgreSQL persistence, migrations and installation settings
 packages/ui   Reusable messaging screens and editors
+packages/shopify Shopify API, imports, webhooks, recovery and consent
+shopify-app    Source and assets for the Shopify theme extension
 ```
 
 Ermes uses TypeScript, React, Next.js, PostgreSQL and pg-boss. The web process applies

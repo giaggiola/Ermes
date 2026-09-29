@@ -45,3 +45,15 @@ test authentication, navigation, drafts, publishing and errors before an upgrade
 When adapting an existing runtime, preserve event IDs, preference secrets and
 database migration history. Rehearse configuration migration on a disposable
 database, and avoid running duplicate event producers or senders.
+
+The form list and editor are exported as `FormsPage` and `FormEditorPage`. The host
+may supply `pickImage: () => Promise<string | undefined>` for its own media picker.
+Form experiments remain disabled unless a host explicitly provides their backend.
+
+The native Shopify connector lives in `@ermes/shopify`, used by the web app and
+worker. Existing server integrations can retain `COMMERCE_COMMAND_URL` and
+`COMMERCE_COMMAND_SHARED_SECRET`; when both are absent the standalone worker uses
+the native connector. Supply both together. This preserves the external adapter
+contract while allowing shared UI and engine improvements to be adopted by a host
+through a reviewed package upgrade. Hosts are not updated automatically by an
+Ermes deployment.
