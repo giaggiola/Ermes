@@ -6,9 +6,9 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Self-hosted](https://img.shields.io/badge/Self--hosted-Docker-2496ED.svg)](#quick-start)
 
-Ermes is a self-hosted, open-source alternative to Klaviyo. Build email campaigns,
-design automated customer journeys, manage subscribers and keep your messaging
-data on infrastructure you control.
+Ermes is a self-hosted, open-source email marketing application for Shopify.
+Build email campaigns, design automated customer journeys, manage subscribers
+and keep your messaging data on infrastructure you control.
 
 One workspace for your audience, templates, campaigns and flows. Your own email
 provider. A community project you can inspect, extend and run yourself.
@@ -57,8 +57,11 @@ provider. A community project you can inspect, extend and run yourself.
 | Signup form editor and storefront extension              | Available; published popup/flyout forms                                                         |
 | SMS, multiple stores and hosted Ermes accounts           | Not included                                                    |
 
-The preview supports one store and one owner account per installation. It is not
-a feature-for-feature replacement for Klaviyo yet.
+The preview supports one store and one owner account per installation. If you are
+evaluating a self-hosted alternative to services such as Klaviyo, use the capability
+table above and the [roadmap](docs/roadmap.md) to assess whether Ermes fits your
+needs. This comparison does not imply feature parity or compatibility with
+Klaviyo-specific templates, flows or exports.
 
 ## Quick start
 
@@ -205,4 +208,6 @@ Ermes is licensed under the **GNU Affero General Public License v3.0 only**
 (`AGPL-3.0-only`). See [LICENSE](LICENSE). Third-party components retain their own
 licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-Ermes is an independent community project and is not affiliated with Klaviyo or Shopify.
+Ermes is an independent community project. It is not affiliated with, endorsed by
+or sponsored by Klaviyo or Shopify. Third-party names are used to identify the
+respective products and services; their trademarks belong to their respective owners.
