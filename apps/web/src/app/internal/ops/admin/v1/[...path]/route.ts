@@ -35,7 +35,10 @@ async function handle(request: NextRequest, context: RouteContext) {
       response = await dispatchAdminDELETE(request, context);
       break;
     default:
-      return NextResponse.json({ message: "Method not allowed" }, { status: 405 });
+      return NextResponse.json(
+        { message: "Method not allowed" },
+        { status: 405 },
+      );
   }
 
   if (request.method !== "GET") {

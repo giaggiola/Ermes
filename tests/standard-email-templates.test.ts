@@ -60,15 +60,11 @@ test("standard email templates are built in and legacy placeholders upgrade safe
     "tpl_placeholder_win_back_30_days_v1",
   ]);
   assert.match(
-    String(
-      templates.get("tpl_placeholder_win_back_30_days_v1")?.html_content,
-    ),
+    String(templates.get("tpl_placeholder_win_back_30_days_v1")?.html_content),
     /\{\{store_name\}\}/,
   );
   assert.doesNotMatch(
-    String(
-      templates.get("tpl_placeholder_win_back_30_days_v1")?.html_content,
-    ),
+    String(templates.get("tpl_placeholder_win_back_30_days_v1")?.html_content),
     /placeholder content/i,
   );
   assert.equal(
@@ -88,7 +84,10 @@ test("untouched pre-branding templates receive the logo without replacing edits"
     /<tr><td align="center" bgcolor="#ffffff"[^\n]+<\/td><\/tr>/,
   )?.[0];
   assert.ok(brandedHeader);
-  const preBrandingHtml = readFileSync(new URL("./fixtures/legacy-welcome.html", import.meta.url), "utf8");
+  const preBrandingHtml = readFileSync(
+    new URL("./fixtures/legacy-welcome.html", import.meta.url),
+    "utf8",
+  );
   const edited = MEDUSA_EMAIL_TEMPLATES.orderConfirmation;
   const templates = new Map<string, Record<string, unknown>>([
     [

@@ -54,7 +54,10 @@ export async function subscribeToNewsletter(input: unknown) {
 
   if (subscribed.welcomeEligible) {
     const runtime = await service.getRuntimeSettings();
-    const storeUrl = (await installationRow()).merchant?.storefrontUrl ?? process.env.STOREFRONT_URL ?? "https://example.com";
+    const storeUrl =
+      (await installationRow()).merchant?.storefrontUrl ??
+      process.env.STOREFRONT_URL ??
+      "https://example.com";
     await service.triggerFlowsForEvent(
       "newsletter.subscribed",
       email,
@@ -62,9 +65,7 @@ export async function subscribeToNewsletter(input: unknown) {
         email,
         care_guide_url: `${storeUrl}/pages/care-guide`,
         editorial_image_alt: "Your store collection",
-        editorial_image_url:
-          process.env.EMAIL_EDITORIAL_IMAGE_URL ??
-          "",
+        editorial_image_url: process.env.EMAIL_EDITORIAL_IMAGE_URL ?? "",
         first_name: firstName ?? "",
         store_name: runtime.emailSenderName,
         store_url: storeUrl,

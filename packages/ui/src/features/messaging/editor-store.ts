@@ -14,7 +14,12 @@ import { create } from "zustand";
 
 import type { SignupForm } from "./admin-types";
 
-export const STEP_ORDER: StepKind[] = ["teaser", "opt_in", "success", "already_subscribed"];
+export const STEP_ORDER: StepKind[] = [
+  "teaser",
+  "opt_in",
+  "success",
+  "already_subscribed",
+];
 
 // The slice of state we snapshot for undo/redo (the persisted content, not UI state).
 interface Snapshot {
@@ -83,7 +88,10 @@ function snapshot(state: EditorState): Snapshot {
 }
 
 function currentStepBlocks(state: EditorState): FormBlock[] {
-  return state.document.steps.find((candidate) => candidate.kind === state.step)?.blocks ?? [];
+  return (
+    state.document.steps.find((candidate) => candidate.kind === state.step)
+      ?.blocks ?? []
+  );
 }
 
 function alreadySubscribedBlocks(): FormBlock[] {
@@ -99,15 +107,20 @@ function alreadySubscribedBlocks(): FormBlock[] {
   ];
 }
 
-function withAlreadySubscribedStep(document: SignupFormDocument): SignupFormDocument {
-  if (document.steps.some((candidate) => candidate.kind === "already_subscribed")) {
+function withAlreadySubscribedStep(
+  document: SignupFormDocument,
+): SignupFormDocument {
+  if (
+    document.steps.some((candidate) => candidate.kind === "already_subscribed")
+  ) {
     return document;
   }
   return {
     ...document,
-    steps: [...document.steps, makeStep("already_subscribed", alreadySubscribedBlocks())].sort(
-      (a, b) => STEP_ORDER.indexOf(a.kind) - STEP_ORDER.indexOf(b.kind),
-    ),
+    steps: [
+      ...document.steps,
+      makeStep("already_subscribed", alreadySubscribedBlocks()),
+    ].sort((a, b) => STEP_ORDER.indexOf(a.kind) - STEP_ORDER.indexOf(b.kind)),
   };
 }
 
@@ -121,12 +134,17 @@ export const useEditorStore = create<EditorState>()((set, get) => {
     });
   }
 
-  function mutateStepBlocks(stepKind: StepKind, updater: (blocks: FormBlock[]) => FormBlock[]) {
+  function mutateStepBlocks(
+    stepKind: StepKind,
+    updater: (blocks: FormBlock[]) => FormBlock[],
+  ) {
     commit((state) => ({
       document: {
         ...state.document,
         steps: state.document.steps.map((candidate) =>
-          candidate.kind === stepKind ? { ...candidate, blocks: updater(candidate.blocks) } : candidate,
+          candidate.kind === stepKind
+            ? { ...candidate, blocks: updater(candidate.blocks) }
+            : candidate,
         ),
       },
     }));
@@ -163,7 +181,9 @@ export const useEditorStore = create<EditorState>()((set, get) => {
     loaded: false,
 
     load: (form, options) => {
-      const document = withAlreadySubscribedStep(options?.document ?? form.document);
+      const document = withAlreadySubscribedStep(
+        options?.document ?? form.document,
+      );
       set({
         formId: form.id,
         editorKey: options?.editorKey ?? form.id,
@@ -171,7 +191,9 @@ export const useEditorStore = create<EditorState>()((set, get) => {
         type: form.type,
         status: options?.status ?? form.status,
         document,
-        step: document.steps.some((s) => s.kind === "opt_in") ? "opt_in" : document.steps[0]?.kind ?? "opt_in",
+        step: document.steps.some((s) => s.kind === "opt_in")
+          ? "opt_in"
+          : (document.steps[0]?.kind ?? "opt_in"),
         selectedBlockId: null,
         past: [],
         future: [],
@@ -182,22 +204,57 @@ export const useEditorStore = create<EditorState>()((set, get) => {
 
     setName: (name) => commit(() => ({ name })),
     setType: (type) => commit(() => ({ type })),
-    setStyles: (patch) => commit((state) => ({ document: { ...state.document, styles: { ...state.document.styles, ...patch } } })),
-    setTargeting: (patch) => commit((state) => ({ document: { ...state.document, targeting: { ...state.document.targeting, ...patch } } })),
+    setStyles: (patch) =>
+      commit((state) => ({
+        document: {
+          ...state.document,
+          styles: { ...state.document.styles, ...patch },
+        },
+      })),
+    setTargeting: (patch) =>
+      commit((state) => ({
+        document: {
+          ...state.document,
+          targeting: { ...state.document.targeting, ...patch },
+        },
+      })),
     // Switching to HTML mode for the first time seeds the code from the visual blocks
     // (one-way). Once html exists we never clobber it on toggle.
     setMode: (mode) =>
       commit((state) =>
         mode === "html" && !(state.document.html ?? "").trim()
-          ? { document: { ...state.document, mode, html: serializeBlocksToHtml(state.document) } }
+          ? {
+              document: {
+                ...state.document,
+                mode,
+                html: serializeBlocksToHtml(state.document),
+              },
+            }
           : { document: { ...state.document, mode } },
       ),
     // Code edits don't push history entries (the code editor has its own undo); they
     // just mark dirty so autosave fires.
-    setHtml: (html) => set((state) => ({ document: { ...state.document, html }, future: [], dirty: true })),
-    setCss: (css) => set((state) => ({ document: { ...state.document, css }, future: [], dirty: true })),
+    setHtml: (html) =>
+      set((state) => ({
+        document: { ...state.document, html },
+        future: [],
+        dirty: true,
+      })),
+    setCss: (css) =>
+      set((state) => ({
+        document: { ...state.document, css },
+        future: [],
+        dirty: true,
+      })),
     regenerateHtml: () =>
-      set((state) => ({ document: { ...state.document, html: serializeBlocksToHtml(state.document) }, future: [], dirty: true })),
+      set((state) => ({
+        document: {
+          ...state.document,
+          html: serializeBlocksToHtml(state.document),
+        },
+        future: [],
+        dirty: true,
+      })),
 
     addBlock: (type) => {
       const defaults: Partial<FormBlock> =
@@ -214,21 +271,31 @@ export const useEditorStore = create<EditorState>()((set, get) => {
                   : type === "text"
                     ? { text: "Text" }
                     : type === "html"
-                      ? { text: '<div style="text-align:center;padding:8px">Custom HTML</div>' }
+                      ? {
+                          text: '<div style="text-align:center;padding:8px">Custom HTML</div>',
+                        }
                       : {};
       const block = makeBlock(type, defaults);
       mutateStepBlocks(get().step, (blocks) => [...blocks, block]);
       set({ selectedBlockId: block.id });
     },
 
-    updateBlock: (id, patch) => mutateStepBlocks(get().step, (blocks) => blocks.map((b) => (b.id === id ? { ...b, ...patch } : b))),
+    updateBlock: (id, patch) =>
+      mutateStepBlocks(get().step, (blocks) =>
+        blocks.map((b) => (b.id === id ? { ...b, ...patch } : b)),
+      ),
     setBlockCode: (id, text) =>
       set((state) => ({
         document: {
           ...state.document,
           steps: state.document.steps.map((candidate) =>
             candidate.kind === state.step
-              ? { ...candidate, blocks: candidate.blocks.map((b) => (b.id === id ? { ...b, text } : b)) }
+              ? {
+                  ...candidate,
+                  blocks: candidate.blocks.map((b) =>
+                    b.id === id ? { ...b, text } : b,
+                  ),
+                }
               : candidate,
           ),
         },
@@ -236,20 +303,34 @@ export const useEditorStore = create<EditorState>()((set, get) => {
         dirty: true,
       })),
     updateBlockStyle: (id, patch) =>
-      mutateStepBlocks(get().step, (blocks) => blocks.map((b) => (b.id === id ? { ...b, styles: { ...b.styles, ...patch } } : b))),
+      mutateStepBlocks(get().step, (blocks) =>
+        blocks.map((b) =>
+          b.id === id ? { ...b, styles: { ...b.styles, ...patch } } : b,
+        ),
+      ),
 
     duplicateBlock: (id) => {
       const blocks = currentStepBlocks(get());
       const source = blocks.find((b) => b.id === id);
       if (!source) return;
-      const copy = makeBlock(source.type, { text: source.text, src: source.src, styles: source.styles ? { ...source.styles } : undefined });
+      const copy = makeBlock(source.type, {
+        text: source.text,
+        src: source.src,
+        styles: source.styles ? { ...source.styles } : undefined,
+      });
       const index = blocks.findIndex((b) => b.id === id);
-      mutateStepBlocks(get().step, (current) => [...current.slice(0, index + 1), copy, ...current.slice(index + 1)]);
+      mutateStepBlocks(get().step, (current) => [
+        ...current.slice(0, index + 1),
+        copy,
+        ...current.slice(index + 1),
+      ]);
       set({ selectedBlockId: copy.id });
     },
 
     removeBlock: (id) => {
-      mutateStepBlocks(get().step, (blocks) => blocks.filter((b) => b.id !== id));
+      mutateStepBlocks(get().step, (blocks) =>
+        blocks.filter((b) => b.id !== id),
+      );
       if (get().selectedBlockId === id) set({ selectedBlockId: null });
     },
 
@@ -303,7 +384,7 @@ export const useEditorStore = create<EditorState>()((set, get) => {
       set({
         step: remaining.some((candidate) => candidate.kind === "opt_in")
           ? "opt_in"
-          : remaining[0]?.kind ?? "opt_in",
+          : (remaining[0]?.kind ?? "opt_in"),
         selectedBlockId: null,
       });
     },

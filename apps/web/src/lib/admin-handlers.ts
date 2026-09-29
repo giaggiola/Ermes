@@ -10,7 +10,10 @@ import {
   type SegmentRuleGroup,
 } from "@ermes/core";
 import { queueNames, sendJob } from "@ermes/core/queue";
-import { defaultTemplateContext, renderHandlebarsTemplate } from "@ermes/core/render-template";
+import {
+  defaultTemplateContext,
+  renderHandlebarsTemplate,
+} from "@ermes/core/render-template";
 import { isValidEmail, normalizeEmail } from "@ermes/core/validation";
 import { getMessagingService } from "@ermes/db";
 
@@ -153,7 +156,10 @@ const resources = {
   },
 } as const;
 
-export async function dispatchAdminGET(request: NextRequest, context: RouteContext) {
+export async function dispatchAdminGET(
+  request: NextRequest,
+  context: RouteContext,
+) {
   try {
     const path = await getPath(context);
     const service = getMessagingService();
@@ -182,7 +188,9 @@ export async function dispatchAdminGET(request: NextRequest, context: RouteConte
     }
 
     if (path[0] === "metrics") {
-      return NextResponse.json({ metrics: await service.listDistinctCommerceEventTypes() });
+      return NextResponse.json({
+        metrics: await service.listDistinctCommerceEventTypes(),
+      });
     }
 
     if (path[0] === "email-flows" && path[1] && path[2] === "analytics") {
@@ -190,7 +198,9 @@ export async function dispatchAdminGET(request: NextRequest, context: RouteConte
     }
 
     if (path[0] === "email-campaigns" && path[1] && path[2] === "analytics") {
-      return NextResponse.json({ analytics: await service.getCampaignAnalytics(path[1]) });
+      return NextResponse.json({
+        analytics: await service.getCampaignAnalytics(path[1]),
+      });
     }
 
     if (path[0] === "email-subscribers" && path[1] === "tags") {
@@ -222,12 +232,17 @@ export async function dispatchAdminGET(request: NextRequest, context: RouteConte
 
     if (path[0] === "message-suppressions") {
       const filter = Object.fromEntries(request.nextUrl.searchParams.entries());
-      return NextResponse.json({ message_suppressions: await service.listMessageSuppressions(filter) });
+      return NextResponse.json({
+        message_suppressions: await service.listMessageSuppressions(filter),
+      });
     }
 
     const config = getResource(path[0]);
     if (!config) {
-      return NextResponse.json({ message: "Unknown admin resource" }, { status: 404 });
+      return NextResponse.json(
+        { message: "Unknown admin resource" },
+        { status: 404 },
+      );
     }
 
     if (path[1]) {
@@ -243,7 +258,10 @@ export async function dispatchAdminGET(request: NextRequest, context: RouteConte
   }
 }
 
-export async function dispatchAdminPOST(request: NextRequest, context: RouteContext) {
+export async function dispatchAdminPOST(
+  request: NextRequest,
+  context: RouteContext,
+) {
   try {
     const path = await getPath(context);
     const body = await parseBody(request);
@@ -260,8 +278,14 @@ export async function dispatchAdminPOST(request: NextRequest, context: RouteCont
       return NextResponse.json({
         context_used: contextData,
         preview: {
-          html: renderHandlebarsTemplate(String(template.html_content), contextData),
-          subject: renderHandlebarsTemplate(String(template.subject), contextData),
+          html: renderHandlebarsTemplate(
+            String(template.html_content),
+            contextData,
+          ),
+          subject: renderHandlebarsTemplate(
+            String(template.subject),
+            contextData,
+          ),
           text:
             typeof template.text_content === "string"
               ? renderHandlebarsTemplate(template.text_content, contextData)
@@ -282,7 +306,8 @@ export async function dispatchAdminPOST(request: NextRequest, context: RouteCont
     }
 
     if (path[0] === "email-campaigns" && path[1] === "preview-audience") {
-      const filter = (body.filter as Record<string, unknown> | null | undefined) ?? null;
+      const filter =
+        (body.filter as Record<string, unknown> | null | undefined) ?? null;
       return NextResponse.json(await service.previewCampaignAudience(filter));
     }
 
@@ -380,9 +405,13 @@ export async function dispatchAdminPOST(request: NextRequest, context: RouteCont
     }
 
     if (path[0] === "email-flows" && path[1] === "test-trigger") {
-      const email = typeof body.email === "string" ? normalizeEmail(body.email) : "";
+      const email =
+        typeof body.email === "string" ? normalizeEmail(body.email) : "";
       if (!email || !isValidEmail(email)) {
-        return NextResponse.json({ message: "Valid email is required" }, { status: 400 });
+        return NextResponse.json(
+          { message: "Valid email is required" },
+          { status: 400 },
+        );
       }
 
       const contextData = {
@@ -403,22 +432,38 @@ export async function dispatchAdminPOST(request: NextRequest, context: RouteCont
         return NextResponse.json({ results: [result] });
       }
 
-      const triggerEvent = typeof body.trigger_event === "string" ? body.trigger_event : "order.placed";
-      const results = await service.triggerFlowsForEvent(triggerEvent, email, contextData, "transactional");
+      const triggerEvent =
+        typeof body.trigger_event === "string"
+          ? body.trigger_event
+          : "order.placed";
+      const results = await service.triggerFlowsForEvent(
+        triggerEvent,
+        email,
+        contextData,
+        "transactional",
+      );
       return NextResponse.json({ results });
     }
 
     if (path[0] === "message-suppressions") {
-      const email = typeof body.email === "string" ? normalizeEmail(body.email) : "";
+      const email =
+        typeof body.email === "string" ? normalizeEmail(body.email) : "";
       const reason = typeof body.reason === "string" ? body.reason : "manual";
-      const source = typeof body.source === "string" && body.source ? body.source : "admin";
+      const source =
+        typeof body.source === "string" && body.source ? body.source : "admin";
 
       if (!email || !isValidEmail(email)) {
-        return NextResponse.json({ message: "Valid email is required" }, { status: 400 });
+        return NextResponse.json(
+          { message: "Valid email is required" },
+          { status: 400 },
+        );
       }
 
       if (!["bounce", "complaint", "manual", "unsubscribe"].includes(reason)) {
-        return NextResponse.json({ message: "Invalid suppression reason" }, { status: 400 });
+        return NextResponse.json(
+          { message: "Invalid suppression reason" },
+          { status: 400 },
+        );
       }
 
       const suppression = await service.recordSuppression(
@@ -426,12 +471,18 @@ export async function dispatchAdminPOST(request: NextRequest, context: RouteCont
         reason as "bounce" | "complaint" | "manual" | "unsubscribe",
         source,
       );
-      return NextResponse.json({ message_suppression: suppression }, { status: 201 });
+      return NextResponse.json(
+        { message_suppression: suppression },
+        { status: 201 },
+      );
     }
 
     const config = getResource(path[0]);
     if (!config) {
-      return NextResponse.json({ message: "Unknown admin resource" }, { status: 404 });
+      return NextResponse.json(
+        { message: "Unknown admin resource" },
+        { status: 404 },
+      );
     }
 
     if (path[0] === "email-campaigns") {
@@ -447,25 +498,41 @@ export async function dispatchAdminPOST(request: NextRequest, context: RouteCont
         delete body[field];
       }
     }
-    const created = (await callService(service, config.create, [body])) as Record<string, unknown>[];
-    return NextResponse.json({ [singular(path[0])]: created[0] }, { status: 201 });
+    const created = (await callService(service, config.create, [
+      body,
+    ])) as Record<string, unknown>[];
+    return NextResponse.json(
+      { [singular(path[0])]: created[0] },
+      { status: 201 },
+    );
   } catch (error) {
     return handleRouteError(error);
   }
 }
 
-export async function dispatchAdminDELETE(_request: NextRequest, context: RouteContext) {
+export async function dispatchAdminDELETE(
+  _request: NextRequest,
+  context: RouteContext,
+) {
   try {
     const path = await getPath(context);
     const config = getResource(path[0]);
 
     if (path[0] === "message-suppressions" && path[1]) {
-      const suppression = await getMessagingService().clearSuppressionById(path[1]);
-      return NextResponse.json({ message_suppression: suppression, success: Boolean(suppression) });
+      const suppression = await getMessagingService().clearSuppressionById(
+        path[1],
+      );
+      return NextResponse.json({
+        message_suppression: suppression,
+        success: Boolean(suppression),
+      });
     }
 
     if (!config || !path[1]) {
-      return NextResponse.json({ message: "Unknown admin resource" }, { status: 404 });
+      return NextResponse.json(
+        { message: "Unknown admin resource" },
+        { status: 404 },
+      );
     }
 
     await callService(getMessagingService(), config.delete, path[1]);
@@ -475,7 +542,10 @@ export async function dispatchAdminDELETE(_request: NextRequest, context: RouteC
   }
 }
 
-export async function dispatchAdminUpdate(request: NextRequest, context: RouteContext) {
+export async function dispatchAdminUpdate(
+  request: NextRequest,
+  context: RouteContext,
+) {
   try {
     const path = await getPath(context);
     if (path[0] === "settings" && path.length === 1) {
@@ -490,7 +560,10 @@ export async function dispatchAdminUpdate(request: NextRequest, context: RouteCo
     }
     const config = getResource(path[0]);
     if (!config || !path[1]) {
-      return NextResponse.json({ message: "Unknown admin resource" }, { status: 404 });
+      return NextResponse.json(
+        { message: "Unknown admin resource" },
+        { status: 404 },
+      );
     }
 
     const body = await parseBody(request);
@@ -541,10 +614,17 @@ export async function auditMutation(
     .catch(() => undefined);
 }
 
-async function sendTestEmail(templateId: string, body: Record<string, unknown>) {
-  const email = typeof body.email === "string" ? normalizeEmail(body.email) : "";
+async function sendTestEmail(
+  templateId: string,
+  body: Record<string, unknown>,
+) {
+  const email =
+    typeof body.email === "string" ? normalizeEmail(body.email) : "";
   if (!email || !isValidEmail(email)) {
-    return NextResponse.json({ message: "Valid email is required" }, { status: 400 });
+    return NextResponse.json(
+      { message: "Valid email is required" },
+      { status: 400 },
+    );
   }
   const requestId =
     typeof body.request_id === "string" &&
@@ -569,7 +649,10 @@ async function sendTestEmail(templateId: string, body: Record<string, unknown>) 
   };
 
   const subject = `[TEST] ${renderHandlebarsTemplate(String(template.subject), contextData)}`;
-  const html = renderHandlebarsTemplate(String(template.html_content), contextData);
+  const html = renderHandlebarsTemplate(
+    String(template.html_content),
+    contextData,
+  );
 
   const { apiKey } = await deliveryCredentials();
 
@@ -586,16 +669,30 @@ async function sendTestEmail(templateId: string, body: Record<string, unknown>) 
   );
 
   if (result.error) {
-    return NextResponse.json({ error: result.error.message, message: "Failed to send test email" }, { status: 500 });
+    return NextResponse.json(
+      { error: result.error.message, message: "Failed to send test email" },
+      { status: 500 },
+    );
   }
 
-  return NextResponse.json({ message: `Test email sent to ${email}`, message_id: result.data?.id, success: true });
+  return NextResponse.json({
+    message: `Test email sent to ${email}`,
+    message_id: result.data?.id,
+    success: true,
+  });
 }
 
-async function sendCampaignTestEmail(campaignId: string, body: Record<string, unknown>) {
-  const email = typeof body.email === "string" ? normalizeEmail(body.email) : "";
+async function sendCampaignTestEmail(
+  campaignId: string,
+  body: Record<string, unknown>,
+) {
+  const email =
+    typeof body.email === "string" ? normalizeEmail(body.email) : "";
   if (!email || !isValidEmail(email)) {
-    return NextResponse.json({ message: "Valid email is required" }, { status: 400 });
+    return NextResponse.json(
+      { message: "Valid email is required" },
+      { status: 400 },
+    );
   }
   const requestId =
     typeof body.request_id === "string" &&
@@ -611,7 +708,9 @@ async function sendCampaignTestEmail(campaignId: string, body: Record<string, un
 
   const service = getMessagingService();
   const campaign = await service.retrieveEmailCampaign(campaignId);
-  const template = await service.retrieveEmailTemplate(String(campaign.template_id));
+  const template = await service.retrieveEmailTemplate(
+    String(campaign.template_id),
+  );
   const runtime = await service.getRuntimeSettings();
   const contextData = {
     ...defaultTemplateContext,
@@ -622,7 +721,10 @@ async function sendCampaignTestEmail(campaignId: string, body: Record<string, un
   };
 
   const subject = `[TEST] ${renderHandlebarsTemplate(String(campaign.subject || template.subject), contextData)}`;
-  const html = renderHandlebarsTemplate(String(template.html_content), contextData);
+  const html = renderHandlebarsTemplate(
+    String(template.html_content),
+    contextData,
+  );
 
   const { apiKey } = await deliveryCredentials();
 
@@ -639,10 +741,17 @@ async function sendCampaignTestEmail(campaignId: string, body: Record<string, un
   );
 
   if (result.error) {
-    return NextResponse.json({ error: result.error.message, message: "Failed to send campaign test" }, { status: 500 });
+    return NextResponse.json(
+      { error: result.error.message, message: "Failed to send campaign test" },
+      { status: 500 },
+    );
   }
 
-  return NextResponse.json({ message: `Campaign test sent to ${email}`, message_id: result.data?.id, success: true });
+  return NextResponse.json({
+    message: `Campaign test sent to ${email}`,
+    message_id: result.data?.id,
+    success: true,
+  });
 }
 
 async function getPath(context: RouteContext) {
@@ -659,7 +768,9 @@ function getResource(resource: string | undefined) {
 }
 
 function callService(service: unknown, method: string, ...args: unknown[]) {
-  return (service as Record<string, (...methodArgs: unknown[]) => unknown>)[method](...args);
+  return (service as Record<string, (...methodArgs: unknown[]) => unknown>)[
+    method
+  ](...args);
 }
 
 function collectionKey(resource: string) {

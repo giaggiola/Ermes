@@ -1,20 +1,40 @@
 "use client";
 
 import { format } from "date-fns";
-import { ChevronRight, ListFilter, Mail, MoreHorizontal, Play, Plus, Search, Tags, TriangleAlert, WandSparkles } from "lucide-react";
+import {
+  ChevronRight,
+  ListFilter,
+  Mail,
+  MoreHorizontal,
+  Play,
+  Plus,
+  Search,
+  Tags,
+  TriangleAlert,
+  WandSparkles,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { triggerLabel } from "../../trigger-catalog";
 
-import { EmptyState, ErrorState, LoadingState } from "../../components/admin/empty-state";
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "../../components/admin/empty-state";
 import { JsonBlock } from "../../components/admin/json-block";
 import { PageHeader } from "../../components/admin/page-header";
 import { StatusBadge } from "../../components/admin/status-badge";
 import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../../components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -25,12 +45,34 @@ import {
   DropdownMenuTrigger,
 } from "../../../../components/ui/dropdown-menu";
 import { Input } from "../../../../components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../../components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../../../components/ui/table";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../../../components/ui/tabs";
 import { adminFetch, jsonBody } from "../../admin-api";
 import type { EmailFlow, EmailTemplate } from "../../admin-types";
-import { useEmailFlowRuns, useEmailFlows, useEmailTemplates } from "../../use-admin";
+import {
+  useEmailFlowRuns,
+  useEmailFlows,
+  useEmailTemplates,
+} from "../../use-admin";
 import { useMessagingCompatibility } from "../../contract";
 
 const statusOptions = [
@@ -62,7 +104,9 @@ function flowStatusTone(status: EmailFlow["status"]) {
 }
 
 function flowEmailAlert(flow: EmailFlow, templates: EmailTemplate[]) {
-  const templateById = new Map(templates.map((template) => [template.id, template]));
+  const templateById = new Map(
+    templates.map((template) => [template.id, template]),
+  );
   const steps = Array.isArray(flow.steps) ? (flow.steps as FlowListStep[]) : [];
 
   return steps.some((step) => {
@@ -75,7 +119,11 @@ function flowEmailAlert(flow: EmailFlow, templates: EmailTemplate[]) {
 }
 
 function flowTags(flow: EmailFlow) {
-  return Array.isArray(flow.tags) ? flow.tags.filter((tag): tag is string => typeof tag === "string" && tag.length > 0) : [];
+  return Array.isArray(flow.tags)
+    ? flow.tags.filter(
+        (tag): tag is string => typeof tag === "string" && tag.length > 0,
+      )
+    : [];
 }
 
 function flowHasAbTest(flow: EmailFlow) {
@@ -128,7 +176,11 @@ export default function FlowsPage() {
       if (query && !flow.name.toLowerCase().includes(query)) return false;
       if (statusFilter !== "all" && flow.status !== statusFilter) return false;
       if (alertOnly && !flowAlerts.get(flow.id)) return false;
-      if (selectedTags.length > 0 && !selectedTags.some((tag) => flowTags(flow).includes(tag))) return false;
+      if (
+        selectedTags.length > 0 &&
+        !selectedTags.some((tag) => flowTags(flow).includes(tag))
+      )
+        return false;
       return true;
     });
   }, [alertOnly, flowAlerts, flows.data, search, selectedTags, statusFilter]);
@@ -138,7 +190,10 @@ export default function FlowsPage() {
   const testTrigger = useMutation({
     mutationFn: (input: { email: string; flow_id: string }) =>
       adminFetch("email-flows/test-trigger", jsonBody(input)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["messaging", "email-flow-runs"] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: ["messaging", "email-flow-runs"],
+      }),
   });
   const installRecipes = useMutation({
     mutationFn: () =>
@@ -154,8 +209,12 @@ export default function FlowsPage() {
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["messaging", "dashboard"] }),
-        queryClient.invalidateQueries({ queryKey: ["messaging", "email-flows"] }),
-        queryClient.invalidateQueries({ queryKey: ["messaging", "email-templates"] }),
+        queryClient.invalidateQueries({
+          queryKey: ["messaging", "email-flows"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["messaging", "email-templates"],
+        }),
       ]);
     },
   });
@@ -166,7 +225,9 @@ export default function FlowsPage() {
       await testTrigger.mutateAsync({ email: testEmail, flow_id: testFlowId });
       toast.success("Test trigger queued");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Test trigger failed");
+      toast.error(
+        error instanceof Error ? error.message : "Test trigger failed",
+      );
     }
   }
 
@@ -190,9 +251,9 @@ export default function FlowsPage() {
           ? `${created} starter flow${created === 1 ? "" : "s"} created as drafts`
           : retired > 0
             ? `${retired} legacy post-purchase flow${retired === 1 ? "" : "s"} retired`
-          : updated > 0
-            ? `${updated} starter flow${updated === 1 ? "" : "s"} updated with safety exclusions`
-          : "All starter flows are already installed",
+            : updated > 0
+              ? `${updated} starter flow${updated === 1 ? "" : "s"} updated with safety exclusions`
+              : "All starter flows are already installed",
       );
       if (result.installation.retained_legacy_active_flow_ids.length > 0) {
         toast.warning(
@@ -201,13 +262,19 @@ export default function FlowsPage() {
       }
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Starter flows could not be installed",
+        error instanceof Error
+          ? error.message
+          : "Starter flows could not be installed",
       );
     }
   }
 
   function toggleTag(tag: string) {
-    setSelectedTags((current) => (current.includes(tag) ? current.filter((item) => item !== tag) : [...current, tag]));
+    setSelectedTags((current) =>
+      current.includes(tag)
+        ? current.filter((item) => item !== tag)
+        : [...current, tag],
+    );
   }
 
   return (
@@ -217,13 +284,20 @@ export default function FlowsPage() {
         description="Build and manage automation flows visually. Open a flow to edit its steps on the canvas."
         actions={
           <div className="flex items-center gap-2">
-            <Button disabled={!compatibility.canEdit} onClick={() => router.push("/messaging/flows/new")}>
+            <Button
+              disabled={!compatibility.canEdit}
+              onClick={() => router.push("/messaging/flows/new")}
+            >
               <Plus className="size-4" />
               New flow
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button aria-label="More flow actions" size="icon" variant="outline">
+                <Button
+                  aria-label="More flow actions"
+                  size="icon"
+                  variant="outline"
+                >
                   <MoreHorizontal className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -257,9 +331,19 @@ export default function FlowsPage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <div className="relative flex-1 sm:max-w-sm">
                   <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input className="pl-9" placeholder="Search flows" value={search} onChange={(event) => setSearch(event.target.value)} />
+                  <Input
+                    className="pl-9"
+                    placeholder="Search flows"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                  />
                 </div>
-                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
+                <Select
+                  value={statusFilter}
+                  onValueChange={(value) =>
+                    setStatusFilter(value as StatusFilter)
+                  }
+                >
                   <SelectTrigger className="w-full sm:w-40">
                     <SelectValue />
                   </SelectTrigger>
@@ -285,7 +369,10 @@ export default function FlowsPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-64">
                     <DropdownMenuLabel>Flow health</DropdownMenuLabel>
-                    <DropdownMenuCheckboxItem checked={alertOnly} onCheckedChange={setAlertOnly}>
+                    <DropdownMenuCheckboxItem
+                      checked={alertOnly}
+                      onCheckedChange={setAlertOnly}
+                    >
                       <TriangleAlert className="size-4" />
                       Sender alerts only
                     </DropdownMenuCheckboxItem>
@@ -341,26 +428,42 @@ export default function FlowsPage() {
                     </TableHeader>
                     <TableBody>
                       {filteredFlows.map((flow) => {
-                        const stepCount = Array.isArray(flow.steps) ? flow.steps.length : 0;
+                        const stepCount = Array.isArray(flow.steps)
+                          ? flow.steps.length
+                          : 0;
                         const hasAlert = flowAlerts.get(flow.id) ?? false;
                         const hasAbTest = flowHasAbTest(flow);
                         const statusTone = flowStatusTone(flow.status);
                         const tags = flowTags(flow);
 
                         return (
-                          <TableRow key={flow.id} className="cursor-pointer" onClick={() => router.push(`/messaging/flows/${flow.id}`)}>
+                          <TableRow
+                            key={flow.id}
+                            className="cursor-pointer"
+                            onClick={() =>
+                              router.push(`/messaging/flows/${flow.id}`)
+                            }
+                          >
                             <TableCell>
                               <div className="grid gap-1">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <span className="font-medium">{flow.name}</span>
+                                  <span className="font-medium">
+                                    {flow.name}
+                                  </span>
                                   {hasAlert ? (
-                                    <Badge variant="outline" className="gap-1 border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
+                                    <Badge
+                                      variant="outline"
+                                      className="gap-1 border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300"
+                                    >
                                       <TriangleAlert className="size-3" />
                                       Sender alert
                                     </Badge>
                                   ) : null}
                                   {hasAbTest ? (
-                                    <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300">
+                                    <Badge
+                                      variant="outline"
+                                      className="border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300"
+                                    >
                                       A/B
                                     </Badge>
                                   ) : null}
@@ -380,11 +483,22 @@ export default function FlowsPage() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <StatusBadge value={statusTone.tone} label={flowStatusLabel(flow.status)} dotClassName={statusTone.dot} />
+                              <StatusBadge
+                                value={statusTone.tone}
+                                label={flowStatusLabel(flow.status)}
+                                dotClassName={statusTone.dot}
+                              />
                             </TableCell>
-                            <TableCell className="text-muted-foreground">{stepCount}</TableCell>
                             <TableCell className="text-muted-foreground">
-                              {flow.updated_at ? format(new Date(flow.updated_at), "MMM d, yyyy") : "-"}
+                              {stepCount}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {flow.updated_at
+                                ? format(
+                                    new Date(flow.updated_at),
+                                    "MMM d, yyyy",
+                                  )
+                                : "-"}
                             </TableCell>
                             <TableCell className="text-right text-muted-foreground">
                               <ChevronRight className="ml-auto size-4" />
@@ -432,12 +546,16 @@ export default function FlowsPage() {
                     <TableBody>
                       {recentRuns.map((run) => (
                         <TableRow key={run.id}>
-                          <TableCell>{flowNames.get(run.flow_id) ?? run.flow_id}</TableCell>
+                          <TableCell>
+                            {flowNames.get(run.flow_id) ?? run.flow_id}
+                          </TableCell>
                           <TableCell>{run.subscriber_email}</TableCell>
                           <TableCell>
                             <StatusBadge value={run.status} />
                           </TableCell>
-                          <TableCell className="text-muted-foreground">{format(new Date(run.started_at), "MMM d, HH:mm")}</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {format(new Date(run.started_at), "MMM d, HH:mm")}
+                          </TableCell>
                           <TableCell className="min-w-80">
                             <JsonBlock value={run.context} />
                           </TableCell>
@@ -468,8 +586,22 @@ export default function FlowsPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Input placeholder="test@example.com" value={testEmail} onChange={(event) => setTestEmail(event.target.value)} />
-                <Button type="button" variant="outline" disabled={!compatibility.canEdit || !testEmail || !testFlowId || testTrigger.isPending} onClick={runTest}>
+                <Input
+                  placeholder="test@example.com"
+                  value={testEmail}
+                  onChange={(event) => setTestEmail(event.target.value)}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={
+                    !compatibility.canEdit ||
+                    !testEmail ||
+                    !testFlowId ||
+                    testTrigger.isPending
+                  }
+                  onClick={runTest}
+                >
                   <Play className="size-4" />
                   Send test trigger
                 </Button>

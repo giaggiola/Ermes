@@ -1,16 +1,33 @@
 "use client";
 
 import { format } from "date-fns";
-import { Activity, Download, Pencil, Plus, Trash2, Upload, Users } from "lucide-react";
+import {
+  Activity,
+  Download,
+  Pencil,
+  Plus,
+  Trash2,
+  Upload,
+  Users,
+} from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 
-import { EmptyState, ErrorState, LoadingState } from "../../components/admin/empty-state";
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "../../components/admin/empty-state";
 import { PageHeader } from "../../components/admin/page-header";
 import { StatusBadge } from "../../components/admin/status-badge";
 import { Button } from "../../../../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../../components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -22,11 +39,23 @@ import {
 import { Input } from "../../../../components/ui/input";
 import { Label } from "../../../../components/ui/label";
 import { Switch } from "../../../../components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../../components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../../../components/ui/table";
 import type { EmailSubscriber } from "../../admin-types";
 import { adminFetch } from "../../admin-api";
 import { useMessagingCompatibility } from "../../contract";
-import { useAdminCreate, useAdminDelete, useAdminPatch, useEmailSubscribers } from "../../use-admin";
+import {
+  useAdminCreate,
+  useAdminDelete,
+  useAdminPatch,
+  useEmailSubscribers,
+} from "../../use-admin";
 
 const PAGE_SIZE = 25;
 
@@ -59,7 +88,9 @@ function parseCsv(content: string): Array<Record<string, string>> {
   const lines = content.split(/\r?\n/).filter((line) => line.trim());
   if (lines.length < 2) return [];
 
-  const headers = lines[0].split(",").map((h) => h.trim().toLowerCase().replace(/['"]/g, ""));
+  const headers = lines[0]
+    .split(",")
+    .map((h) => h.trim().toLowerCase().replace(/['"]/g, ""));
   const rows: Array<Record<string, string>> = [];
 
   for (let i = 1; i < lines.length; i++) {
@@ -81,9 +112,17 @@ function parseCsv(content: string): Array<Record<string, string>> {
 export default function SubscribersPage() {
   const compatibility = useMessagingCompatibility();
   const subscribers = useEmailSubscribers();
-  const createSubscriber = useAdminCreate<Record<string, unknown>>("email-subscribers", ["email-subscribers", "dashboard"]);
-  const updateSubscriber = useAdminPatch<Record<string, unknown> & { id: string }>("email-subscribers", ["email-subscribers", "dashboard"]);
-  const deleteSubscriber = useAdminDelete("email-subscribers", ["email-subscribers", "dashboard"]);
+  const createSubscriber = useAdminCreate<Record<string, unknown>>(
+    "email-subscribers",
+    ["email-subscribers", "dashboard"],
+  );
+  const updateSubscriber = useAdminPatch<
+    Record<string, unknown> & { id: string }
+  >("email-subscribers", ["email-subscribers", "dashboard"]);
+  const deleteSubscriber = useAdminDelete("email-subscribers", [
+    "email-subscribers",
+    "dashboard",
+  ]);
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
@@ -116,14 +155,23 @@ export default function SubscribersPage() {
     for (const subscriber of all) {
       if (subscriber.subscribed) subscribed += 1;
     }
-    return { total: all.length, subscribed, unsubscribed: all.length - subscribed };
+    return {
+      total: all.length,
+      subscribed,
+      unsubscribed: all.length - subscribed,
+    };
   }, [all]);
 
   const filtered = useMemo(() => {
     const term = search.toLowerCase().trim();
     if (!term) return all;
     return all.filter((subscriber) =>
-      [subscriber.email, subscriber.first_name, subscriber.last_name, subscriber.subscription_source]
+      [
+        subscriber.email,
+        subscriber.first_name,
+        subscriber.last_name,
+        subscriber.subscription_source,
+      ]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(term)),
     );
@@ -131,7 +179,10 @@ export default function SubscribersPage() {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages - 1);
-  const pageRows = filtered.slice(currentPage * PAGE_SIZE, currentPage * PAGE_SIZE + PAGE_SIZE);
+  const pageRows = filtered.slice(
+    currentPage * PAGE_SIZE,
+    currentPage * PAGE_SIZE + PAGE_SIZE,
+  );
 
   function openAdd() {
     setEditing(null);
@@ -174,7 +225,9 @@ export default function SubscribersPage() {
         await updateSubscriber.mutateAsync({
           ...payload,
           id: editing.id,
-          unsubscribed_at: form.subscribed ? null : editing.unsubscribed_at ?? new Date().toISOString(),
+          unsubscribed_at: form.subscribed
+            ? null
+            : (editing.unsubscribed_at ?? new Date().toISOString()),
         });
         toast.success("Subscriber updated");
       } else {
@@ -186,18 +239,23 @@ export default function SubscribersPage() {
       }
       setModalOpen(false);
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Failed to save subscriber");
+      setFormError(
+        error instanceof Error ? error.message : "Failed to save subscriber",
+      );
     }
   }
 
   async function remove(subscriber: EmailSubscriber) {
     if (!compatibility.canEdit) return;
-    if (!window.confirm(`Delete ${subscriber.email}? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete ${subscriber.email}? This cannot be undone.`))
+      return;
     try {
       await deleteSubscriber.mutateAsync(subscriber.id);
       toast.success("Subscriber deleted");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to delete subscriber");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete subscriber",
+      );
     }
   }
 
@@ -223,19 +281,40 @@ export default function SubscribersPage() {
 
       const mapped = rows.map((row) => ({
         email: (row.email || row.e_mail || row["e-mail"] || "").trim(),
-        first_name: row.first_name || row.firstname || row["first name"] || row.name?.split(" ")[0] || null,
-        last_name: row.last_name || row.lastname || row["last name"] || row.name?.split(" ").slice(1).join(" ") || null,
-        subscription_source: row.source || row.subscription_source || "admin_import",
+        first_name:
+          row.first_name ||
+          row.firstname ||
+          row["first name"] ||
+          row.name?.split(" ")[0] ||
+          null,
+        last_name:
+          row.last_name ||
+          row.lastname ||
+          row["last name"] ||
+          row.name?.split(" ").slice(1).join(" ") ||
+          null,
+        subscription_source:
+          row.source || row.subscription_source || "admin_import",
         subscribed: true,
         subscribed_at: new Date().toISOString(),
       }));
 
-      const results = await Promise.allSettled(mapped.filter((row) => row.email).map((row) => createSubscriber.mutateAsync(row)));
-      const imported = results.filter((result) => result.status === "fulfilled").length;
+      const results = await Promise.allSettled(
+        mapped
+          .filter((row) => row.email)
+          .map((row) => createSubscriber.mutateAsync(row)),
+      );
+      const imported = results.filter(
+        (result) => result.status === "fulfilled",
+      ).length;
       const failed = results.length - imported;
-      toast.success(`Imported ${imported}${failed ? `, ${failed} failed (likely duplicates)` : ""}`);
+      toast.success(
+        `Imported ${imported}${failed ? `, ${failed} failed (likely duplicates)` : ""}`,
+      );
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to import CSV");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to import CSV",
+      );
     } finally {
       setImporting(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -243,7 +322,14 @@ export default function SubscribersPage() {
   }
 
   function exportCsv() {
-    const headers = ["email", "first_name", "last_name", "subscribed", "subscription_source", "subscribed_at"];
+    const headers = [
+      "email",
+      "first_name",
+      "last_name",
+      "subscribed",
+      "subscription_source",
+      "subscribed_at",
+    ];
     const csv = [
       headers.join(","),
       ...all.map((s) =>
@@ -274,7 +360,13 @@ export default function SubscribersPage() {
         description="Search customer profiles, inspect consent and messaging activity, and manage audience data."
         actions={
           <div className="flex flex-wrap gap-2">
-            <input ref={fileInputRef} type="file" accept=".csv" onChange={importCsv} className="hidden" />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              onChange={importCsv}
+              className="hidden"
+            />
             <Button
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
@@ -283,7 +375,11 @@ export default function SubscribersPage() {
               <Upload className="size-4" />
               {importing ? "Importing…" : "Import CSV"}
             </Button>
-            <Button variant="outline" onClick={exportCsv} disabled={all.length === 0}>
+            <Button
+              variant="outline"
+              onClick={exportCsv}
+              disabled={all.length === 0}
+            >
               <Download className="size-4" />
               Export CSV
             </Button>
@@ -305,7 +401,9 @@ export default function SubscribersPage() {
       <section className="grid gap-4 sm:grid-cols-3">
         <Card className="rounded-lg">
           <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-semibold">{stats.total}</p>
@@ -313,18 +411,26 @@ export default function SubscribersPage() {
         </Card>
         <Card className="rounded-lg">
           <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Active
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-semibold text-emerald-600">{stats.subscribed}</p>
+            <p className="text-2xl font-semibold text-emerald-600">
+              {stats.subscribed}
+            </p>
           </CardContent>
         </Card>
         <Card className="rounded-lg">
           <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">Unsubscribed</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Unsubscribed
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-semibold text-muted-foreground">{stats.unsubscribed}</p>
+            <p className="text-2xl font-semibold text-muted-foreground">
+              {stats.unsubscribed}
+            </p>
           </CardContent>
         </Card>
       </section>
@@ -364,22 +470,43 @@ export default function SubscribersPage() {
                 </TableHeader>
                 <TableBody>
                   {pageRows.map((subscriber) => {
-                    const name = [subscriber.first_name, subscriber.last_name].filter(Boolean).join(" ");
+                    const name = [subscriber.first_name, subscriber.last_name]
+                      .filter(Boolean)
+                      .join(" ");
                     const rawTags = subscriber.properties?.tags;
-                    const tags = Array.isArray(rawTags) ? (rawTags as string[]) : [];
+                    const tags = Array.isArray(rawTags)
+                      ? (rawTags as string[])
+                      : [];
                     return (
                       <TableRow key={subscriber.id}>
-                        <TableCell className="font-medium">{subscriber.email}</TableCell>
-                        <TableCell>{name || "—"}</TableCell>
-                        <TableCell className="text-muted-foreground">{subscriber.subscription_source ?? "—"}</TableCell>
-                        <TableCell>
-                          <StatusBadge value={subscriber.subscribed ? "active" : "unsubscribed"} />
+                        <TableCell className="font-medium">
+                          {subscriber.email}
                         </TableCell>
-                        <TableCell className="text-muted-foreground">{tags.length ? tags.join(", ") : "—"}</TableCell>
-                        <TableCell className="text-muted-foreground">{formatDate(subscriber.subscribed_at)}</TableCell>
+                        <TableCell>{name || "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {subscriber.subscription_source ?? "—"}
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge
+                            value={
+                              subscriber.subscribed ? "active" : "unsubscribed"
+                            }
+                          />
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {tags.length ? tags.join(", ") : "—"}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDate(subscriber.subscribed_at)}
+                        </TableCell>
                         <TableCell>
                           <div className="flex justify-end gap-1">
-                            <Button size="icon-sm" variant="ghost" title="Activity" onClick={() => setProfile(subscriber)}>
+                            <Button
+                              size="icon-sm"
+                              variant="ghost"
+                              title="Activity"
+                              onClick={() => setProfile(subscriber)}
+                            >
                               <Activity className="size-4" />
                             </Button>
                             <Button
@@ -419,17 +546,33 @@ export default function SubscribersPage() {
                   <span>
                     Page {currentPage + 1} of {totalPages}
                   </span>
-                  <Button size="sm" variant="outline" disabled={currentPage <= 0} onClick={() => setPage(currentPage - 1)}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={currentPage <= 0}
+                    onClick={() => setPage(currentPage - 1)}
+                  >
                     Previous
                   </Button>
-                  <Button size="sm" variant="outline" disabled={currentPage >= totalPages - 1} onClick={() => setPage(currentPage + 1)}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={currentPage >= totalPages - 1}
+                    onClick={() => setPage(currentPage + 1)}
+                  >
                     Next
                   </Button>
                 </div>
               </div>
             </>
           ) : (
-            <EmptyState message={search ? "No subscribers match this search." : "No subscribers yet."} />
+            <EmptyState
+              message={
+                search
+                  ? "No subscribers match this search."
+                  : "No subscribers yet."
+              }
+            />
           )}
         </CardContent>
       </Card>
@@ -444,21 +587,29 @@ export default function SubscribersPage() {
           <DialogHeader>
             <DialogTitle>{profile?.email ?? "Profile activity"}</DialogTitle>
             <DialogDescription>
-              Consent changes, deliveries, flow entries, and suppressions in chronological order.
+              Consent changes, deliveries, flow entries, and suppressions in
+              chronological order.
             </DialogDescription>
           </DialogHeader>
           {timeline.isLoading ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">Loading timeline…</p>
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              Loading timeline…
+            </p>
           ) : timeline.error ? (
             <ErrorState message={timeline.error.message} />
           ) : (
             <div className="grid gap-3">
               {(timeline.data?.timeline ?? []).length ? (
                 (timeline.data?.timeline ?? []).map((item, index) => (
-                  <div className="grid gap-1 rounded-md border p-3" key={`${item.kind}-${item.at}-${index}`}>
+                  <div
+                    className="grid gap-1 rounded-md border p-3"
+                    key={`${item.kind}-${item.at}-${index}`}
+                  >
                     <div className="flex items-center justify-between gap-2">
                       <StatusBadge value={item.kind} />
-                      <span className="text-xs text-muted-foreground">{formatDate(item.at)}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(item.at)}
+                      </span>
                     </div>
                     <p className="text-sm">
                       {timelineLabel(item.kind, item.data)}
@@ -476,14 +627,22 @@ export default function SubscribersPage() {
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit subscriber" : "Add subscriber"}</DialogTitle>
+            <DialogTitle>
+              {editing ? "Edit subscriber" : "Add subscriber"}
+            </DialogTitle>
             <DialogDescription>
-              {editing ? "Update this contact's details and consent state." : "Manually add a contact to the subscriber list."}
+              {editing
+                ? "Update this contact's details and consent state."
+                : "Manually add a contact to the subscriber list."}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4">
-            {formError ? <p className="rounded-md border border-red-200 bg-red-50 p-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">{formError}</p> : null}
+            {formError ? (
+              <p className="rounded-md border border-red-200 bg-red-50 p-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+                {formError}
+              </p>
+            ) : null}
 
             <div className="grid gap-2">
               <Label htmlFor="sub-email">Email *</Label>
@@ -499,11 +658,25 @@ export default function SubscribersPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="sub-first">First name</Label>
-                <Input id="sub-first" placeholder="Jane" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
+                <Input
+                  id="sub-first"
+                  placeholder="Jane"
+                  value={form.first_name}
+                  onChange={(e) =>
+                    setForm({ ...form, first_name: e.target.value })
+                  }
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="sub-last">Last name</Label>
-                <Input id="sub-last" placeholder="Doe" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} />
+                <Input
+                  id="sub-last"
+                  placeholder="Doe"
+                  value={form.last_name}
+                  onChange={(e) =>
+                    setForm({ ...form, last_name: e.target.value })
+                  }
+                />
               </div>
             </div>
 
@@ -513,12 +686,20 @@ export default function SubscribersPage() {
                 id="sub-source"
                 placeholder="e.g. popup, checkout, footer, manual"
                 value={form.subscription_source}
-                onChange={(e) => setForm({ ...form, subscription_source: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, subscription_source: e.target.value })
+                }
               />
             </div>
 
             <div className="flex items-center gap-3">
-              <Switch id="sub-consent" checked={form.subscribed} onCheckedChange={(checked) => setForm({ ...form, subscribed: checked })} />
+              <Switch
+                id="sub-consent"
+                checked={form.subscribed}
+                onCheckedChange={(checked) =>
+                  setForm({ ...form, subscribed: checked })
+                }
+              />
               <Label htmlFor="sub-consent" className="cursor-pointer">
                 {form.subscribed ? "Subscribed" : "Unsubscribed"}
               </Label>

@@ -1,16 +1,14 @@
 import { NextResponse } from "next/server";
 
-import { getMessagingService } from "@ermes/db";
+import { getPool } from "@ermes/db";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   let database: "ok" | "unavailable" = "ok";
-  let stats: Record<string, number> | undefined;
 
   try {
-    const service = getMessagingService();
-    stats = await service.getDashboardStats();
+    await getPool().query("SELECT 1");
   } catch {
     database = "unavailable";
   }

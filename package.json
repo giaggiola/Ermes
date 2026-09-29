@@ -14,6 +14,8 @@
     "db:migrate": "npm run db:migrate --workspace=@ermes/db",
     "dev:web": "npm run dev --workspace=@ermes/web",
     "dev:worker": "npm run dev --workspace=@ermes/worker",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "npm run build --workspace=@ermes/core && npm run build --workspace=@ermes/db && npm run build -w @ermes/shopify && node --experimental-strip-types --test --test-concurrency=1 tests/*.test.ts",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "setup": "node scripts/setup.mjs",

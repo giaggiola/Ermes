@@ -43,7 +43,10 @@ function collection<T>(key: CollectionKey) {
 
 export function useDashboardStats() {
   return useQuery({
-    queryFn: () => adminFetch<{ stats: DashboardStats }>("dashboard").then((data) => data.stats),
+    queryFn: () =>
+      adminFetch<{ stats: DashboardStats }>("dashboard").then(
+        (data) => data.stats,
+      ),
     queryKey: ["messaging", "dashboard"],
   });
 }
@@ -60,7 +63,10 @@ export function useDeliverabilityAnalytics(days: number) {
 
 export function useSettings() {
   return useQuery({
-    queryFn: () => adminFetch<{ settings: AdminSettings }>("settings").then((data) => data.settings),
+    queryFn: () =>
+      adminFetch<{ settings: AdminSettings }>("settings").then(
+        (data) => data.settings,
+      ),
     queryKey: ["messaging", "settings"],
   });
 }
@@ -80,35 +86,50 @@ export function useUpdateSettings() {
 
 export function useEmailTemplates() {
   return useQuery({
-    queryFn: () => adminFetch<Record<string, unknown>>("email-templates").then(collection<EmailTemplate>("email_templates")),
+    queryFn: () =>
+      adminFetch<Record<string, unknown>>("email-templates").then(
+        collection<EmailTemplate>("email_templates"),
+      ),
     queryKey: ["messaging", "email-templates"],
   });
 }
 
 export function useEmailCampaigns() {
   return useQuery({
-    queryFn: () => adminFetch<Record<string, unknown>>("email-campaigns").then(collection<EmailCampaign>("email_campaigns")),
+    queryFn: () =>
+      adminFetch<Record<string, unknown>>("email-campaigns").then(
+        collection<EmailCampaign>("email_campaigns"),
+      ),
     queryKey: ["messaging", "email-campaigns"],
   });
 }
 
 export function useEmailFlows() {
   return useQuery({
-    queryFn: () => adminFetch<Record<string, unknown>>("email-flows").then(collection<EmailFlow>("email_flows")),
+    queryFn: () =>
+      adminFetch<Record<string, unknown>>("email-flows").then(
+        collection<EmailFlow>("email_flows"),
+      ),
     queryKey: ["messaging", "email-flows"],
   });
 }
 
 export function useEmailFlowRuns() {
   return useQuery({
-    queryFn: () => adminFetch<Record<string, unknown>>("email-flow-runs").then(collection<EmailFlowRun>("email_flow_runs")),
+    queryFn: () =>
+      adminFetch<Record<string, unknown>>("email-flow-runs").then(
+        collection<EmailFlowRun>("email_flow_runs"),
+      ),
     queryKey: ["messaging", "email-flow-runs"],
   });
 }
 
 export function useEmailSubscribers() {
   return useQuery({
-    queryFn: () => adminFetch<Record<string, unknown>>("email-subscribers").then(collection<EmailSubscriber>("email_subscribers")),
+    queryFn: () =>
+      adminFetch<Record<string, unknown>>("email-subscribers").then(
+        collection<EmailSubscriber>("email_subscribers"),
+      ),
     queryKey: ["messaging", "email-subscribers"],
   });
 }
@@ -125,14 +146,20 @@ export function useEmailSegments() {
 
 export function useSubscriberTags() {
   return useQuery({
-    queryFn: () => adminFetch<{ tags: string[] }>("email-subscribers/tags").then((data) => data.tags),
+    queryFn: () =>
+      adminFetch<{ tags: string[] }>("email-subscribers/tags").then(
+        (data) => data.tags,
+      ),
     queryKey: ["messaging", "email-subscribers", "tags"],
   });
 }
 
 export function useTriggerMetrics() {
   return useQuery({
-    queryFn: () => adminFetch<{ metrics: TriggerMetric[] }>("metrics").then((data) => data.metrics),
+    queryFn: () =>
+      adminFetch<{ metrics: TriggerMetric[] }>("metrics").then(
+        (data) => data.metrics,
+      ),
     queryKey: ["messaging", "metrics"],
   });
 }
@@ -141,22 +168,34 @@ export function useCampaignAnalytics(campaignId?: string) {
   return useQuery({
     enabled: Boolean(campaignId),
     queryFn: () =>
-      adminFetch<{ analytics: CampaignAnalytics }>(`email-campaigns/${campaignId}/analytics`).then((data) => data.analytics),
+      adminFetch<{ analytics: CampaignAnalytics }>(
+        `email-campaigns/${campaignId}/analytics`,
+      ).then((data) => data.analytics),
     queryKey: ["messaging", "email-campaigns", campaignId, "analytics"],
   });
 }
 
 export function useSignupForms() {
   return useQuery({
-    queryFn: () => adminFetch<Record<string, unknown>>("signup-forms").then(collection<SignupForm>("signup_forms")),
+    queryFn: () =>
+      adminFetch<Record<string, unknown>>("signup-forms").then(
+        collection<SignupForm>("signup_forms"),
+      ),
     queryKey: ["messaging", "signup-forms"],
   });
 }
 
-export function useSignupFormAnalytics(days = 30, device = "all", window?: { from: string; to: string }) {
+export function useSignupFormAnalytics(
+  days = 30,
+  device = "all",
+  window?: { from: string; to: string },
+) {
   const query = new URLSearchParams({ days: String(days) });
   if (device !== "all") query.set("device", device);
-  if (window) { query.set("from_date", window.from); query.set("to_date", window.to); }
+  if (window) {
+    query.set("from_date", window.from);
+    query.set("to_date", window.to);
+  }
   return useQuery({
     staleTime: 30_000,
     refetchInterval: 60_000,
@@ -164,14 +203,25 @@ export function useSignupFormAnalytics(days = 30, device = "all", window?: { fro
       adminFetch<{ analytics: SignupFormAnalytics }>(
         `signup-forms/analytics?${query}`,
       ).then((data) => data.analytics),
-    queryKey: ["messaging", "signup-forms", "analytics", days, device, window?.from, window?.to],
+    queryKey: [
+      "messaging",
+      "signup-forms",
+      "analytics",
+      days,
+      device,
+      window?.from,
+      window?.to,
+    ],
   });
 }
 
 export function useSignupForm(id: string | null) {
   return useQuery({
     enabled: Boolean(id),
-    queryFn: () => adminFetch<{ signup_form: SignupForm }>(`signup-forms/${id}`).then((data) => data.signup_form),
+    queryFn: () =>
+      adminFetch<{ signup_form: SignupForm }>(`signup-forms/${id}`).then(
+        (data) => data.signup_form,
+      ),
     queryKey: ["messaging", "signup-forms", id],
   });
 }
@@ -187,7 +237,10 @@ export function useSignupFormVersions(id: string | null) {
   });
 }
 
-export function useSignupFormVersion(formId: string | null, versionId: string | null) {
+export function useSignupFormVersion(
+  formId: string | null,
+  versionId: string | null,
+) {
   return useQuery({
     enabled: Boolean(formId && versionId),
     queryFn: () =>
@@ -202,9 +255,7 @@ export function useSignupFormExperiments(formId: string | null) {
   return useQuery({
     enabled: Boolean(formId),
     queryFn: () =>
-      adminFetch<SignupFormExperiment[]>(
-        `signup-forms/${formId}/experiments`,
-      ),
+      adminFetch<SignupFormExperiment[]>(`signup-forms/${formId}/experiments`),
     queryKey: ["messaging", "signup-forms", formId, "experiments"],
   });
 }
@@ -275,7 +326,10 @@ export function useUpdateSignupFormExperimentVariant(
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { document: Record<string, unknown>; name?: string }) =>
+    mutationFn: (payload: {
+      document: Record<string, unknown>;
+      name?: string;
+    }) =>
       adminFetch<SignupFormExperiment>(
         `form-experiments/${experimentId}/variants/${variantKey}`,
         { body: JSON.stringify(payload), method: "PUT" },
@@ -293,7 +347,10 @@ export function useUpdateSignupFormExperimentVariant(
 
 export function useEmailEvents() {
   return useQuery({
-    queryFn: () => adminFetch<Record<string, unknown>>("email-events").then(collection<EmailEvent>("email_events")),
+    queryFn: () =>
+      adminFetch<Record<string, unknown>>("email-events").then(
+        collection<EmailEvent>("email_events"),
+      ),
     queryKey: ["messaging", "email-events"],
   });
 }
@@ -301,14 +358,17 @@ export function useEmailEvents() {
 export function useMessageSuppressions() {
   return useQuery({
     queryFn: () =>
-      adminFetch<Record<string, unknown>>("message-suppressions?active=true").then(
-        collection<MessageSuppression>("message_suppressions"),
-      ),
+      adminFetch<Record<string, unknown>>(
+        "message-suppressions?active=true",
+      ).then(collection<MessageSuppression>("message_suppressions")),
     queryKey: ["messaging", "message-suppressions"],
   });
 }
 
-export function useAdminCreate<TInput extends Record<string, unknown>>(resource: string, invalidate: string[]) {
+export function useAdminCreate<TInput extends Record<string, unknown>>(
+  resource: string,
+  invalidate: string[],
+) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: TInput) => adminFetch(resource, jsonBody(input)),
@@ -320,10 +380,14 @@ export function useAdminCreate<TInput extends Record<string, unknown>>(resource:
   });
 }
 
-export function useAdminPatch<TInput extends Record<string, unknown>>(resource: string, invalidate: string[]) {
+export function useAdminPatch<TInput extends Record<string, unknown>>(
+  resource: string,
+  invalidate: string[],
+) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...input }: TInput & { id: string }) => adminFetch(`${resource}/${id}`, patchBody(input)),
+    mutationFn: ({ id, ...input }: TInput & { id: string }) =>
+      adminFetch(`${resource}/${id}`, patchBody(input)),
     onSuccess: () => {
       for (const key of invalidate) {
         void queryClient.invalidateQueries({ queryKey: ["messaging", key] });
@@ -347,17 +411,29 @@ export function useAdminDelete(resource: string, invalidate: string[]) {
 export function useTemplatePreview(templateId?: string) {
   return useMutation({
     mutationFn: (context: Record<string, unknown>) => {
-      if (!templateId) throw new Error("Template must be saved before previewing");
-      return adminFetch<TemplatePreview>(`email-templates/${templateId}/preview`, jsonBody({ context }));
+      if (!templateId)
+        throw new Error("Template must be saved before previewing");
+      return adminFetch<TemplatePreview>(
+        `email-templates/${templateId}/preview`,
+        jsonBody({ context }),
+      );
     },
   });
 }
 
 export function useTemplateTestSend(templateId?: string) {
   return useMutation({
-    mutationFn: (input: { email: string; context?: Record<string, unknown> }) => {
-      if (!templateId) throw new Error("Template must be saved before test send");
-      return adminFetch<{ dry_run?: boolean; message?: string; preview?: { html: string; subject: string } }>(
+    mutationFn: (input: {
+      email: string;
+      context?: Record<string, unknown>;
+    }) => {
+      if (!templateId)
+        throw new Error("Template must be saved before test send");
+      return adminFetch<{
+        dry_run?: boolean;
+        message?: string;
+        preview?: { html: string; subject: string };
+      }>(
         `email-templates/${templateId}/send-test`,
         jsonBody({ ...input, request_id: crypto.randomUUID() }),
       );

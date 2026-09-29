@@ -12,5 +12,7 @@ export async function POST(request: NextRequest) {
     const file = await readImageUpload(request);
     const asset = await uploadImage(file, credentials, saveImageAsset);
     return Response.json(asset, { status: 201 });
-  } catch (error) { return imageRouteError(error); }
+  } catch (error) {
+    return imageRouteError(error);
+  }
 }

@@ -2,7 +2,6 @@ import type { PgBoss } from "pg-boss";
 import type { Logger } from "pino";
 
 import {
-  buildStorefrontUnsubscribeUrls,
   type ExecuteStepJob,
   type FlowStep,
   type FlowStepCondition,
@@ -27,7 +26,11 @@ import {
   type StartFlowJob,
   toFlowTriggerEvent,
 } from "@ermes/core";
-import { getMessagingService, installationRow, type MessagingService } from "@ermes/db";
+import {
+  getMessagingService,
+  installationRow,
+  type MessagingService,
+} from "@ermes/db";
 import { EmailDeliveryDisabledError } from "@ermes/core/installation";
 import { withDeliveryGate } from "./delivery-gate.js";
 
@@ -37,7 +40,10 @@ import {
   insertBeforeBodyClose,
   sendRenderedEmail,
 } from "./email.js";
-import { checkShopifyRecoveryEligibility, createCommercePromotion } from "./commerce.js";
+import {
+  checkShopifyRecoveryEligibility,
+  createCommercePromotion,
+} from "./commerce.js";
 
 type Job<T> = {
   data: T;
@@ -45,7 +51,9 @@ type Job<T> = {
   retryCount?: number;
 };
 const deliveryQueues = new Set<string>([
-  queueNames.executeStep, queueNames.sendCampaign, queueNames.sendCampaignRecipient,
+  queueNames.executeStep,
+  queueNames.sendCampaign,
+  queueNames.sendCampaignRecipient,
 ]);
 
 export async function registerWorkers(logger: Logger) {
@@ -86,21 +94,41 @@ export async function registerWorkers(logger: Logger) {
     { tz: "UTC" },
   );
 
-  await work(boss, queueNames.processCommerceEvent, { teamSize: 5 }, async (job: Job<{ commerceEventId: string }>) => {
-    await processCommerceEvent(service, job.data, logger);
-  });
+  await work(
+    boss,
+    queueNames.processCommerceEvent,
+    { teamSize: 5 },
+    async (job: Job<{ commerceEventId: string }>) => {
+      await processCommerceEvent(service, job.data, logger);
+    },
+  );
 
-  await work(boss, queueNames.startFlow, { teamSize: 5 }, async (job: Job<StartFlowJob>) => {
-    await startFlow(service, job.data, logger);
-  });
+  await work(
+    boss,
+    queueNames.startFlow,
+    { teamSize: 5 },
+    async (job: Job<StartFlowJob>) => {
+      await startFlow(service, job.data, logger);
+    },
+  );
 
-  await work(boss, queueNames.executeStep, { teamSize: 10 }, async (job: Job<ExecuteStepJob>) => {
-    await executeStep(service, job.data, logger, job.retryCount ?? 0);
-  });
+  await work(
+    boss,
+    queueNames.executeStep,
+    { teamSize: 10 },
+    async (job: Job<ExecuteStepJob>) => {
+      await executeStep(service, job.data, logger, job.retryCount ?? 0);
+    },
+  );
 
-  await work(boss, queueNames.sendCampaign, { teamSize: 2 }, async (job: Job<{ campaignId: string }>) => {
-    await sendCampaign(service, job.data.campaignId, logger);
-  });
+  await work(
+    boss,
+    queueNames.sendCampaign,
+    { teamSize: 2 },
+    async (job: Job<{ campaignId: string }>) => {
+      await sendCampaign(service, job.data.campaignId, logger);
+    },
+  );
 
   await work(
     boss,
@@ -118,23 +146,30 @@ async function work<T>(
   options: Record<string, unknown>,
   handler: (job: Job<T>) => Promise<void>,
 ) {
-  await (boss as unknown as {
-    work: (
-      name: string,
-      options: unknown,
-      handler: (jobOrJobs: Job<T> | Job<T>[]) => Promise<void>,
-    ) => Promise<string>;
-  }).work(queueName, options, async (jobOrJobs) => {
+  await (
+    boss as unknown as {
+      work: (
+        name: string,
+        options: unknown,
+        handler: (jobOrJobs: Job<T> | Job<T>[]) => Promise<void>,
+      ) => Promise<string>;
+    }
+  ).work(queueName, options, async (jobOrJobs) => {
     const jobs = Array.isArray(jobOrJobs) ? jobOrJobs : [jobOrJobs];
     for (const job of jobs) {
       const gated = deliveryQueues.has(queueName);
-      if (!gated) { await handler(job); continue; }
+      if (!gated) {
+        await handler(job);
+        continue;
+      }
       await withDeliveryGate({
-        enabled: async () => Boolean((await installationRow()).delivery_enabled),
+        enabled: async () =>
+          Boolean((await installationRow()).delivery_enabled),
         run: () => handler(job),
         defer: async () => {
           const next = await boss.send(queueName, job.data as object, {
-            ...retryOptions(), startAfter: new Date(Date.now() + 60_000),
+            ...retryOptions(),
+            startAfter: new Date(Date.now() + 60_000),
           });
           if (!next) throw new Error("Could not defer paused delivery job");
         },
@@ -150,17 +185,25 @@ async function processCommerceEvent(
 ) {
   const event = await service.retrieveCommerceEvent(data.commerceEventId);
   if (!event) {
-    logger.warn({ commerceEventId: data.commerceEventId }, "commerce event not found");
+    logger.warn(
+      { commerceEventId: data.commerceEventId },
+      "commerce event not found",
+    );
     return;
   }
 
   if (event.processed_at) return;
 
-  const envelope = commerceEventEnvelopeSchema.parse(event.payload) as CommerceEventEnvelope;
+  const envelope = commerceEventEnvelopeSchema.parse(
+    event.payload,
+  ) as CommerceEventEnvelope;
 
   if (envelope.type === "discount.redeemed") {
-    const code = stringValue(envelope.payload.code) ?? stringValue(envelope.context.code);
-    const orderId = stringValue(envelope.payload.order_id) ?? stringValue(envelope.context.order_id);
+    const code =
+      stringValue(envelope.payload.code) ?? stringValue(envelope.context.code);
+    const orderId =
+      stringValue(envelope.payload.order_id) ??
+      stringValue(envelope.context.order_id);
     if (code && orderId) {
       await service.markDiscountRedeemed(code, orderId);
     }
@@ -174,12 +217,17 @@ async function processCommerceEvent(
     if (email && envelope.payload.subscription_recorded === true) {
       // Native storefront subscriptions and their outbox event commit together.
       // Replaying that event must never resubscribe a later opt-out.
-      const current = (await service.listEmailSubscribers({email}))[0];
-      newsletterWelcomeEligible = Boolean(current?.subscribed &&
-        new Date(String(current.subscribed_at)).getTime() === new Date(String(envelope.payload.subscribed_at)).getTime());
+      const current = (await service.listEmailSubscribers({ email }))[0];
+      newsletterWelcomeEligible = Boolean(
+        current?.subscribed &&
+        new Date(String(current.subscribed_at)).getTime() ===
+          new Date(String(envelope.payload.subscribed_at)).getTime(),
+      );
     } else if (email) {
       const subscribed = await service.subscribeWithStatus(email, {
-        first_name: stringValue(envelope.context.first_name) ?? stringValue(envelope.payload.first_name),
+        first_name:
+          stringValue(envelope.context.first_name) ??
+          stringValue(envelope.payload.first_name),
         source:
           stringValue(envelope.context.source) ??
           stringValue(envelope.payload.source) ??
@@ -191,7 +239,11 @@ async function processCommerceEvent(
 
   await maybeCaptureCartPriceDropWatches(service, envelope);
 
-  const productWatchHandled = await maybeProcessProductWatchFanout(service, envelope, logger);
+  const productWatchHandled = await maybeProcessProductWatchFanout(
+    service,
+    envelope,
+    logger,
+  );
   if (!productWatchHandled && newsletterWelcomeEligible) {
     const email = getEventRecipient(envelope);
     if (!email) {
@@ -201,8 +253,17 @@ async function processCommerceEvent(
     const context = buildEventContext(envelope, email);
     const triggerEvent = toFlowTriggerEvent(envelope.type);
     const messageKind = getMessageKindForEvent(envelope.type);
-    const results = await service.triggerFlowsForEvent(triggerEvent, email, context, messageKind, envelope.eventId);
-    logger.info({ eventId: envelope.eventId, results }, "triggered flows for commerce event");
+    const results = await service.triggerFlowsForEvent(
+      triggerEvent,
+      email,
+      context,
+      messageKind,
+      envelope.eventId,
+    );
+    logger.info(
+      { eventId: envelope.eventId, results },
+      "triggered flows for commerce event",
+    );
     await maybeMarkSpecificWatchNotified(service, envelope);
   }
 
@@ -214,7 +275,10 @@ async function maybeProcessProductWatchFanout(
   envelope: CommerceEventEnvelope,
   logger: Logger,
 ) {
-  if (envelope.type !== "product.back_in_stock" && envelope.type !== "product.price_drop") {
+  if (
+    envelope.type !== "product.back_in_stock" &&
+    envelope.type !== "product.price_drop"
+  ) {
     return false;
   }
 
@@ -222,21 +286,25 @@ async function maybeProcessProductWatchFanout(
     return false;
   }
 
-  const productId = stringValue(envelope.payload.product_id) ?? stringValue(envelope.context.product_id);
+  const productId =
+    stringValue(envelope.payload.product_id) ??
+    stringValue(envelope.context.product_id);
   if (!productId) {
     return false;
   }
 
-  const alertType = envelope.type === "product.back_in_stock" ? "back-in-stock" : "price-drop";
+  const alertType =
+    envelope.type === "product.back_in_stock" ? "back-in-stock" : "price-drop";
   const productHandle =
     stringValue(envelope.payload.product_handle) ??
     stringValue(envelope.context.product_handle);
   const watchRows = await Promise.all(
-    [...new Set([productId, productHandle].filter(Boolean))].map((watchProductId) =>
-      service.listEmailProductWatches({
-        notified: false,
-        product_id: watchProductId,
-      }),
+    [...new Set([productId, productHandle].filter(Boolean))].map(
+      (watchProductId) =>
+        service.listEmailProductWatches({
+          notified: false,
+          product_id: watchProductId,
+        }),
     ),
   );
   const watches = [
@@ -244,7 +312,9 @@ async function maybeProcessProductWatchFanout(
       watchRows.flat().map((watch) => [String(watch.id), watch]),
     ).values(),
   ];
-  const variantId = stringValue(envelope.payload.variant_id) ?? stringValue(envelope.context.variant_id);
+  const variantId =
+    stringValue(envelope.payload.variant_id) ??
+    stringValue(envelope.context.variant_id);
   let triggered = 0;
 
   for (const watch of watches) {
@@ -270,9 +340,15 @@ async function maybeProcessProductWatchFanout(
     }
 
     if (alertType === "price-drop") {
-      const currentPrice = numericValue(envelope.payload.current_price) ?? numericValue(envelope.context.current_price);
+      const currentPrice =
+        numericValue(envelope.payload.current_price) ??
+        numericValue(envelope.context.current_price);
       const referencePrice = numericValue(watch.reference_price);
-      if (currentPrice == null || referencePrice == null || currentPrice >= referencePrice) {
+      if (
+        currentPrice == null ||
+        referencePrice == null ||
+        currentPrice >= referencePrice
+      ) {
         continue;
       }
     }
@@ -305,7 +381,10 @@ async function maybeProcessProductWatchFanout(
     triggered++;
   }
 
-  logger.info({ alertType, eventId: envelope.eventId, productId, triggered }, "processed product watch fan-out");
+  logger.info(
+    { alertType, eventId: envelope.eventId, productId, triggered },
+    "processed product watch fan-out",
+  );
   return true;
 }
 
@@ -373,12 +452,20 @@ async function maybeCaptureCartPriceDropWatches(
   await service.ensureCartPriceDropWatches({ email, items });
 }
 
-async function maybeMarkSpecificWatchNotified(service: MessagingService, envelope: CommerceEventEnvelope) {
-  if (envelope.type !== "product.back_in_stock" && envelope.type !== "product.price_drop") {
+async function maybeMarkSpecificWatchNotified(
+  service: MessagingService,
+  envelope: CommerceEventEnvelope,
+) {
+  if (
+    envelope.type !== "product.back_in_stock" &&
+    envelope.type !== "product.price_drop"
+  ) {
     return;
   }
 
-  const watchId = stringValue(envelope.payload.watch_id) ?? stringValue(envelope.context.watch_id);
+  const watchId =
+    stringValue(envelope.payload.watch_id) ??
+    stringValue(envelope.context.watch_id);
   if (!watchId) {
     return;
   }
@@ -390,11 +477,18 @@ async function maybeMarkSpecificWatchNotified(service: MessagingService, envelop
   });
 }
 
-async function startFlow(service: MessagingService, data: StartFlowJob, logger: Logger) {
+async function startFlow(
+  service: MessagingService,
+  data: StartFlowJob,
+  logger: Logger,
+) {
   const execution = await service.getFlowExecutionSnapshot(data.flowId);
   const flow = execution.flow;
   if (flow.status !== "active") {
-    logger.debug({ flowId: data.flowId, status: flow.status }, "flow not active");
+    logger.debug(
+      { flowId: data.flowId, status: flow.status },
+      "flow not active",
+    );
     return;
   }
 
@@ -413,7 +507,11 @@ async function startFlow(service: MessagingService, data: StartFlowJob, logger: 
   const run = result.run;
   if (!result.created) {
     logger.info(
-      { flowId: data.flowId, flowRunId: run.id, sourceEventId: data.sourceEventId },
+      {
+        flowId: data.flowId,
+        flowRunId: run.id,
+        sourceEventId: data.sourceEventId,
+      },
       "duplicate flow start ignored",
     );
     return;
@@ -491,7 +589,10 @@ async function executeStep(
 ) {
   const run = await service.retrieveEmailFlowRun(data.flowRunId);
   if (run.status !== "running") {
-    logger.debug({ flowRunId: data.flowRunId, status: run.status }, "flow run not running");
+    logger.debug(
+      { flowRunId: data.flowRunId, status: run.status },
+      "flow run not running",
+    );
     return;
   }
 
@@ -519,7 +620,9 @@ async function executeStep(
       await queueNextSnapshotStep(steps, data.flowRunId, stepPath);
     } else if (step.type === "delay") {
       const startAfter = new Date(Date.now() + calculateFlowDelay(step));
-      await queueNextSnapshotStep(steps, data.flowRunId, stepPath, { startAfter });
+      await queueNextSnapshotStep(steps, data.flowRunId, stepPath, {
+        startAfter,
+      });
     } else if (step.type === "condition") {
       await executeConditionStep(step, run, steps, data.flowRunId, stepPath);
     } else if (step.type === "discount") {
@@ -558,9 +661,13 @@ async function executeEmailStep(
     ...((run.context as Record<string, unknown>) ?? {}),
     ...(await service.getEmailTemplateBrandContext()),
   };
-  const messageKind = context.__message_kind === "transactional" ? "transactional" : "marketing";
+  const messageKind =
+    context.__message_kind === "transactional" ? "transactional" : "marketing";
   const subscriberEmail = normalizeEmail(String(run.subscriber_email));
-  const suppression = await service.getSuppressionState(subscriberEmail, messageKind);
+  const suppression = await service.getSuppressionState(
+    subscriberEmail,
+    messageKind,
+  );
   if (!suppression.allowed) {
     await logFlowEmailSkip(service, {
       category: "suppression",
@@ -571,20 +678,29 @@ async function executeEmailStep(
       stepPath,
       subscriberEmail,
     });
-    logger.info({ reason: suppression.reason, subscriberEmail }, "email suppressed");
+    logger.info(
+      { reason: suppression.reason, subscriberEmail },
+      "email suppressed",
+    );
     return;
   }
 
   const excludedEventTypes = step.skip_if_event_types_since_start ?? [];
   if (context.shopify_recovery_id) {
     const eligibility = await checkShopifyRecoveryEligibility(
-      String(context.shopify_recovery_id), subscriberEmail, String(context.occurred_at ?? ""),
+      String(context.shopify_recovery_id),
+      subscriberEmail,
+      String(context.occurred_at ?? ""),
     );
     if (!eligibility.allowed) {
       await logFlowEmailSkip(service, {
-        category: "recovery_eligibility", messageKind,
+        category: "recovery_eligibility",
+        messageKind,
         reason: eligibility.reason ?? "Recovery is no longer eligible",
-        run, step, stepPath, subscriberEmail,
+        run,
+        step,
+        stepPath,
+        subscriberEmail,
       });
       return;
     }
@@ -639,7 +755,14 @@ async function executeEmailStep(
     throw new Error(`Template ${templateId} is not active`);
   }
 
-  const renderStep = selectedVariant ? { ...step, template_id: templateId, subject_override: selectedVariant.subject_override ?? step.subject_override } : step;
+  const renderStep = selectedVariant
+    ? {
+        ...step,
+        template_id: templateId,
+        subject_override:
+          selectedVariant.subject_override ?? step.subject_override,
+      }
+    : step;
   const built = buildEmailForStep(renderStep, template, context, run);
   let html = built.html;
   let oneClickUnsubscribeUrl: string | undefined;
@@ -648,10 +771,7 @@ async function executeEmailStep(
     const links = await createUnsubscribeLinks(service, subscriberEmail);
     unsubscribeUrl = links.confirmationUrl;
     oneClickUnsubscribeUrl = links.oneClickUrl;
-    html = insertBeforeBodyClose(
-      html,
-      buildUnsubscribeFooter(unsubscribeUrl),
-    );
+    html = insertBeforeBodyClose(html, buildUnsubscribeFooter(unsubscribeUrl));
   }
 
   const delivery = await sendRenderedEmail(service, {
@@ -668,14 +788,16 @@ async function executeEmailStep(
     metadata: {
       order_id: context.order_id,
       source: "flow",
-      ab_test_flag: selectedVariant ? step.ab_test_flag ?? "email-template-test" : undefined,
+      ab_test_flag: selectedVariant
+        ? (step.ab_test_flag ?? "email-template-test")
+        : undefined,
       ab_variant: selectedVariant?.key,
       ab_variant_template_id: selectedVariant?.template_id,
     },
     subject: built.subject,
     subscriberEmail,
     smartSendingHours: step.skip_recently_emailed
-      ? step.skip_recently_emailed_hours ?? 16
+      ? (step.skip_recently_emailed_hours ?? 16)
       : undefined,
     template,
     templateVersionId:
@@ -746,7 +868,10 @@ async function executeDiscountStep(
   });
   const discount = reserved.discount;
   if (discount.promotion_id) {
-    logger.info({ flowRunId: run.id, stepPath }, "discount step already completed");
+    logger.info(
+      { flowRunId: run.id, stepPath },
+      "discount step already completed",
+    );
     return;
   }
   const promotion = await createCommercePromotion({
@@ -760,14 +885,21 @@ async function executeDiscountStep(
     usageLimit: step.usage_limit || 1,
   });
 
-  await service.completeDiscountPromotion(String(discount.id), promotion.promotionId);
+  await service.completeDiscountPromotion(
+    String(discount.id),
+    promotion.promotionId,
+  );
 
   await service.updateEmailFlowRuns({
     context: {
       ...context,
       discount_code: promotion.code,
       discount_expires: expiresAt
-        ? expiresAt.toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" })
+        ? expiresAt.toLocaleDateString("en-US", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })
         : undefined,
       discount_type: step.discount_type,
       discount_value: step.discount_value,
@@ -778,10 +910,17 @@ async function executeDiscountStep(
   logger.info({ flowRunId: run.id }, "discount step completed");
 }
 
-async function sendCampaign(service: MessagingService, campaignId: string, logger: Logger) {
+async function sendCampaign(
+  service: MessagingService,
+  campaignId: string,
+  logger: Logger,
+) {
   const campaign = await service.retrieveEmailCampaign(campaignId);
   if (!["scheduled", "sending"].includes(String(campaign.status))) {
-    logger.info({ campaignId, status: campaign.status }, "campaign not sendable");
+    logger.info(
+      { campaignId, status: campaign.status },
+      "campaign not sendable",
+    );
     return;
   }
 
@@ -825,7 +964,10 @@ async function sendCampaign(service: MessagingService, campaignId: string, logge
   } else {
     await service.refreshCampaignCounts(campaignId);
   }
-  logger.info({ campaignId, recipientCount: recipients.length }, "campaign recipient jobs queued");
+  logger.info(
+    { campaignId, recipientCount: recipients.length },
+    "campaign recipient jobs queued",
+  );
 }
 
 async function sendCampaignRecipient(
@@ -855,7 +997,9 @@ async function sendCampaignRecipient(
     }
 
     const subscriber = recipient.subscriber_id
-      ? await service.retrieveEmailSubscriber(String(recipient.subscriber_id)).catch(() => null)
+      ? await service
+          .retrieveEmailSubscriber(String(recipient.subscriber_id))
+          .catch(() => null)
       : null;
     const runtime = await service.getRuntimeSettings();
     const context = {
@@ -915,14 +1059,22 @@ async function sendCampaignRecipient(
       throw error;
     }
     const message = error instanceof Error ? error.message : String(error);
-    await service.completeCampaignRecipient(data.recipientId, "failed", { error: message });
+    await service.completeCampaignRecipient(data.recipientId, "failed", {
+      error: message,
+    });
     await finalizeCampaignFromRecipients(service, data.campaignId);
-    logger.warn({ campaignId: data.campaignId, error, recipientId: data.recipientId }, "campaign recipient failed");
+    logger.warn(
+      { campaignId: data.campaignId, error, recipientId: data.recipientId },
+      "campaign recipient failed",
+    );
     throw error;
   }
 }
 
-async function finalizeCampaignFromRecipients(service: MessagingService, campaignId: string) {
+async function finalizeCampaignFromRecipients(
+  service: MessagingService,
+  campaignId: string,
+) {
   const counts = await service.refreshCampaignCounts(campaignId);
   if (counts.pendingCount > 0) {
     return;
@@ -938,7 +1090,11 @@ async function queueStep(
   data: ExecuteStepJob,
   options: Record<string, unknown> = {},
 ) {
-  await sendJob(queueNames.executeStep, { ...data }, { ...retryOptions(), ...options });
+  await sendJob(
+    queueNames.executeStep,
+    { ...data },
+    { ...retryOptions(), ...options },
+  );
 }
 
 async function queueNextSnapshotStep(
@@ -949,7 +1105,10 @@ async function queueNextSnapshotStep(
 ) {
   const next = nextFlowStepPath(steps, currentPath);
   if (!next) {
-    await queueStep({ flowRunId, stepPath: terminalPath(currentPath) }, options);
+    await queueStep(
+      { flowRunId, stepPath: terminalPath(currentPath) },
+      options,
+    );
     return;
   }
   await queueStep({ flowRunId, stepPath: next }, options);
@@ -961,7 +1120,9 @@ function retryOptions() {
 
 function terminalPath(currentPath: string): string {
   const topLevel = Number(currentPath.split(".")[0]);
-  return String(Number.isFinite(topLevel) ? topLevel + 1_000_000_000 : 1_000_000_000);
+  return String(
+    Number.isFinite(topLevel) ? topLevel + 1_000_000_000 : 1_000_000_000,
+  );
 }
 
 async function logFlowEmailSkip(
@@ -976,8 +1137,7 @@ async function logFlowEmailSkip(
     subscriberEmail: string;
   },
 ) {
-  const context =
-    (input.run.context as Record<string, unknown> | null) ?? {};
+  const context = (input.run.context as Record<string, unknown> | null) ?? {};
   await service.logEmailEvent({
     event_type: "skipped",
     flow_run_id: String(input.run.id),
@@ -1018,9 +1178,7 @@ function brandTemplateContext() {
   return {
     care_guide_url: `${storeUrl}/pages/care-guide`,
     editorial_image_alt: "Your store collection",
-    editorial_image_url:
-      process.env.EMAIL_EDITORIAL_IMAGE_URL ??
-      "",
+    editorial_image_url: process.env.EMAIL_EDITORIAL_IMAGE_URL ?? "",
     store_name: "Your store",
     store_url: storeUrl,
   };
@@ -1036,7 +1194,10 @@ async function createUnsubscribeLinks(
   );
   const base = process.env.APP_URL;
   if (!base) throw new Error("APP_URL is required for unsubscribe links");
-  return { confirmationUrl: `${base}/unsubscribe?token=${encodeURIComponent(token)}`, oneClickUrl: `${base}/api/store/email-unsubscribe?token=${encodeURIComponent(token)}` };
+  return {
+    confirmationUrl: `${base}/unsubscribe?token=${encodeURIComponent(token)}`,
+    oneClickUrl: `${base}/api/store/email-unsubscribe?token=${encodeURIComponent(token)}`,
+  };
 }
 
 function stringValue(value: unknown) {

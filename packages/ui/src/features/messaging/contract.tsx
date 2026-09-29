@@ -4,10 +4,7 @@ import { createContext, useContext, useEffect, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { adminFetch } from "./admin-api";
-import {
-  setTriggerCatalogue,
-  type TriggerDefinition,
-} from "./trigger-catalog";
+import { setTriggerCatalogue, type TriggerDefinition } from "./trigger-catalog";
 
 const SUPPORTED_API_VERSION = 1;
 const SUPPORTED_ADMIN_API_VERSION = 2;
@@ -50,7 +47,11 @@ const CompatibilityContext = createContext<Compatibility>({
   message: null,
 });
 
-export function MessagingContractProvider({ children }: { children: ReactNode }) {
+export function MessagingContractProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const contract = useQuery({
     queryFn: () => adminFetch<MessagingContract>("contract"),
     queryKey: ["messaging", "contract"],
@@ -72,7 +73,8 @@ export function MessagingContractProvider({ children }: { children: ReactNode })
 
   let message: string | null = null;
   if (contract.error || adminContract.error) {
-    message = "Messaging compatibility could not be verified. Editing is disabled.";
+    message =
+      "Messaging compatibility could not be verified. Editing is disabled.";
   } else if (
     contract.data &&
     (contract.data.api_version !== SUPPORTED_API_VERSION ||
@@ -93,8 +95,8 @@ export function MessagingContractProvider({ children }: { children: ReactNode })
   }
   const canUseVisualEmail = Boolean(
     adminContract.data?.capabilities.visual_email_document &&
-      adminContract.data.email_document_schema_version ===
-        SUPPORTED_EMAIL_DOCUMENT_SCHEMA_VERSION,
+    adminContract.data.email_document_schema_version ===
+      SUPPORTED_EMAIL_DOCUMENT_SCHEMA_VERSION,
   );
   const value = {
     canEdit: Boolean(contract.data && adminContract.data) && !message,

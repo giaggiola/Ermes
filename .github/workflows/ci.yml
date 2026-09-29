@@ -25,6 +25,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run format:check
       - run: npm ci --prefix shopify-app
       - run: npm run build --prefix shopify-app
       - run: npm test --prefix shopify-app

@@ -31,7 +31,9 @@ export function compileEmailDocument(document: unknown): CompiledEmailDocument {
   }
 
   const body = renderChildren(document.root);
-  const text = plainText(document.root).replace(/\n{3,}/g, "\n\n").trim();
+  const text = plainText(document.root)
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
   return {
     html:
       '<div style="margin:0 auto;max-width:640px;color:#1c1c1c;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6">' +
@@ -89,9 +91,7 @@ function renderNode(node: JsonRecord): string {
 
 function renderText(node: JsonRecord): string {
   let value = escapeHtml(typeof node.text === "string" ? node.text : "");
-  const marks = Array.isArray(node.marks)
-    ? node.marks.filter(isRecord)
-    : [];
+  const marks = Array.isArray(node.marks) ? node.marks.filter(isRecord) : [];
   for (const mark of marks) {
     switch (mark.type) {
       case "bold":
@@ -131,9 +131,13 @@ function plainText(node: JsonRecord): string {
     return "\n";
   }
   const value = childrenOf(node).map(plainText).join("");
-  return ["blockquote", "heading", "listItem", "paragraph", "tableRow"].includes(
-    String(node.type),
-  )
+  return [
+    "blockquote",
+    "heading",
+    "listItem",
+    "paragraph",
+    "tableRow",
+  ].includes(String(node.type))
     ? `${value}\n`
     : value;
 }

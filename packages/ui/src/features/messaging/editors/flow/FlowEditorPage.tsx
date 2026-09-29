@@ -1,7 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, MoreHorizontal, Play, Plus, Rocket, Save, Settings2, Tags, X } from "lucide-react";
+import {
+  ArrowLeft,
+  MoreHorizontal,
+  Play,
+  Plus,
+  Rocket,
+  Save,
+  Settings2,
+  Tags,
+  X,
+} from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -20,7 +30,13 @@ import {
 } from "../../../../components/ui/dropdown-menu";
 import { Input } from "../../../../components/ui/input";
 import { Label } from "../../../../components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -44,7 +60,12 @@ import { FlowCanvas } from "./components/FlowCanvas";
 import { Sidebar } from "./components/Sidebar";
 import { NodeDetailPanel } from "./components/NodeDetailPanel";
 import { TriggerPicker } from "./components/TriggerPicker";
-import { stepsToFlow, flowToSteps, createInitialFlow, type FlowStep } from "./components/flowUtils";
+import {
+  stepsToFlow,
+  flowToSteps,
+  createInitialFlow,
+  type FlowStep,
+} from "./components/flowUtils";
 
 interface FlowState {
   id?: string;
@@ -63,7 +84,12 @@ interface FlowState {
 }
 
 function normalizeTags(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0) : [];
+  return Array.isArray(value)
+    ? value.filter(
+        (tag): tag is string =>
+          typeof tag === "string" && tag.trim().length > 0,
+      )
+    : [];
 }
 
 export default function FlowEditorPage() {
@@ -75,7 +101,10 @@ export default function FlowEditorPage() {
   const isNew = id === "new";
 
   const templatesQuery = useEmailTemplates();
-  const templates = (templatesQuery.data ?? []).map((t) => ({ id: t.id, name: t.name }));
+  const templates = (templatesQuery.data ?? []).map((t) => ({
+    id: t.id,
+    name: t.name,
+  }));
 
   const [flow, setFlow] = useState<FlowState>({
     name: "",
@@ -116,7 +145,9 @@ export default function FlowEditorPage() {
     let cancelled = false;
     (async () => {
       try {
-        const data = await adminFetch<{ email_flow: EmailFlow }>(`email-flows/${id}`);
+        const data = await adminFetch<{ email_flow: EmailFlow }>(
+          `email-flows/${id}`,
+        );
         if (cancelled) return;
         const loaded = data.email_flow;
         const steps = (loaded.steps as FlowStep[]) ?? [];
@@ -136,7 +167,8 @@ export default function FlowEditorPage() {
           reentry_duration: loaded.reentry_duration ?? undefined,
           reentry_unit: loaded.reentry_unit ?? undefined,
           trigger_delay_hours: loaded.trigger_delay_hours ?? 1,
-          trigger_conditions: (loaded.trigger_conditions as TriggerConditionInput | null) ?? [],
+          trigger_conditions:
+            (loaded.trigger_conditions as TriggerConditionInput | null) ?? [],
         });
 
         // Convert flow steps to visual nodes/edges
@@ -173,7 +205,8 @@ export default function FlowEditorPage() {
         setTriggerChosen(true);
         setDirty(false);
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Unknown error");
+        if (!cancelled)
+          setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -210,7 +243,9 @@ export default function FlowEditorPage() {
   }, []);
 
   const handleTriggerSelect = useCallback((trigger: TriggerDefinition) => {
-    const { nodes: initialNodes, edges: initialEdges } = createInitialFlow(trigger.value);
+    const { nodes: initialNodes, edges: initialEdges } = createInitialFlow(
+      trigger.value,
+    );
     setNodes(initialNodes);
     setEdges(initialEdges);
     setSelectedNode(null);
@@ -218,7 +253,7 @@ export default function FlowEditorPage() {
       ...prev,
       message_kind: trigger.messageKind,
       trigger_event: trigger.value,
-      trigger_delay_hours: trigger.timed ? prev.trigger_delay_hours ?? 1 : 0,
+      trigger_delay_hours: trigger.timed ? (prev.trigger_delay_hours ?? 1) : 0,
       steps: [],
     }));
     setFlowInitialized(true);
@@ -231,7 +266,11 @@ export default function FlowEditorPage() {
     (nodeId: string, updates: Record<string, unknown>) => {
       setDirty(true);
       setNodes((nds) => {
-        const newNodes = nds.map((node) => (node.id === nodeId ? { ...node, data: { ...node.data, ...updates } } : node));
+        const newNodes = nds.map((node) =>
+          node.id === nodeId
+            ? { ...node, data: { ...node.data, ...updates } }
+            : node,
+        );
 
         const { triggerEvent, steps } = flowToSteps(newNodes, edges);
         const node = newNodes.find((n) => n.id === nodeId);
@@ -242,15 +281,24 @@ export default function FlowEditorPage() {
             ...prev,
             message_kind:
               typeof updates.trigger_event === "string"
-                ? selectedTrigger?.messageKind ?? prev.message_kind
+                ? (selectedTrigger?.messageKind ?? prev.message_kind)
                 : prev.message_kind,
             trigger_event: triggerEvent,
             steps,
-            reentry_mode: (updates.reentry_mode as FlowState["reentry_mode"]) ?? prev.reentry_mode,
-            reentry_duration: (updates.reentry_duration as number) ?? prev.reentry_duration,
-            reentry_unit: (updates.reentry_unit as FlowState["reentry_unit"]) ?? prev.reentry_unit,
-            trigger_delay_hours: (updates.trigger_delay_hours as number) ?? prev.trigger_delay_hours,
-            trigger_conditions: (updates.trigger_conditions as TriggerConditionInput) ?? prev.trigger_conditions,
+            reentry_mode:
+              (updates.reentry_mode as FlowState["reentry_mode"]) ??
+              prev.reentry_mode,
+            reentry_duration:
+              (updates.reentry_duration as number) ?? prev.reentry_duration,
+            reentry_unit:
+              (updates.reentry_unit as FlowState["reentry_unit"]) ??
+              prev.reentry_unit,
+            trigger_delay_hours:
+              (updates.trigger_delay_hours as number) ??
+              prev.trigger_delay_hours,
+            trigger_conditions:
+              (updates.trigger_conditions as TriggerConditionInput) ??
+              prev.trigger_conditions,
           }));
         } else {
           setFlow((prev) => ({ ...prev, trigger_event: triggerEvent, steps }));
@@ -273,13 +321,21 @@ export default function FlowEditorPage() {
   const addTag = () => {
     const tag = tagInput.trim();
     if (!tag) return;
-    setFlow((prev) => ({ ...prev, tags: Array.from(new Set([...prev.tags, tag])).sort((a, b) => a.localeCompare(b)) }));
+    setFlow((prev) => ({
+      ...prev,
+      tags: Array.from(new Set([...prev.tags, tag])).sort((a, b) =>
+        a.localeCompare(b),
+      ),
+    }));
     setTagInput("");
     setDirty(true);
   };
 
   const removeTag = (tag: string) => {
-    setFlow((prev) => ({ ...prev, tags: prev.tags.filter((item) => item !== tag) }));
+    setFlow((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((item) => item !== tag),
+    }));
     setDirty(true);
   };
 
@@ -308,8 +364,14 @@ export default function FlowEditorPage() {
       status: flow.status,
       tags: flow.tags.length > 0 ? flow.tags : null,
       reentry_mode: flow.reentry_mode ?? "never",
-      reentry_duration: flow.reentry_mode === "after_duration" ? flow.reentry_duration ?? null : null,
-      reentry_unit: flow.reentry_mode === "after_duration" ? flow.reentry_unit ?? "days" : null,
+      reentry_duration:
+        flow.reentry_mode === "after_duration"
+          ? (flow.reentry_duration ?? null)
+          : null,
+      reentry_unit:
+        flow.reentry_mode === "after_duration"
+          ? (flow.reentry_unit ?? "days")
+          : null,
       trigger_delay_hours: flow.trigger_delay_hours ?? 0,
       trigger_conditions: flow.trigger_conditions ?? [],
       graph_document: {
@@ -336,17 +398,35 @@ export default function FlowEditorPage() {
 
     try {
       if (isNew) {
-        const created = await adminFetch<{ email_flow: EmailFlow }>("email-flows", jsonBody(payload));
-        await queryClient.invalidateQueries({ queryKey: ["messaging", "email-flows"] });
-        await queryClient.invalidateQueries({ queryKey: ["messaging", "dashboard"] });
+        const created = await adminFetch<{ email_flow: EmailFlow }>(
+          "email-flows",
+          jsonBody(payload),
+        );
+        await queryClient.invalidateQueries({
+          queryKey: ["messaging", "email-flows"],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["messaging", "dashboard"],
+        });
         toast.success("Flow created");
         setDirty(false);
         router.push(`/messaging/flows/${created.email_flow.id}`);
         return created.email_flow.id;
       } else {
-        const updated = await adminFetch<{ email_flow: EmailFlow }>(`email-flows/${id}`, patchBody(payload));
-        await queryClient.invalidateQueries({ queryKey: ["messaging", "email-flows"] });
-        setFlow((prev) => ({ ...prev, id: updated.email_flow.id, status: payload.status, steps: payload.steps, tags: payload.tags ?? [] }));
+        const updated = await adminFetch<{ email_flow: EmailFlow }>(
+          `email-flows/${id}`,
+          patchBody(payload),
+        );
+        await queryClient.invalidateQueries({
+          queryKey: ["messaging", "email-flows"],
+        });
+        setFlow((prev) => ({
+          ...prev,
+          id: updated.email_flow.id,
+          status: payload.status,
+          steps: payload.steps,
+          tags: payload.tags ?? [],
+        }));
         setDirty(false);
         toast.success("Flow saved");
         return updated.email_flow.id;
@@ -371,7 +451,9 @@ export default function FlowEditorPage() {
       return;
     }
 
-    const hasInvalidSteps = steps.some((step) => step.type === "email" && !step.template_id);
+    const hasInvalidSteps = steps.some(
+      (step) => step.type === "email" && !step.template_id,
+    );
     if (hasInvalidSteps) {
       setError("All email steps must have a template selected");
       toast.error("All email steps must have a template selected");
@@ -399,14 +481,10 @@ export default function FlowEditorPage() {
       }>(`v2/email-flows/${savedId}/validate`, jsonBody({}));
       if (!validation.validation.valid) {
         throw new Error(
-          validation.validation.errors?.join(". ") ||
-            "Flow validation failed",
+          validation.validation.errors?.join(". ") || "Flow validation failed",
         );
       }
-      await adminFetch(
-        `v2/email-flows/${savedId}/publish`,
-        jsonBody({}),
-      );
+      await adminFetch(`v2/email-flows/${savedId}/publish`, jsonBody({}));
       setFlow((prev) => ({ ...prev, status: "active" }));
       await queryClient.invalidateQueries({
         queryKey: ["messaging", "email-flows"],
@@ -469,7 +547,8 @@ export default function FlowEditorPage() {
             <Button
               aria-label="Back to flows"
               onClick={() => {
-                if (confirmUnsavedChanges(dirty)) router.push("/messaging/flows");
+                if (confirmUnsavedChanges(dirty))
+                  router.push("/messaging/flows");
               }}
               size="icon-sm"
               title="Back to flows"
@@ -480,12 +559,26 @@ export default function FlowEditorPage() {
             <div className="min-w-0 flex-1">
               <div className="flex min-w-0 items-center gap-2">
                 <h1 className="truncate text-sm font-semibold">
-                  {isNew ? flow.name || "New flow" : flow.name || "Untitled flow"}
+                  {isNew
+                    ? flow.name || "New flow"
+                    : flow.name || "Untitled flow"}
                 </h1>
-                {!isNew ? <span className="hidden sm:inline-flex"><StatusBadge value={flow.status} /></span> : null}
+                {!isNew ? (
+                  <span className="hidden sm:inline-flex">
+                    <StatusBadge value={flow.status} />
+                  </span>
+                ) : null}
               </div>
-              <p className={`mt-0.5 text-xs ${dirty ? "text-amber-600" : "text-muted-foreground"}`}>
-                {saving ? "Saving…" : dirty ? "Unsaved changes" : isNew ? "Not created yet" : "Saved"}
+              <p
+                className={`mt-0.5 text-xs ${dirty ? "text-amber-600" : "text-muted-foreground"}`}
+              >
+                {saving
+                  ? "Saving…"
+                  : dirty
+                    ? "Unsaved changes"
+                    : isNew
+                      ? "Not created yet"
+                      : "Saved"}
               </p>
             </div>
             <div className="ml-auto flex shrink-0 items-center gap-2">
@@ -522,7 +615,10 @@ export default function FlowEditorPage() {
                         <Textarea
                           value={flow.description}
                           onChange={(event) => {
-                            setFlow({ ...flow, description: event.target.value });
+                            setFlow({
+                              ...flow,
+                              description: event.target.value,
+                            });
                             setDirty(true);
                           }}
                           placeholder="What this flow does and who it is for"
@@ -537,7 +633,8 @@ export default function FlowEditorPage() {
                           onValueChange={(value) => {
                             setFlow({
                               ...flow,
-                              message_kind: value as "marketing" | "transactional",
+                              message_kind: value as
+                                "marketing" | "transactional",
                             });
                             setDirty(true);
                           }}
@@ -546,12 +643,17 @@ export default function FlowEditorPage() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="marketing">Marketing — honors opt-out</SelectItem>
-                            <SelectItem value="transactional">Transactional — service message</SelectItem>
+                            <SelectItem value="marketing">
+                              Marketing — honors opt-out
+                            </SelectItem>
+                            <SelectItem value="transactional">
+                              Transactional — service message
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                         <p className="text-xs text-muted-foreground">
-                          Transactional delivery is only for essential order or service messages.
+                          Transactional delivery is only for essential order or
+                          service messages.
                         </p>
                       </div>
 
@@ -563,7 +665,9 @@ export default function FlowEditorPage() {
                         <div className="flex gap-2">
                           <Input
                             value={tagInput}
-                            onChange={(event) => setTagInput(event.target.value)}
+                            onChange={(event) =>
+                              setTagInput(event.target.value)
+                            }
                             onKeyDown={(event) => {
                               if (event.key === "Enter") {
                                 event.preventDefault();
@@ -572,14 +676,24 @@ export default function FlowEditorPage() {
                             }}
                             placeholder="Add a tag"
                           />
-                          <Button aria-label="Add tag" type="button" size="icon" variant="outline" onClick={addTag}>
+                          <Button
+                            aria-label="Add tag"
+                            type="button"
+                            size="icon"
+                            variant="outline"
+                            onClick={addTag}
+                          >
                             <Plus className="size-4" />
                           </Button>
                         </div>
                         {flow.tags.length > 0 ? (
                           <div className="flex flex-wrap gap-1.5">
                             {flow.tags.map((tag) => (
-                              <Badge key={tag} variant="secondary" className="gap-1 pr-1">
+                              <Badge
+                                key={tag}
+                                variant="secondary"
+                                className="gap-1 pr-1"
+                              >
                                 {tag}
                                 <button
                                   aria-label={`Remove ${tag}`}
@@ -593,7 +707,9 @@ export default function FlowEditorPage() {
                             ))}
                           </div>
                         ) : (
-                          <p className="text-xs text-muted-foreground">No tags added.</p>
+                          <p className="text-xs text-muted-foreground">
+                            No tags added.
+                          </p>
                         )}
                       </div>
                     </div>
@@ -603,7 +719,11 @@ export default function FlowEditorPage() {
               {!isNew && triggerChosen ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button aria-label="More flow actions" size="icon" variant="outline">
+                    <Button
+                      aria-label="More flow actions"
+                      size="icon"
+                      variant="outline"
+                    >
                       <MoreHorizontal className="size-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -639,7 +759,9 @@ export default function FlowEditorPage() {
               ) : (
                 <Button
                   onClick={handlePublish}
-                  disabled={!compatibility.canEdit || publishing || !triggerChosen}
+                  disabled={
+                    !compatibility.canEdit || publishing || !triggerChosen
+                  }
                 >
                   <Rocket className="size-4" />
                   <span className="hidden md:inline">
@@ -663,11 +785,17 @@ export default function FlowEditorPage() {
       }
     >
       {isNew && !triggerChosen ? (
-        <div className={compatibility.canEdit ? "" : "pointer-events-none opacity-70"}>
+        <div
+          className={
+            compatibility.canEdit ? "" : "pointer-events-none opacity-70"
+          }
+        >
           <TriggerPicker onSelect={handleTriggerSelect} />
         </div>
       ) : (
-        <div className={`relative flex h-full min-h-0 min-w-0 overflow-hidden ${compatibility.canEdit ? "" : "pointer-events-none opacity-70"}`}>
+        <div
+          className={`relative flex h-full min-h-0 min-w-0 overflow-hidden ${compatibility.canEdit ? "" : "pointer-events-none opacity-70"}`}
+        >
           {/* Step palette */}
           <Sidebar />
 

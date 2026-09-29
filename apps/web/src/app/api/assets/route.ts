@@ -15,8 +15,18 @@ export async function GET(request: NextRequest) {
       listImageAssets(request.nextUrl.searchParams.get("search") ?? "", offset),
       installationStatus(),
     ]);
-    return Response.json({ ...page, configured:
-      ["cloudinaryCloudName", "cloudinaryApiKey", "cloudinaryApiSecret"].every(key => status.credentials[key]),
-    }, { headers: { "cache-control": "private, no-store" } });
-  } catch (error) { return imageRouteError(error); }
+    return Response.json(
+      {
+        ...page,
+        configured: [
+          "cloudinaryCloudName",
+          "cloudinaryApiKey",
+          "cloudinaryApiSecret",
+        ].every((key) => status.credentials[key]),
+      },
+      { headers: { "cache-control": "private, no-store" } },
+    );
+  } catch (error) {
+    return imageRouteError(error);
+  }
 }

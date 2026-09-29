@@ -78,7 +78,14 @@ export type FlowStepDelay = {
 
 export type FlowConditionClause = {
   field: string;
-  operator: "equals" | "not_equals" | "contains" | "greater_than" | "less_than" | "is_set" | "is_not_set";
+  operator:
+    | "equals"
+    | "not_equals"
+    | "contains"
+    | "greater_than"
+    | "less_than"
+    | "is_set"
+    | "is_not_set";
   value: string;
 };
 
@@ -106,7 +113,8 @@ export type FlowStepDiscount = {
   min_purchase?: number;
 };
 
-export type FlowStep = FlowStepEmail | FlowStepDelay | FlowStepCondition | FlowStepDiscount;
+export type FlowStep =
+  FlowStepEmail | FlowStepDelay | FlowStepCondition | FlowStepDiscount;
 
 export interface FlowTriggerResult {
   flowId: string;

@@ -21,7 +21,10 @@ test("persistent suppression is checked whenever the popup tries to open", () =>
 
 test("the generated popup asset is a valid classic browser script", () => {
   const asset = readFileSync(
-    new URL("../extensions/welcome-popup/assets/welcome-popup.js", import.meta.url),
+    new URL(
+      "../extensions/welcome-popup/assets/welcome-popup.js",
+      import.meta.url,
+    ),
     "utf8",
   );
 

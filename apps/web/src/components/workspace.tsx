@@ -4,9 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
-import {
-  MessagingContractProvider,
-} from "@ermes/ui";
+import { MessagingContractProvider } from "@ermes/ui";
 import { StandaloneErmesProvider } from "./image-picker";
 const links = [
   ["", "Overview"],
@@ -62,8 +60,10 @@ export function Workspace({
                 ))}
               </nav>
               <div className="nav-bottom">
-              <Link href="/onboarding">Connections & setup ↗</Link>
-              <a href="https://github.com/giaggiola/Ermes">Source code · AGPLv3</a>
+                <Link href="/onboarding">Connections & setup ↗</Link>
+                <a href="https://github.com/giaggiola/Ermes">
+                  Source code · AGPLv3
+                </a>
                 <small>{email}</small>
                 <button
                   onClick={async () => {

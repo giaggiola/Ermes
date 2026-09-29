@@ -1,7 +1,7 @@
 // Single source of truth for the sign-up form "block document" — the JSON contract
-// shared between the eilish-messaging builder (editor + preview) and storefront
-// storefront renderer. Bump SIGNUP_FORM_SCHEMA_VERSION on any breaking change so the
-// storefront can guard a document it doesn't understand yet.
+// shared between the form builder (editor + preview) and storefront renderer.
+// Bump SIGNUP_FORM_SCHEMA_VERSION on any breaking change so the storefront can
+// guard a document it doesn't understand yet.
 
 export const SIGNUP_FORM_SCHEMA_VERSION = 1;
 
@@ -104,7 +104,7 @@ export interface FormTargeting {
 }
 
 export interface FormStyles {
-  // Desktop side-image (current Eilish popup has a photo on the left).
+  // Optional side image for desktop popup layouts.
   image_url?: string | null;
   // Side images stay desktop-only unless the author explicitly enables the
   // stacked mobile treatment.
@@ -153,12 +153,19 @@ function blockId(type: string): string {
   return `blk_${type}_${blockSeq}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export function makeBlock(type: BlockType, overrides: Partial<FormBlock> = {}): FormBlock {
+export function makeBlock(
+  type: BlockType,
+  overrides: Partial<FormBlock> = {},
+): FormBlock {
   return { id: blockId(type), type, ...overrides };
 }
 
 export function makeStep(kind: StepKind, blocks: FormBlock[]): FormStep {
-  return { id: `step_${kind}_${Math.random().toString(36).slice(2, 8)}`, kind, blocks };
+  return {
+    id: `step_${kind}_${Math.random().toString(36).slice(2, 8)}`,
+    kind,
+    blocks,
+  };
 }
 
 // Neutral starting point for a new signup form.
@@ -166,27 +173,47 @@ export function createDefaultSignupForm(): SignupFormDocument {
   return {
     schema_version: SIGNUP_FORM_SCHEMA_VERSION,
     targeting: { ...DEFAULT_TARGETING },
-    styles: { image_url: null, accent: "#111111", background: "#ffffff", width: 480 },
+    styles: {
+      image_url: null,
+      accent: "#111111",
+      background: "#ffffff",
+      width: 480,
+    },
     steps: [
       makeStep("opt_in", [
-        makeBlock("heading", { text: "Your store", styles: { align: "center", fontSize: 18, fontWeight: "medium" } }),
-        makeBlock("heading", { text: "Stay in the loop", styles: { align: "center", fontSize: 24, fontWeight: "bold" } }),
+        makeBlock("heading", {
+          text: "Your store",
+          styles: { align: "center", fontSize: 18, fontWeight: "medium" },
+        }),
+        makeBlock("heading", {
+          text: "Stay in the loop",
+          styles: { align: "center", fontSize: 24, fontWeight: "bold" },
+        }),
         makeBlock("text", {
           text: "Sign up to get early access to new drops, styling tips, and member-only discounts delivered straight to your inbox.",
           styles: { align: "center", color: "#666666", fontSize: 13 },
         }),
         makeBlock("email_input", { text: "Email" }),
-        makeBlock("button", { text: "SUBSCRIBE", styles: { background: "#111111", color: "#ffffff" } }),
+        makeBlock("button", {
+          text: "SUBSCRIBE",
+          styles: { background: "#111111", color: "#ffffff" },
+        }),
       ]),
       makeStep("success", [
-        makeBlock("heading", { text: "Thank you!", styles: { align: "center", fontSize: 20, fontWeight: "medium" } }),
+        makeBlock("heading", {
+          text: "Thank you!",
+          styles: { align: "center", fontSize: 20, fontWeight: "medium" },
+        }),
         makeBlock("text", {
           text: "You're on the list. We'll keep you posted with news from our store.",
           styles: { align: "center", color: "#666666" },
         }),
       ]),
       makeStep("already_subscribed", [
-        makeBlock("heading", { text: "You're already on the list", styles: { align: "center", fontSize: 20, fontWeight: "medium" } }),
+        makeBlock("heading", {
+          text: "You're already on the list",
+          styles: { align: "center", fontSize: 20, fontWeight: "medium" },
+        }),
         makeBlock("text", {
           text: "No need to sign up again — we'll keep you posted.",
           styles: { align: "center", color: "#666666" },
@@ -209,23 +236,37 @@ function styleAttr(decls: Record<string, string | number | undefined>): string {
 }
 
 function escapeHtml(value: string): string {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 // One-way: turn the visual blocks of a step into HTML, used to seed/refresh HTML mode.
 // The reverse (HTML -> blocks) is intentionally unsupported — custom HTML is an eject.
-export function serializeBlocksToHtml(doc: SignupFormDocument, step: StepKind = "opt_in"): string {
+export function serializeBlocksToHtml(
+  doc: SignupFormDocument,
+  step: StepKind = "opt_in",
+): string {
   const theme = doc.styles ?? {};
-  const blocks = doc.steps.find((candidate) => candidate.kind === step)?.blocks ?? [];
+  const blocks =
+    doc.steps.find((candidate) => candidate.kind === step)?.blocks ?? [];
 
-  const textDecls = (st: BlockStyles, fallbackColor: string, fallbackSize: number, defaultMb: number) => ({
+  const textDecls = (
+    st: BlockStyles,
+    fallbackColor: string,
+    fallbackSize: number,
+    defaultMb: number,
+  ) => ({
     "text-align": st.align ?? "center",
     color: st.color ?? theme.textColor ?? fallbackColor,
     "font-family": st.fontFamily ?? theme.fontFamily,
     "font-size": `${st.fontSize ?? fallbackSize}px`,
     "font-weight": fontWeightValue(st.fontWeight),
     "line-height": st.lineHeight ?? 1.4,
-    "letter-spacing": st.letterSpacing != null ? `${st.letterSpacing}px` : undefined,
+    "letter-spacing":
+      st.letterSpacing != null ? `${st.letterSpacing}px` : undefined,
     "margin-top": `${st.marginTop ?? 0}px`,
     "margin-bottom": `${st.marginBottom ?? defaultMb}px`,
     "padding-left": st.paddingX != null ? `${st.paddingX}px` : undefined,
@@ -259,7 +300,9 @@ export function serializeBlocksToHtml(doc: SignupFormDocument, step: StepKind = 
       case "image": {
         if (!block.src) return "";
         const img = `<img src="${escapeHtml(block.src)}" alt="${escapeHtml(text)}"${styleAttr({ width: "100%", height: st.height ? `${st.height}px` : "auto", "object-fit": st.objectFit ?? "cover", "border-radius": `${st.radius ?? 0}px`, display: "block", "margin-top": `${st.marginTop ?? 0}px`, "margin-bottom": `${st.marginBottom ?? 0}px` })} />`;
-        return st.href ? `<a href="${escapeHtml(st.href)}" target="_blank" rel="noreferrer" style="display:block">${img}</a>` : img;
+        return st.href
+          ? `<a href="${escapeHtml(st.href)}" target="_blank" rel="noreferrer" style="display:block">${img}</a>`
+          : img;
       }
       case "email_input":
         return `<input type="email" name="email" required placeholder="${escapeHtml(text || "Email")}"${styleAttr(fieldDecls(st))} />`;

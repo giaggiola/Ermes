@@ -6,7 +6,6 @@ import {
   date,
   emailOf,
   gid,
-  acceptEvent,
   persistEvent,
   connector,
   setCursor,

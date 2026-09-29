@@ -1,6 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { createDefaultSignupForm, type SignupFormType } from "@ermes/core/signup-form-schema";
+import {
+  createDefaultSignupForm,
+  type SignupFormType,
+} from "@ermes/core/signup-form-schema";
 import { getMessagingService } from "@ermes/db";
 
 import { handleRouteError, parseBody } from "@/lib/http";
@@ -9,9 +12,7 @@ import { enforcePublicRateLimit } from "@/lib/public-security";
 export const dynamic = "force-dynamic";
 
 function resolveType(value: string | null): SignupFormType {
-  return value === "flyout" ||
-    value === "embedded" ||
-    value === "full-page"
+  return value === "flyout" || value === "embedded" || value === "full-page"
     ? value
     : "popup";
 }
@@ -37,7 +38,12 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ form: null });
       }
       return NextResponse.json({
-        form: { id: null, type, name: "Default", document: createDefaultSignupForm() },
+        form: {
+          id: null,
+          type,
+          name: "Default",
+          document: createDefaultSignupForm(),
+        },
       });
     }
 
@@ -64,7 +70,10 @@ export async function POST(request: NextRequest) {
     const body = await parseBody(request);
     const formId = typeof body.form_id === "string" ? body.form_id : "";
     if (formId) {
-      await getMessagingService().incrementSignupFormCounter(formId, "impressions");
+      await getMessagingService().incrementSignupFormCounter(
+        formId,
+        "impressions",
+      );
     }
     return NextResponse.json({ success: true });
   } catch (error) {

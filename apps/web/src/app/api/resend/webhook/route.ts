@@ -9,7 +9,13 @@ import { getMessagingService } from "@ermes/db";
 export const dynamic = "force-dynamic";
 
 type ResendWebhookPayload = {
-  type: "email.sent" | "email.delivered" | "email.opened" | "email.clicked" | "email.bounced" | "email.complained";
+  type:
+    | "email.sent"
+    | "email.delivered"
+    | "email.opened"
+    | "email.clicked"
+    | "email.bounced"
+    | "email.complained";
   created_at: string;
   data: {
     email_id: string;
@@ -27,7 +33,10 @@ type ResendWebhookPayload = {
   };
 };
 
-const resendEventMap: Record<string, "sent" | "delivered" | "opened" | "clicked" | "bounced" | "complained"> = {
+const resendEventMap: Record<
+  string,
+  "sent" | "delivered" | "opened" | "clicked" | "bounced" | "complained"
+> = {
   "email.bounced": "bounced",
   "email.clicked": "clicked",
   "email.complained": "complained",
@@ -38,7 +47,9 @@ const resendEventMap: Record<string, "sent" | "delivered" | "opened" | "clicked"
 
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();
-  const webhookSecret = await getCredential("resendWebhookSecret") || process.env.RESEND_WEBHOOK_SECRET;
+  const webhookSecret =
+    (await getCredential("resendWebhookSecret")) ||
+    process.env.RESEND_WEBHOOK_SECRET;
   const isProduction = process.env.NODE_ENV === "production";
 
   if (
@@ -53,7 +64,10 @@ export async function POST(request: NextRequest) {
       isProduction,
     )
   ) {
-    return NextResponse.json({ message: "Invalid webhook signature" }, { status: 401 });
+    return NextResponse.json(
+      { message: "Invalid webhook signature" },
+      { status: 401 },
+    );
   }
 
   let payload: ResendWebhookPayload;
@@ -63,8 +77,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Invalid JSON body" }, { status: 400 });
   }
 
-  if (!payload.data || !Array.isArray(payload.data.to) || typeof payload.data.email_id !== "string") {
-    return NextResponse.json({ message: "Invalid webhook payload" }, { status: 400 });
+  if (
+    !payload.data ||
+    !Array.isArray(payload.data.to) ||
+    typeof payload.data.email_id !== "string"
+  ) {
+    return NextResponse.json(
+      { message: "Invalid webhook payload" },
+      { status: 400 },
+    );
   }
 
   const eventType = resendEventMap[payload.type];
@@ -73,16 +94,27 @@ export async function POST(request: NextRequest) {
   }
 
   if (payload.type === "email.sent") {
-    return NextResponse.json({ reason: "Already logged on send", received: true, skipped: true });
+    return NextResponse.json({
+      reason: "Already logged on send",
+      received: true,
+      skipped: true,
+    });
   }
 
-  const subscriberEmail = payload.data.to[0] ? normalizeEmail(payload.data.to[0]) : "";
+  const subscriberEmail = payload.data.to[0]
+    ? normalizeEmail(payload.data.to[0])
+    : "";
   if (!subscriberEmail) {
-    return NextResponse.json({ message: "No recipient email" }, { status: 400 });
+    return NextResponse.json(
+      { message: "No recipient email" },
+      { status: 400 },
+    );
   }
 
   const service = getMessagingService();
-  const existingEvent = (await service.listEmailEvents({ message_id: payload.data.email_id }))[0];
+  const existingEvent = (
+    await service.listEmailEvents({ message_id: payload.data.email_id })
+  )[0];
   const providerEventId = request.headers.get("svix-id");
   const metadata: Record<string, unknown> = {
     from: payload.data.from,
@@ -101,15 +133,27 @@ export async function POST(request: NextRequest) {
   }
 
   await service.logEmailEvent({
-    campaign_id: typeof existingEvent?.campaign_id === "string" ? existingEvent.campaign_id : null,
-    flow_step_key: typeof existingEvent?.flow_step_key === "string" ? existingEvent.flow_step_key : null,
+    campaign_id:
+      typeof existingEvent?.campaign_id === "string"
+        ? existingEvent.campaign_id
+        : null,
+    flow_step_key:
+      typeof existingEvent?.flow_step_key === "string"
+        ? existingEvent.flow_step_key
+        : null,
     event_type: eventType,
-    flow_run_id: typeof existingEvent?.flow_run_id === "string" ? existingEvent.flow_run_id : null,
+    flow_run_id:
+      typeof existingEvent?.flow_run_id === "string"
+        ? existingEvent.flow_run_id
+        : null,
     message_id: payload.data.email_id,
     metadata,
     provider_event_id: providerEventId,
     subscriber_email: subscriberEmail,
-    template_id: typeof existingEvent?.template_id === "string" ? existingEvent.template_id : null,
+    template_id:
+      typeof existingEvent?.template_id === "string"
+        ? existingEvent.template_id
+        : null,
     template_version_id:
       typeof existingEvent?.template_version_id === "string"
         ? existingEvent.template_version_id
@@ -117,12 +161,20 @@ export async function POST(request: NextRequest) {
   });
 
   if (payload.type === "email.bounced" || payload.type === "email.complained") {
-    const issueType = payload.type === "email.bounced" ? "bounced" : "complained";
-    await service.recordSuppression(subscriberEmail, issueType === "bounced" ? "bounce" : "complaint", "resend");
+    const issueType =
+      payload.type === "email.bounced" ? "bounced" : "complained";
+    await service.recordSuppression(
+      subscriberEmail,
+      issueType === "bounced" ? "bounce" : "complaint",
+      "resend",
+    );
 
-    const subscriber = (await service.listEmailSubscribers({ email: subscriberEmail }))[0];
+    const subscriber = (
+      await service.listEmailSubscribers({ email: subscriberEmail })
+    )[0];
     if (subscriber) {
-      const properties = (subscriber.properties as Record<string, unknown> | null) ?? {};
+      const properties =
+        (subscriber.properties as Record<string, unknown> | null) ?? {};
       await service.updateEmailSubscribers({
         id: subscriber.id,
         properties: {
@@ -139,7 +191,10 @@ export async function POST(request: NextRequest) {
 }
 
 export function GET() {
-  return NextResponse.json({ message: "Resend webhook endpoint active", status: "ok" });
+  return NextResponse.json({
+    message: "Resend webhook endpoint active",
+    status: "ok",
+  });
 }
 
 function verifyWebhookSignature(
@@ -162,12 +217,18 @@ function verifyWebhookSignature(
   }
 
   const timestamp = Number.parseInt(svixTimestamp, 10);
-  if (!Number.isFinite(timestamp) || Math.abs(Math.floor(Date.now() / 1000) - timestamp) > 300) {
+  if (
+    !Number.isFinite(timestamp) ||
+    Math.abs(Math.floor(Date.now() / 1000) - timestamp) > 300
+  ) {
     return false;
   }
 
   try {
-    const secretBytes = Buffer.from(secret.startsWith("whsec_") ? secret.slice(6) : secret, "base64");
+    const secretBytes = Buffer.from(
+      secret.startsWith("whsec_") ? secret.slice(6) : secret,
+      "base64",
+    );
     const expectedSignature = createHmac("sha256", secretBytes)
       .update(`${svixId}.${svixTimestamp}.${payload}`)
       .digest("base64");
@@ -180,7 +241,10 @@ function verifyWebhookSignature(
 
       const expected = Buffer.from(expectedSignature);
       const actual = Buffer.from(signature);
-      if (expected.length === actual.length && timingSafeEqual(actual, expected)) {
+      if (
+        expected.length === actual.length &&
+        timingSafeEqual(actual, expected)
+      ) {
         return true;
       }
     }

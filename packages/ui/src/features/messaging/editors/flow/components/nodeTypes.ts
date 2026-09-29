@@ -14,4 +14,11 @@ export const nodeTypes = {
   end: EndNode,
 };
 
-export { TriggerNode, EmailNode, DelayNode, ConditionNode, DiscountNode, EndNode };
+export {
+  TriggerNode,
+  EmailNode,
+  DelayNode,
+  ConditionNode,
+  DiscountNode,
+  EndNode,
+};

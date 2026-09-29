@@ -112,8 +112,8 @@ Password reset, additional users and account administration are future work.
 | Store name, storefront URL, timezone            | Setup UI                                 | PostgreSQL                              |
 | Sender name/address and logo URL                | Setup UI or sender settings              | PostgreSQL                              |
 | Resend key/webhook signing secret               | Setup UI                                 | AES-256-GCM encrypted PostgreSQL fields |
-| Cloudinary cloud name/API key/API secret        | Image storage setup                     | AES-256-GCM encrypted PostgreSQL fields |
-| Uploaded images / library metadata              | Image picker                            | Cloudinary / PostgreSQL                |
+| Cloudinary cloud name/API key/API secret        | Image storage setup                      | AES-256-GCM encrypted PostgreSQL fields |
+| Uploaded images / library metadata              | Image picker                             | Cloudinary / PostgreSQL                 |
 | Shopify shop domain/client ID/client secret     | Setup UI                                 | Domain plus encrypted credential fields |
 | Delivery enabled                                | Explicit owner action after sender setup | PostgreSQL, disabled initially          |
 

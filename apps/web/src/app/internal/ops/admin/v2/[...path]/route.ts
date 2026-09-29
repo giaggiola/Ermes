@@ -64,7 +64,11 @@ async function handle(request: NextRequest, context: RouteContext) {
   const service = getMessagingService();
 
   try {
-    if (request.method === "GET" && path.length === 1 && path[0] === "contract") {
+    if (
+      request.method === "GET" &&
+      path.length === 1 &&
+      path[0] === "contract"
+    ) {
       return NextResponse.json({
         api_version: 2,
         capabilities: {
@@ -95,7 +99,11 @@ async function handle(request: NextRequest, context: RouteContext) {
       });
     }
 
-    if (request.method === "GET" && path.length === 3 && path[2] === "versions") {
+    if (
+      request.method === "GET" &&
+      path.length === 3 &&
+      path[2] === "versions"
+    ) {
       if (path[0] === "email-templates") {
         return NextResponse.json({
           versions: await service.listEmailTemplateVersions(path[1]),
@@ -167,7 +175,7 @@ async function handle(request: NextRequest, context: RouteContext) {
       const installation = await service.installStandardFlowDrafts(
         body.recipe_keys,
       );
-      await auditMutation(auth, request, path, "install", "success");
+      await auditMutation(auth, path, "install", "success");
       return NextResponse.json({ installation });
     }
 
@@ -183,7 +191,7 @@ async function handle(request: NextRequest, context: RouteContext) {
         auth.actorEmail,
         body.document,
       );
-      await auditMutation(auth, request, path, "snapshot", "success");
+      await auditMutation(auth, path, "snapshot", "success");
       return NextResponse.json({ version });
     }
 
@@ -194,7 +202,7 @@ async function handle(request: NextRequest, context: RouteContext) {
       path[2] === "versions"
     ) {
       const deletion = await service.deleteSignupFormVersion(path[1], path[3]);
-      await auditMutation(auth, request, path, "delete-snapshot", "success");
+      await auditMutation(auth, path, "delete-snapshot", "success");
       return NextResponse.json({ deletion });
     }
 
@@ -226,7 +234,7 @@ async function handle(request: NextRequest, context: RouteContext) {
           { status: 404 },
         );
       }
-      await auditMutation(auth, request, path, "publish", "success");
+      await auditMutation(auth, path, "publish", "success");
       return NextResponse.json({ published });
     }
 
@@ -282,7 +290,6 @@ async function readJsonBody(request: NextRequest) {
 
 async function auditMutation(
   auth: { actorEmail: string; requestId: string },
-  request: NextRequest,
   path: string[],
   action: string,
   outcome: string,

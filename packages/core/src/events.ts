@@ -98,7 +98,9 @@ export function toFlowTriggerEvent(type: CommerceEventType): string {
   return type;
 }
 
-export function getEventRecipient(envelope: CommerceEventEnvelope): string | undefined {
+export function getEventRecipient(
+  envelope: CommerceEventEnvelope,
+): string | undefined {
   const fields = [
     envelope.context.email,
     envelope.context.recipient_email,
@@ -108,6 +110,8 @@ export function getEventRecipient(envelope: CommerceEventEnvelope): string | und
     envelope.payload.subscriber_email,
   ];
 
-  const value = fields.find((field) => typeof field === "string" && field.includes("@"));
+  const value = fields.find(
+    (field) => typeof field === "string" && field.includes("@"),
+  );
   return typeof value === "string" ? value : undefined;
 }

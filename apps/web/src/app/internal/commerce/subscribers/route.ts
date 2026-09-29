@@ -38,13 +38,19 @@ export async function POST(request: NextRequest) {
         timestamp: request.headers.get("x-eilish-timestamp") ?? "",
       })
     ) {
-      return NextResponse.json({ message: "Invalid signature" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Invalid signature" },
+        { status: 401 },
+      );
     }
     let rawPayload: unknown;
     try {
       rawPayload = JSON.parse(rawBody);
     } catch {
-      return NextResponse.json({ message: "Invalid JSON body" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Invalid JSON body" },
+        { status: 400 },
+      );
     }
     const parsed = newsletterSubscribeSchema.safeParse(rawPayload);
     if (!parsed.success) {

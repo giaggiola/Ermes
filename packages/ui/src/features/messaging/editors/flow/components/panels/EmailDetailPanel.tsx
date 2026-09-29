@@ -5,7 +5,13 @@ import { useEffect, useState } from "react";
 import { Button } from "../../../../../../components/ui/button";
 import { Input } from "../../../../../../components/ui/input";
 import { Label } from "../../../../../../components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../../../components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../../../components/ui/select";
 import { Switch } from "../../../../../../components/ui/switch";
 import { adminFetch } from "../../../../admin-api";
 
@@ -66,12 +72,19 @@ interface StepAnalytics {
   click_rate: number;
 }
 
-export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDetailPanelProps) {
+export function EmailDetailPanel({
+  data,
+  templates,
+  onChange,
+  flowId,
+}: EmailDetailPanelProps) {
   const [templateDetailsResult, setTemplateDetailsResult] = useState<{
     templateId: string;
     details: TemplateDetails | null;
   } | null>(null);
-  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
+  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">(
+    "desktop",
+  );
   const [showSubjectEdit, setShowSubjectEdit] = useState(false);
   const [analyticsResult, setAnalyticsResult] = useState<{
     flowId: string;
@@ -81,7 +94,9 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
 
   const selectedTemplate = templates?.find((t) => t.id === data.template_id);
   const templateDetails =
-    templateDetailsResult?.templateId === data.template_id ? templateDetailsResult.details : null;
+    templateDetailsResult?.templateId === data.template_id
+      ? templateDetailsResult.details
+      : null;
   const analytics =
     analyticsResult &&
     analyticsResult.flowId === flowId &&
@@ -92,7 +107,9 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
     a: { template_id: data.template_id || "" },
     b: { template_id: "" },
   };
-  const variantEntries = ["a", "b"].map((key) => [key, abVariants[key] ?? { template_id: "" }] as const);
+  const variantEntries = ["a", "b"].map(
+    (key) => [key, abVariants[key] ?? { template_id: "" }] as const,
+  );
   const excludedEventTypes = data.skip_if_event_types_since_start ?? [];
 
   const toggleExcludedEvent = (eventType: string, checked: boolean) => {
@@ -112,7 +129,10 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
   };
 
   const updateAbVariant = (key: string, updates: Partial<EmailVariant>) => {
-    const nextVariant = { ...(abVariants[key] ?? { template_id: "" }), ...updates };
+    const nextVariant = {
+      ...(abVariants[key] ?? { template_id: "" }),
+      ...updates,
+    };
     onChange({
       ab_test_enabled: true,
       ab_test_flag: data.ab_test_flag || "email-template-test",
@@ -131,9 +151,9 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
     const requestedTemplateId = data.template_id;
     (async () => {
       try {
-        const result = await adminFetch<{ step_metrics?: Record<string, StepAnalytics> }>(
-          `email-flows/${requestedFlowId}/analytics`,
-        );
+        const result = await adminFetch<{
+          step_metrics?: Record<string, StepAnalytics>;
+        }>(`email-flows/${requestedFlowId}/analytics`);
         const stepData = result.step_metrics?.[requestedTemplateId];
         if (!cancelled) {
           setAnalyticsResult({
@@ -195,7 +215,12 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
           </div>
           <div>
             <Label className="text-sm font-medium">Status</Label>
-            <Select value={data.step_status || "live"} onValueChange={(value) => onChange({ step_status: value as "live" | "disabled" })}>
+            <Select
+              value={data.step_status || "live"}
+              onValueChange={(value) =>
+                onChange({ step_status: value as "live" | "disabled" })
+              }
+            >
               <SelectTrigger className="mt-1 w-28">
                 <SelectValue />
               </SelectTrigger>
@@ -223,21 +248,35 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
         <div>
           <Label className="text-sm font-medium">Performance</Label>
           <p className="text-xs text-muted-foreground">
-            {analytics ? `Based on ${analytics.sent} sent email${analytics.sent !== 1 ? "s" : ""}` : "No data yet"}
+            {analytics
+              ? `Based on ${analytics.sent} sent email${analytics.sent !== 1 ? "s" : ""}`
+              : "No data yet"}
           </p>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div>
             <p className="text-xs text-muted-foreground">Open rate</p>
-            <p className="text-sm font-medium">{analytics && analytics.sent > 0 ? `${analytics.open_rate}%` : "—"}</p>
+            <p className="text-sm font-medium">
+              {analytics && analytics.sent > 0
+                ? `${analytics.open_rate}%`
+                : "—"}
+            </p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Click rate</p>
-            <p className="text-sm font-medium">{analytics && analytics.sent > 0 ? `${analytics.click_rate}%` : "—"}</p>
+            <p className="text-sm font-medium">
+              {analytics && analytics.sent > 0
+                ? `${analytics.click_rate}%`
+                : "—"}
+            </p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Delivered</p>
-            <p className="text-sm font-medium">{analytics && analytics.sent > 0 ? `${analytics.delivered}/${analytics.sent}` : "—"}</p>
+            <p className="text-sm font-medium">
+              {analytics && analytics.sent > 0
+                ? `${analytics.delivered}/${analytics.sent}`
+                : "—"}
+            </p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Skipped</p>
@@ -250,7 +289,11 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
       <div className="space-y-3 p-4">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">Subject and sender</Label>
-          <Button variant="outline" size="sm" onClick={() => setShowSubjectEdit(!showSubjectEdit)}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSubjectEdit(!showSubjectEdit)}
+          >
             {showSubjectEdit ? "Done" : "Edit"}
           </Button>
         </div>
@@ -259,16 +302,25 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
           <div className="space-y-2">
             <div>
               <p className="text-xs text-muted-foreground">Subject line</p>
-              <p className="text-sm">{data.subject_override || templateDetails?.subject || "Use template default"}</p>
+              <p className="text-sm">
+                {data.subject_override ||
+                  templateDetails?.subject ||
+                  "Use template default"}
+              </p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Preview text</p>
-              <p className="text-sm">{data.preview_text_override || templateDetails?.preview_text || "Use template default"}</p>
+              <p className="text-sm">
+                {data.preview_text_override ||
+                  templateDetails?.preview_text ||
+                  "Use template default"}
+              </p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Sender</p>
               <p className="text-sm">
-                {data.sender_name_override || "Your store"} &lt;{data.sender_email_override || "hello@example.com"}&gt;
+                {data.sender_name_override || "Your store"} &lt;
+                {data.sender_email_override || "hello@example.com"}&gt;
               </p>
             </div>
           </div>
@@ -279,7 +331,10 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
               <Input
                 value={data.subject_override || ""}
                 onChange={(e) => onChange({ subject_override: e.target.value })}
-                placeholder={templateDetails?.subject || "Leave empty to use template default"}
+                placeholder={
+                  templateDetails?.subject ||
+                  "Leave empty to use template default"
+                }
                 className="mt-1"
               />
             </div>
@@ -287,8 +342,13 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
               <Label className="text-xs">Preview text override</Label>
               <Input
                 value={data.preview_text_override || ""}
-                onChange={(e) => onChange({ preview_text_override: e.target.value })}
-                placeholder={templateDetails?.preview_text || "Leave empty to use template default"}
+                onChange={(e) =>
+                  onChange({ preview_text_override: e.target.value })
+                }
+                placeholder={
+                  templateDetails?.preview_text ||
+                  "Leave empty to use template default"
+                }
                 className="mt-1"
               />
             </div>
@@ -296,7 +356,9 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
               <Label className="text-xs">Sender name override</Label>
               <Input
                 value={data.sender_name_override || ""}
-                onChange={(e) => onChange({ sender_name_override: e.target.value })}
+                onChange={(e) =>
+                  onChange({ sender_name_override: e.target.value })
+                }
                 placeholder="Your store"
                 className="mt-1"
               />
@@ -305,7 +367,9 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
               <Label className="text-xs">Sender email override</Label>
               <Input
                 value={data.sender_email_override || ""}
-                onChange={(e) => onChange({ sender_email_override: e.target.value })}
+                onChange={(e) =>
+                  onChange({ sender_email_override: e.target.value })
+                }
                 placeholder="hello@example.com"
                 className="mt-1"
               />
@@ -319,16 +383,27 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">Template</Label>
           <div className="flex gap-1">
-            <Button variant={previewMode === "desktop" ? "default" : "outline"} size="sm" onClick={() => setPreviewMode("desktop")}>
+            <Button
+              variant={previewMode === "desktop" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setPreviewMode("desktop")}
+            >
               🖥️
             </Button>
-            <Button variant={previewMode === "mobile" ? "default" : "outline"} size="sm" onClick={() => setPreviewMode("mobile")}>
+            <Button
+              variant={previewMode === "mobile" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setPreviewMode("mobile")}
+            >
               📱
             </Button>
           </div>
         </div>
 
-        <Select value={data.template_id || ""} onValueChange={(value) => onChange({ template_id: value })}>
+        <Select
+          value={data.template_id || ""}
+          onValueChange={(value) => onChange({ template_id: value })}
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select template..." />
           </SelectTrigger>
@@ -355,7 +430,8 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
               className="pointer-events-none w-full"
               style={{
                 height: "200px",
-                transform: previewMode === "mobile" ? "scale(0.6)" : "scale(0.5)",
+                transform:
+                  previewMode === "mobile" ? "scale(0.6)" : "scale(0.5)",
                 transformOrigin: "top left",
                 width: previewMode === "desktop" ? "200%" : "300px",
               }}
@@ -370,9 +446,14 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
         <div className="flex items-center justify-between gap-4">
           <div>
             <Label className="text-sm font-medium">A/B test</Label>
-            <p className="mt-0.5 text-xs text-muted-foreground">Split recipients deterministically between two email variants</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Split recipients deterministically between two email variants
+            </p>
           </div>
-          <Switch checked={data.ab_test_enabled ?? false} onCheckedChange={setAbTestEnabled} />
+          <Switch
+            checked={data.ab_test_enabled ?? false}
+            onCheckedChange={setAbTestEnabled}
+          />
         </div>
 
         {data.ab_test_enabled ? (
@@ -387,9 +468,19 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
               />
             </div>
             {variantEntries.map(([key, variant]) => (
-              <div key={key} className="space-y-2 rounded-lg border border-border bg-muted p-3">
-                <div className="text-xs font-medium uppercase text-muted-foreground">Variant {key}</div>
-                <Select value={variant.template_id || ""} onValueChange={(value) => updateAbVariant(key, { template_id: value })}>
+              <div
+                key={key}
+                className="space-y-2 rounded-lg border border-border bg-muted p-3"
+              >
+                <div className="text-xs font-medium uppercase text-muted-foreground">
+                  Variant {key}
+                </div>
+                <Select
+                  value={variant.template_id || ""}
+                  onValueChange={(value) =>
+                    updateAbVariant(key, { template_id: value })
+                  }
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select template..." />
                   </SelectTrigger>
@@ -403,7 +494,9 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
                 </Select>
                 <Input
                   value={variant.subject_override || ""}
-                  onChange={(e) => updateAbVariant(key, { subject_override: e.target.value })}
+                  onChange={(e) =>
+                    updateAbVariant(key, { subject_override: e.target.value })
+                  }
                   placeholder="Optional subject override"
                 />
               </div>
@@ -417,9 +510,16 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
         <div className="flex items-center justify-between">
           <div>
             <Label className="text-sm font-medium">Smart sending</Label>
-            <p className="mt-0.5 text-xs text-muted-foreground">Skip profiles who were emailed recently</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Skip profiles who were emailed recently
+            </p>
           </div>
-          <Switch checked={data.skip_recently_emailed ?? false} onCheckedChange={(checked) => onChange({ skip_recently_emailed: checked })} />
+          <Switch
+            checked={data.skip_recently_emailed ?? false}
+            onCheckedChange={(checked) =>
+              onChange({ skip_recently_emailed: checked })
+            }
+          />
         </div>
 
         {data.skip_recently_emailed ? (
@@ -428,7 +528,11 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
             <Input
               type="number"
               value={data.skip_recently_emailed_hours ?? 16}
-              onChange={(e) => onChange({ skip_recently_emailed_hours: parseInt(e.target.value) || 16 })}
+              onChange={(e) =>
+                onChange({
+                  skip_recently_emailed_hours: parseInt(e.target.value) || 16,
+                })
+              }
               className="w-16"
               min={1}
             />
@@ -447,7 +551,8 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
         </div>
         {[
           {
-            description: "Do not send recovery or win-back email after a purchase.",
+            description:
+              "Do not send recovery or win-back email after a purchase.",
             label: "Placed order since flow started",
             value: "order.placed",
           },
@@ -457,7 +562,8 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
             value: "checkout.abandoned",
           },
           {
-            description: "Do not send a post-delivery follow-up for a returned order.",
+            description:
+              "Do not send a post-delivery follow-up for a returned order.",
             label: "Order returned since flow started",
             value: "order.returned",
           },
@@ -485,11 +591,14 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
             <div>
               <p className="text-sm">Only match the triggering order</p>
               <p className="text-xs text-muted-foreground">
-                Use the order ID so activity on another order does not suppress this email.
+                Use the order ID so activity on another order does not suppress
+                this email.
               </p>
             </div>
             <Switch
-              checked={data.skip_if_event_types_since_start_order_scoped ?? false}
+              checked={
+                data.skip_if_event_types_since_start_order_scoped ?? false
+              }
               onCheckedChange={(checked) =>
                 onChange({
                   skip_if_event_types_since_start_order_scoped: checked,
@@ -505,20 +614,35 @@ export function EmailDetailPanel({ data, templates, onChange, flowId }: EmailDet
         <div className="flex items-center justify-between">
           <div>
             <Label className="text-sm font-medium">UTM tracking</Label>
-            <p className="mt-0.5 text-xs text-muted-foreground">Add UTM parameters to all links</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Add UTM parameters to all links
+            </p>
           </div>
-          <Switch checked={data.enable_utm ?? false} onCheckedChange={(checked) => onChange({ enable_utm: checked })} />
+          <Switch
+            checked={data.enable_utm ?? false}
+            onCheckedChange={(checked) => onChange({ enable_utm: checked })}
+          />
         </div>
 
         {data.enable_utm ? (
           <div className="space-y-2">
             <div>
               <Label className="text-xs">utm_source</Label>
-              <Input value={data.utm_source || "email"} onChange={(e) => onChange({ utm_source: e.target.value })} placeholder="email" className="mt-1" />
+              <Input
+                value={data.utm_source || "email"}
+                onChange={(e) => onChange({ utm_source: e.target.value })}
+                placeholder="email"
+                className="mt-1"
+              />
             </div>
             <div>
               <Label className="text-xs">utm_medium</Label>
-              <Input value={data.utm_medium || "flow"} onChange={(e) => onChange({ utm_medium: e.target.value })} placeholder="flow" className="mt-1" />
+              <Input
+                value={data.utm_medium || "flow"}
+                onChange={(e) => onChange({ utm_medium: e.target.value })}
+                placeholder="flow"
+                className="mt-1"
+              />
             </div>
             <div>
               <Label className="text-xs">utm_campaign</Label>

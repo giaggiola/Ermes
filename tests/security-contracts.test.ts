@@ -35,14 +35,15 @@ import {
   createDefaultSignupForm,
   isSupportedSignupForm,
 } from "../packages/core/dist/signup-form-schema.js";
-import {
-  commerceEventEnvelopeSchema,
-} from "../packages/core/dist/events.js";
+import { commerceEventEnvelopeSchema } from "../packages/core/dist/events.js";
 
 test("commerce HMAC accepts an intact request and rejects stale or modified bodies", () => {
   const secret = "commerce-test-secret";
   const timestamp = String(Math.floor(Date.now() / 1000));
-  const body = JSON.stringify({ eventId: "order:ord_1:placed", type: "order.placed" });
+  const body = JSON.stringify({
+    eventId: "order:ord_1:placed",
+    type: "order.placed",
+  });
   const signature = createEilishSignature({ body, secret, timestamp });
 
   assert.equal(
@@ -106,7 +107,10 @@ test("Shopify order timestamps accept explicit timezones and preserve the event 
       type: "order.placed",
     });
     assert.equal(parsed.occurredAt, occurredAt);
-    assert.equal(new Date(parsed.occurredAt).toISOString(), "2026-09-09T19:50:45.000Z");
+    assert.equal(
+      new Date(parsed.occurredAt).toISOString(),
+      "2026-09-09T19:50:45.000Z",
+    );
   }
 });
 
@@ -117,13 +121,17 @@ test("commerce timestamps still reject missing timezones and invalid dates", () 
     "2026-02-30T15:50:45-04:00",
     "invalid",
   ]) {
-    assert.equal(commerceEventEnvelopeSchema.safeParse({
-      eventId: "order.placed:shopify-webhook-invalid-time",
+    assert.equal(
+      commerceEventEnvelopeSchema.safeParse({
+        eventId: "order.placed:shopify-webhook-invalid-time",
+        occurredAt,
+        payload: {},
+        source: "shopify",
+        type: "order.placed",
+      }).success,
+      false,
       occurredAt,
-      payload: {},
-      source: "shopify",
-      type: "order.placed",
-    }).success, false, occurredAt);
+    );
   }
 });
 
@@ -142,7 +150,10 @@ test("Ops admin HMAC binds actor, method, path/query, and raw body", () => {
   for (const changed of [
     { ...input, actorEmail: "other@example.com" },
     { ...input, method: "PATCH" },
-    { ...input, pathAndQuery: "/internal/ops/admin/v1/email-flows?draft=false" },
+    {
+      ...input,
+      pathAndQuery: "/internal/ops/admin/v1/email-flows?draft=false",
+    },
     { ...input, body: '{"name":"Changed"}' },
   ]) {
     assert.equal(verifyOpsAdminSignature({ ...changed, signature }), false);
@@ -227,14 +238,14 @@ test("unsubscribe links separate human confirmation from mailbox-provider one-cl
 test("opaque unsubscribe links stay on the first-party Shopify storefront", () => {
   assert.deepEqual(
     buildStorefrontUnsubscribeUrls({
-      storefrontUrl: "https://www.eilishstudio.com/collections/new",
+      storefrontUrl: "https://store.example.test/collections/new",
       token: "opaque_token-123",
     }),
     {
       confirmationUrl:
-        "https://www.eilishstudio.com/apps/eilish/unsubscribe/opaque_token-123",
+        "https://store.example.test/apps/eilish/unsubscribe/opaque_token-123",
       oneClickUrl:
-        "https://www.eilishstudio.com/apps/eilish/unsubscribe/opaque_token-123",
+        "https://store.example.test/apps/eilish/unsubscribe/opaque_token-123",
     },
   );
 });
@@ -258,8 +269,14 @@ test("signup-form schema version 1 remains readable while future versions are re
   assert.equal(current.targeting.cooldown_days, 30);
   assert.deepEqual(current.targeting.devices, ["desktop", "mobile"]);
   assert.equal(current.targeting.hide_after_submit, true);
-  assert.deepEqual(current.targeting.close_button_devices, ["desktop", "mobile"]);
-  assert.deepEqual(current.targeting.dismiss_on_outside_devices, ["desktop", "mobile"]);
+  assert.deepEqual(current.targeting.close_button_devices, [
+    "desktop",
+    "mobile",
+  ]);
+  assert.deepEqual(current.targeting.dismiss_on_outside_devices, [
+    "desktop",
+    "mobile",
+  ]);
   assert.equal(
     current.steps.some((step) => step.kind === "already_subscribed"),
     true,
@@ -272,10 +289,10 @@ test("deterministic event IDs and Handlebars templates preserve the deployed wir
   assert.equal(hasDeterministicEventId("order.placed:ord_1"), true);
   assert.equal(hasDeterministicEventId("random-id"), false);
   assert.equal(
-    renderHandlebarsTemplate(
-      "Hello {{first_name}} — order {{order.id}}",
-      { first_name: "Ava", order: { id: "ord_1" } },
-    ),
+    renderHandlebarsTemplate("Hello {{first_name}} — order {{order.id}}", {
+      first_name: "Ava",
+      order: { id: "ord_1" },
+    }),
     "Hello Ava — order ord_1",
   );
 });
@@ -349,7 +366,10 @@ test("nested branch paths resume at siblings and then return to the parent flow"
 
 test("delay calculations and A/B selection are stable across retries", () => {
   assert.equal(
-    calculateFlowDelay({ type: "delay", duration: 90, unit: "minutes" }, 2_000_000_000_000),
+    calculateFlowDelay(
+      { type: "delay", duration: 90, unit: "minutes" },
+      2_000_000_000_000,
+    ),
     90 * 60 * 1000,
   );
   const step = {
@@ -364,7 +384,9 @@ test("delay calculations and A/B selection are stable across retries", () => {
   const first = selectFlowEmailVariant(step, " PERSON@example.com ");
   const retry = selectFlowEmailVariant(step, "person@example.com");
   assert.deepEqual(first, retry);
-  assert.ok(first?.template_id === "template-a" || first?.template_id === "template-b");
+  assert.ok(
+    first?.template_id === "template-a" || first?.template_id === "template-b",
+  );
 });
 
 test("trigger conditions preserve all/any matching and subscriber tag behavior", () => {
@@ -475,12 +497,18 @@ test("re-entry rules distinguish never, recent completion, and elapsed windows",
 });
 
 test("flow message policy overrides the trigger fallback", () => {
-  assert.equal(resolveFlowMessageKind("marketing", "transactional"), "marketing");
+  assert.equal(
+    resolveFlowMessageKind("marketing", "transactional"),
+    "marketing",
+  );
   assert.equal(
     resolveFlowMessageKind("transactional", "marketing"),
     "transactional",
   );
-  assert.equal(resolveFlowMessageKind(undefined, "transactional"), "transactional");
+  assert.equal(
+    resolveFlowMessageKind(undefined, "transactional"),
+    "transactional",
+  );
 });
 
 test("transactional delivery ignores unsubscribe but respects hard suppressions", () => {

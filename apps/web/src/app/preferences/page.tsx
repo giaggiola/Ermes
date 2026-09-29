@@ -27,7 +27,11 @@ async function PreferencesPanel({
     token,
   });
   const subscriber = claims
-    ? (await getMessagingService().listEmailSubscribers({ email: claims.email }))[0]
+    ? (
+        await getMessagingService().listEmailSubscribers({
+          email: claims.email,
+        })
+      )[0]
     : null;
 
   return (
@@ -62,7 +66,12 @@ async function PreferencesPanel({
           <form className="form" method="post" action="/api/preferences/link">
             <label>
               Email
-              <input name="email" type="email" required defaultValue={legacyEmail} />
+              <input
+                name="email"
+                type="email"
+                required
+                defaultValue={legacyEmail}
+              />
             </label>
             <button type="submit">Send secure link</button>
           </form>

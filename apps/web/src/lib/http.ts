@@ -10,7 +10,9 @@ export class HttpError extends Error {
   }
 }
 
-export async function parseBody(request: NextRequest): Promise<Record<string, unknown>> {
+export async function parseBody(
+  request: NextRequest,
+): Promise<Record<string, unknown>> {
   const contentType = request.headers.get("content-type") ?? "";
 
   if (contentType.includes("application/json")) {
@@ -21,7 +23,10 @@ export async function parseBody(request: NextRequest): Promise<Record<string, un
     }
   }
 
-  if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) {
+  if (
+    contentType.includes("application/x-www-form-urlencoded") ||
+    contentType.includes("multipart/form-data")
+  ) {
     const form = await request.formData();
     return Object.fromEntries(form.entries());
   }
@@ -39,25 +44,37 @@ export async function parseBody(request: NextRequest): Promise<Record<string, un
 }
 
 export function handleRouteError(error: unknown) {
-  const message = error instanceof Error ? error.message : "Internal server error";
+  const message =
+    error instanceof Error ? error.message : "Internal server error";
   const status =
     error instanceof EmailDeliveryDisabledError
       ? 409
       : error instanceof HttpError
-      ? error.status
-      : message.includes("not found") || message.includes("Record not found")
-        ? 404
-        : 500;
+        ? error.status
+        : message.includes("not found") || message.includes("Record not found")
+          ? 404
+          : 500;
   return NextResponse.json({ message }, { status });
 }
 
-export function redirectOrJson(request: NextRequest, payload: Record<string, unknown>, path: string) {
+export function redirectOrJson(
+  request: NextRequest,
+  payload: Record<string, unknown>,
+  path: string,
+) {
   const contentType = request.headers.get("content-type") ?? "";
-  if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) {
+  if (
+    contentType.includes("application/x-www-form-urlencoded") ||
+    contentType.includes("multipart/form-data")
+  ) {
     // A Docker/reverse-proxy request URL may contain the internal container host.
     const url = new URL(path, process.env.APP_URL ?? request.url);
     for (const [key, value] of Object.entries(payload)) {
-      if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      if (
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean"
+      ) {
         url.searchParams.set(key, String(value));
       }
     }

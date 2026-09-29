@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { ImageIcon, KeyRound, MailCheck, PlugZap, Settings } from "lucide-react";
+import {
+  ImageIcon,
+  KeyRound,
+  MailCheck,
+  PlugZap,
+  Settings,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { EmptyState, ErrorState } from "../../components/admin/empty-state";
@@ -10,7 +16,12 @@ import { JsonBlock } from "../../components/admin/json-block";
 import { MetricCard } from "../../components/admin/metric-card";
 import { PageHeader } from "../../components/admin/page-header";
 import { StatusBadge } from "../../components/admin/status-badge";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../../components/ui/card";
 import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";
 import { Label } from "../../../../components/ui/label";
@@ -28,7 +39,9 @@ export default function RuntimePage() {
     email_logo_url: runtime?.email_logo_url ?? "",
     email_sender_name: runtime?.email_sender_name ?? "",
   };
-  const [draftOverride, setDraftOverride] = useState<typeof runtimeDraft | null>(null);
+  const [draftOverride, setDraftOverride] = useState<
+    typeof runtimeDraft | null
+  >(null);
   const host = useErmesHost();
   const [logoPending, setLogoPending] = useState(false);
   const draft = draftOverride ?? runtimeDraft;
@@ -39,7 +52,9 @@ export default function RuntimePage() {
       setDraftOverride(null);
       toast.success("Messaging settings saved.");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save settings.");
+      toast.error(
+        error instanceof Error ? error.message : "Could not save settings.",
+      );
     }
   };
 
@@ -47,9 +62,18 @@ export default function RuntimePage() {
     setLogoPending(true);
     try {
       const url = await host.pickImage?.();
-      if (url) setDraftOverride(current => ({ ...(current ?? runtimeDraft), email_logo_url: url }));
-    } catch (error) { toast.error(error instanceof Error ? error.message : "Could not select an image"); }
-    finally { setLogoPending(false); }
+      if (url)
+        setDraftOverride((current) => ({
+          ...(current ?? runtimeDraft),
+          email_logo_url: url,
+        }));
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Could not select an image",
+      );
+    } finally {
+      setLogoPending(false);
+    }
   };
 
   return (
@@ -60,26 +84,39 @@ export default function RuntimePage() {
       />
 
       {settings.error ? (
-        <ErrorState error={settings.error} onRetry={() => void settings.refetch()} />
+        <ErrorState
+          error={settings.error}
+          onRetry={() => void settings.refetch()}
+        />
       ) : null}
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           icon={<MailCheck className="size-4 text-muted-foreground" />}
           label="Resend API"
-          value={<StatusBadge value={data?.env.resend_api_key_configured ?? false} />}
+          value={
+            <StatusBadge value={data?.env.resend_api_key_configured ?? false} />
+          }
         />
         <MetricCard
           icon={<KeyRound className="size-4 text-muted-foreground" />}
           label="Webhook Secret"
-          value={<StatusBadge value={data?.env.resend_webhook_secret_configured ?? false} />}
+          value={
+            <StatusBadge
+              value={data?.env.resend_webhook_secret_configured ?? false}
+            />
+          }
         />
         <MetricCard
           icon={<PlugZap className="size-4 text-muted-foreground" />}
           label="Delivery"
           value="Published items"
         />
-        <MetricCard icon={<Settings className="size-4 text-muted-foreground" />} label="Mode" value={data?.env.commerce_mode ?? "unset"} />
+        <MetricCard
+          icon={<Settings className="size-4 text-muted-foreground" />}
+          label="Mode"
+          value={data?.env.commerce_mode ?? "unset"}
+        />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-2">
@@ -176,30 +213,47 @@ export default function RuntimePage() {
               <p className="text-xs text-muted-foreground">
                 Source: {runtime?.source ?? "loading"}
               </p>
-              <Button disabled={updateSettings.isPending} onClick={() => void save()} size="sm">
+              <Button
+                disabled={updateSettings.isPending}
+                onClick={() => void save()}
+                size="sm"
+              >
                 {updateSettings.isPending ? "Saving…" : "Save settings"}
               </Button>
             </div>
           </CardContent>
         </Card>
 
-
         <Card className="rounded-lg">
           <CardHeader>
             <CardTitle>Commerce Integration</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 text-sm">
-            <SettingRow label="Mode" value={data?.env.commerce_mode ?? "unset"} />
+            <SettingRow
+              label="Mode"
+              value={data?.env.commerce_mode ?? "unset"}
+            />
             <SettingRow
               label="Incoming events"
-              value={data?.env.commerce_event_secret_configured ? "configured" : "not configured"}
+              value={
+                data?.env.commerce_event_secret_configured
+                  ? "configured"
+                  : "not configured"
+              }
             />
             <SettingRow
               label="Commerce commands"
-              value={data?.env.commerce_command_configured ? "configured" : "not configured"}
+              value={
+                data?.env.commerce_command_configured
+                  ? "configured"
+                  : "not configured"
+              }
             />
             <SettingRow label="App URL" value={data?.env.app_url ?? "unset"} />
-            <SettingRow label="Last event" value={formatRecordDate(lastEvent?.received_at)} />
+            <SettingRow
+              label="Last event"
+              value={formatRecordDate(lastEvent?.received_at)}
+            />
           </CardContent>
         </Card>
       </section>
@@ -209,7 +263,13 @@ export default function RuntimePage() {
           <CardHeader>
             <CardTitle>Last Commerce Event</CardTitle>
           </CardHeader>
-          <CardContent>{lastEvent ? <JsonBlock value={lastEvent} /> : <EmptyState message="No commerce events recorded." />}</CardContent>
+          <CardContent>
+            {lastEvent ? (
+              <JsonBlock value={lastEvent} />
+            ) : (
+              <EmptyState message="No commerce events recorded." />
+            )}
+          </CardContent>
         </Card>
       </section>
     </div>
@@ -229,7 +289,11 @@ function RuntimeField({
   return (
     <div className="grid gap-1.5">
       <Label htmlFor={id}>{label}</Label>
-      <Input id={id} onChange={(event) => onChange(event.target.value)} value={value} />
+      <Input
+        id={id}
+        onChange={(event) => onChange(event.target.value)}
+        value={value}
+      />
     </div>
   );
 }

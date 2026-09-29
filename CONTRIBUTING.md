@@ -24,6 +24,7 @@ Do not bind a development instance to a real merchant database.
 ## Checks
 
 ```sh
+npm run format:check
 npm test
 npm run typecheck
 npm run build
@@ -31,6 +32,11 @@ npm ci --prefix shopify-app
 npm run build --prefix shopify-app
 npm test --prefix shopify-app
 ```
+
+Run `npm run format` to apply the shared formatting rules. CI checks formatting
+and rejects unused local variables, parameters and imports through TypeScript.
+Generated migrations, bundled assets and byte-exact upgrade fixtures are excluded
+from formatting.
 
 Without `TEST_DATABASE_URL`, database integration tests are skipped. To run them
 against a disposable database in this Compose project:

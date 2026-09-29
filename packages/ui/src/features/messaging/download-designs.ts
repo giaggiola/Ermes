@@ -1,8 +1,5 @@
 import { adminFetch } from "./admin-api";
-import type {
-  EmailTemplate,
-  SignupForm,
-} from "./admin-types";
+import type { EmailTemplate, SignupForm } from "./admin-types";
 
 interface ExportFile {
   contents: string;
@@ -48,10 +45,7 @@ function setUint32(view: DataView, offset: number, value: number) {
 function zipTimestamp(date: Date) {
   const year = Math.max(1980, date.getFullYear());
   return {
-    date:
-      ((year - 1980) << 9) |
-      ((date.getMonth() + 1) << 5) |
-      date.getDate(),
+    date: ((year - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate(),
     time:
       (date.getHours() << 11) |
       (date.getMinutes() << 5) |
@@ -114,7 +108,10 @@ function createZip(files: ExportFile[], createdAt: Date) {
     localOffset += local.length;
   }
 
-  const centralSize = centralParts.reduce((total, part) => total + part.length, 0);
+  const centralSize = centralParts.reduce(
+    (total, part) => total + part.length,
+    0,
+  );
   const end = new Uint8Array(22);
   const endView = new DataView(end.buffer);
   setUint32(endView, 0, 0x06054b50);
@@ -175,7 +172,12 @@ function buildExportFiles(
 
   const manifest = {
     exported_at: exportedAt.toISOString(),
-    forms: forms.map(({ id, name, status, type }) => ({ id, name, status, type })),
+    forms: forms.map(({ id, name, status, type }) => ({
+      id,
+      name,
+      status,
+      type,
+    })),
     templates: templates.map(({ category, id, name, subject }) => ({
       category,
       id,
@@ -219,25 +221,46 @@ function buildExportFiles(
       path: `${directory}/metadata.json`,
       contents: json(withoutTemplateContents(template)),
     });
-    files.push({ path: `${directory}/template.html`, contents: template.html_content });
+    files.push({
+      path: `${directory}/template.html`,
+      contents: template.html_content,
+    });
     if (template.text_content) {
-      files.push({ path: `${directory}/template.txt`, contents: template.text_content });
+      files.push({
+        path: `${directory}/template.txt`,
+        contents: template.text_content,
+      });
     }
     if (template.document) {
-      files.push({ path: `${directory}/document.json`, contents: json(template.document) });
+      files.push({
+        path: `${directory}/document.json`,
+        contents: json(template.document),
+      });
     }
   }
 
   for (const form of forms) {
     const directory = `${root}/signup-forms/${slug(form.name)}--${slug(form.id)}`;
-    files.push({ path: `${directory}/metadata.json`, contents: json(withoutFormDocument(form)) });
-    files.push({ path: `${directory}/form.json`, contents: json(form.document) });
+    files.push({
+      path: `${directory}/metadata.json`,
+      contents: json(withoutFormDocument(form)),
+    });
+    files.push({
+      path: `${directory}/form.json`,
+      contents: json(form.document),
+    });
     if (form.document.mode === "html") {
       if (form.document.html) {
-        files.push({ path: `${directory}/form.html`, contents: form.document.html });
+        files.push({
+          path: `${directory}/form.html`,
+          contents: form.document.html,
+        });
       }
       if (form.document.css) {
-        files.push({ path: `${directory}/form.css`, contents: form.document.css });
+        files.push({
+          path: `${directory}/form.css`,
+          contents: form.document.css,
+        });
       }
     }
   }
@@ -246,10 +269,11 @@ function buildExportFiles(
 }
 
 export async function downloadMessagingDesigns(): Promise<ExportResult> {
-  const [{ email_templates: templates }, { signup_forms: forms }] = await Promise.all([
-    adminFetch<{ email_templates: EmailTemplate[] }>("email-templates"),
-    adminFetch<{ signup_forms: SignupForm[] }>("signup-forms"),
-  ]);
+  const [{ email_templates: templates }, { signup_forms: forms }] =
+    await Promise.all([
+      adminFetch<{ email_templates: EmailTemplate[] }>("email-templates"),
+      adminFetch<{ signup_forms: SignupForm[] }>("signup-forms"),
+    ]);
   const exportedAt = new Date();
   const files = buildExportFiles(templates, forms, exportedAt);
   const archive = createZip(files, exportedAt);
@@ -259,7 +283,9 @@ export async function downloadMessagingDesigns(): Promise<ExportResult> {
     archive.byteOffset,
     archive.byteOffset + archive.byteLength,
   ) as ArrayBuffer;
-  const url = URL.createObjectURL(new Blob([buffer], { type: "application/zip" }));
+  const url = URL.createObjectURL(
+    new Blob([buffer], { type: "application/zip" }),
+  );
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = filename;

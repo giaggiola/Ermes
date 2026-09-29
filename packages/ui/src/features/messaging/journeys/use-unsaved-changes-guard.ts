@@ -30,7 +30,9 @@ export function useUnsavedChangesGuard(dirty: boolean) {
       }
       const target = event.target;
       const anchor =
-        target instanceof Element ? target.closest<HTMLAnchorElement>("a[href]") : null;
+        target instanceof Element
+          ? target.closest<HTMLAnchorElement>("a[href]")
+          : null;
       if (
         !anchor ||
         anchor.target === "_blank" ||

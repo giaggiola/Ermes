@@ -14,52 +14,77 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-export const ermesInstallation = pgTable("ermes_installation", {
-  id: integer("id").primaryKey(),
-  merchant: jsonb("merchant"),
-  credentials: jsonb("credentials").notNull().default({}),
-  shopDomain: text("shop_domain"),
-  shopifyVerifiedAt: timestamp("shopify_verified_at", { withTimezone: true }),
-  deliveryEnabled: boolean("delivery_enabled").notNull().default(false),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-}, table => [check("ermes_installation_singleton", sql`${table.id} = 1`)]);
+export const ermesInstallation = pgTable(
+  "ermes_installation",
+  {
+    id: integer("id").primaryKey(),
+    merchant: jsonb("merchant"),
+    credentials: jsonb("credentials").notNull().default({}),
+    shopDomain: text("shop_domain"),
+    shopifyVerifiedAt: timestamp("shopify_verified_at", { withTimezone: true }),
+    deliveryEnabled: boolean("delivery_enabled").notNull().default(false),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [check("ermes_installation_singleton", sql`${table.id} = 1`)],
+);
 
 export const ermesAdmin = pgTable("ermes_admin", {
   id: text("id").primaryKey(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
-export const ermesSession = pgTable("ermes_session", {
-  tokenHash: text("token_hash").primaryKey(),
-  adminId: text("admin_id").notNull().references(() => ermesAdmin.id, { onDelete: "cascade" }),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-}, table => [index("ermes_session_expiry").on(table.expiresAt)]);
+export const ermesSession = pgTable(
+  "ermes_session",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    adminId: text("admin_id")
+      .notNull()
+      .references(() => ermesAdmin.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [index("ermes_session_expiry").on(table.expiresAt)],
+);
 
 export const ermesLoginAttempt = pgTable("ermes_login_attempt", {
   key: text("key").primaryKey(),
   count: integer("count").notNull().default(1),
-  windowStart: timestamp("window_start", { withTimezone: true }).notNull().defaultNow(),
+  windowStart: timestamp("window_start", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
-export const ermesImageAssets = pgTable("ermes_image_asset", {
-  id: uuid("id").primaryKey(),
-  cloudName: text("cloud_name").notNull(),
-  publicId: text("public_id").notNull(),
-  url: text("url").notNull(),
-  filename: text("filename").notNull(),
-  mimeType: text("mime_type").notNull(),
-  bytes: integer("bytes").notNull(),
-  width: integer("width").notNull(),
-  height: integer("height").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, table => [
-  uniqueIndex("ermes_image_asset_source").on(table.cloudName, table.publicId),
-  index("ermes_image_asset_created").on(table.createdAt, table.id),
-]);
+export const ermesImageAssets = pgTable(
+  "ermes_image_asset",
+  {
+    id: uuid("id").primaryKey(),
+    cloudName: text("cloud_name").notNull(),
+    publicId: text("public_id").notNull(),
+    url: text("url").notNull(),
+    filename: text("filename").notNull(),
+    mimeType: text("mime_type").notNull(),
+    bytes: integer("bytes").notNull(),
+    width: integer("width").notNull(),
+    height: integer("height").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("ermes_image_asset_source").on(table.cloudName, table.publicId),
+    index("ermes_image_asset_created").on(table.createdAt, table.id),
+  ],
+);
 
-export const deliveryProvider = pgEnum("delivery_provider", ["resend", "medusa"]);
+export const deliveryProvider = pgEnum("delivery_provider", [
+  "resend",
+  "medusa",
+]);
 export const discountType = pgEnum("discount_type", ["percentage", "fixed"]);
 export const emailCampaignStatus = pgEnum("email_campaign_status", [
   "draft",
@@ -77,7 +102,11 @@ export const emailEventType = pgEnum("email_event_type", [
   "complained",
   "skipped",
 ]);
-export const emailFlowStatus = pgEnum("email_flow_status", ["draft", "active", "paused"]);
+export const emailFlowStatus = pgEnum("email_flow_status", [
+  "draft",
+  "active",
+  "paused",
+]);
 export const emailFlowRunStatus = pgEnum("email_flow_run_status", [
   "running",
   "completed",
@@ -89,7 +118,11 @@ export const productWatchAlertType = pgEnum("product_watch_alert_type", [
   "price-drop",
   "cart-price-drop",
 ]);
-export const reentryMode = pgEnum("reentry_mode", ["never", "after_duration", "always"]);
+export const reentryMode = pgEnum("reentry_mode", [
+  "never",
+  "after_duration",
+  "always",
+]);
 export const reentryUnit = pgEnum("reentry_unit", ["hours", "days"]);
 export const signupFormType = pgEnum("signup_form_type", [
   "popup",
@@ -97,7 +130,10 @@ export const signupFormType = pgEnum("signup_form_type", [
   "embedded",
   "full-page",
 ]);
-export const signupFormStatus = pgEnum("signup_form_status", ["draft", "published"]);
+export const signupFormStatus = pgEnum("signup_form_status", [
+  "draft",
+  "published",
+]);
 export const messageChannel = pgEnum("message_channel", ["email"]);
 export const suppressionReason = pgEnum("suppression_reason", [
   "bounce",
@@ -107,8 +143,12 @@ export const suppressionReason = pgEnum("suppression_reason", [
 ]);
 
 const timestamps = {
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
 };
 
@@ -140,7 +180,9 @@ export const emailTemplateVersions = pgTable(
   {
     compiledHtml: text("compiled_html").notNull(),
     compiledText: text("compiled_text"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     createdBy: text("created_by"),
     document: jsonb("document"),
     editorKind: text("editor_kind").notNull().default("legacy_html"),
@@ -194,7 +236,9 @@ export const emailFlowVersions = pgTable(
   "email_flow_version",
   {
     compiledSteps: jsonb("compiled_steps").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     createdBy: text("created_by"),
     flowId: text("flow_id").notNull(),
     graphDocument: jsonb("graph_document").notNull(),
@@ -257,7 +301,9 @@ export const emailSubscribers = pgTable(
     ...timestamps,
   },
   (table) => [
-    uniqueIndex("IDX_email_subscriber_email_unique").on(table.email).where(sql`deleted_at IS NULL`),
+    uniqueIndex("IDX_email_subscriber_email_unique")
+      .on(table.email)
+      .where(sql`deleted_at IS NULL`),
     index("IDX_email_subscriber_deleted_at").on(table.deletedAt),
     index("IDX_email_subscriber_subscribed").on(table.subscribed),
     index("IDX_email_subscriber_source").on(table.subscriptionSource),
@@ -269,11 +315,15 @@ export const emailConsentEvents = pgTable(
   {
     action: text("action").notNull(),
     channel: messageChannel("channel").notNull().default("email"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     email: text("email").notNull(),
     id: uuid("id").primaryKey().defaultRandom(),
     metadata: jsonb("metadata"),
-    occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull().defaultNow(),
+    occurredAt: timestamp("occurred_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     source: text("source").notNull(),
     topic: text("topic").notNull().default("marketing"),
   },
@@ -287,7 +337,9 @@ export const emailConsentEvents = pgTable(
 export const emailPreferenceLinks = pgTable(
   "email_preference_link",
   {
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     email: text("email").notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     purpose: text("purpose").notNull(),
@@ -322,7 +374,9 @@ export const emailSegmentMembers = pgTable(
   {
     email: text("email").notNull(),
     id: uuid("id").primaryKey().defaultRandom(),
-    matchedAt: timestamp("matched_at", { withTimezone: true }).notNull().defaultNow(),
+    matchedAt: timestamp("matched_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     segmentId: text("segment_id").notNull(),
     subscriberId: text("subscriber_id").notNull(),
   },
@@ -366,7 +420,10 @@ export const emailEvents = pgTable(
       .where(sql`provider_event_id IS NOT NULL`),
     index("IDX_email_event_template_version_id").on(table.templateVersionId),
     index("IDX_email_event_created_at").on(table.createdAt),
-    index("IDX_email_event_subscriber_type").on(table.subscriberEmail, table.eventType),
+    index("IDX_email_event_subscriber_type").on(
+      table.subscriberEmail,
+      table.eventType,
+    ),
   ],
 );
 
@@ -405,7 +462,9 @@ export const emailCampaignRevisions = pgTable(
     audienceDefinition: jsonb("audience_definition"),
     campaignId: text("campaign_id").notNull(),
     context: jsonb("context"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     createdBy: text("created_by"),
     frozenAt: timestamp("frozen_at", { withTimezone: true }),
     id: text("id").primaryKey(),
@@ -450,7 +509,10 @@ export const emailProductWatches = pgTable(
     index("IDX_email_product_watch_product_id").on(table.productId),
     index("IDX_email_product_watch_alert_type").on(table.alertType),
     index("IDX_email_product_watch_notified").on(table.notified),
-    index("IDX_email_product_watch_alert_notified").on(table.alertType, table.notified),
+    index("IDX_email_product_watch_alert_notified").on(
+      table.alertType,
+      table.notified,
+    ),
     uniqueIndex("IDX_email_product_watch_unique")
       .on(table.email, table.productId, table.variantId, table.alertType)
       .where(sql`deleted_at IS NULL AND notified = false`),
@@ -495,7 +557,9 @@ export const commerceEvents = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     payload: jsonb("payload").notNull(),
     processedAt: timestamp("processed_at", { withTimezone: true }),
-    receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
+    receivedAt: timestamp("received_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     source: text("source").notNull().default("commerce"),
   },
   (table) => [
@@ -516,12 +580,17 @@ export const integrationDeliveries = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     lastAttemptAt: timestamp("last_attempt_at", { withTimezone: true }),
     provider: deliveryProvider("provider").notNull(),
-    request: jsonb("request").notNull().default(sql`'{}'::jsonb`),
+    request: jsonb("request")
+      .notNull()
+      .default(sql`'{}'::jsonb`),
     response: jsonb("response"),
     status: text("status").notNull().default("pending"),
   },
   (table) => [
-    uniqueIndex("integration_delivery_provider_event_idx").on(table.provider, table.eventId),
+    uniqueIndex("integration_delivery_provider_event_idx").on(
+      table.provider,
+      table.eventId,
+    ),
     index("integration_delivery_status_idx").on(table.status),
   ],
 );
@@ -553,7 +622,9 @@ export const signupForms = pgTable(
 export const signupFormVersions = pgTable(
   "signup_form_version",
   {
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     createdBy: text("created_by"),
     document: jsonb("document").notNull(),
     formId: text("form_id").notNull(),
@@ -577,7 +648,9 @@ export const messageSuppressions = pgTable(
   {
     active: boolean("active").notNull().default(true),
     channel: messageChannel("channel").notNull().default("email"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     email: text("email").notNull(),
     id: uuid("id").primaryKey().defaultRandom(),
     reason: suppressionReason("reason").notNull(),
@@ -614,14 +687,23 @@ export const emailDeliveryLedger = pgTable(
     claimedAt: timestamp("claimed_at", { withTimezone: true }),
     claimExpiresAt: timestamp("claim_expires_at", { withTimezone: true }),
     lastError: text("last_error"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
-    uniqueIndex("IDX_email_delivery_ledger_idempotency_key_unique").on(table.idempotencyKey),
+    uniqueIndex("IDX_email_delivery_ledger_idempotency_key_unique").on(
+      table.idempotencyKey,
+    ),
     index("IDX_email_delivery_ledger_flow_run").on(table.flowRunId),
     index("IDX_email_delivery_ledger_campaign").on(table.campaignId),
-    index("IDX_email_delivery_ledger_state_claim").on(table.state, table.claimExpiresAt),
+    index("IDX_email_delivery_ledger_state_claim").on(
+      table.state,
+      table.claimExpiresAt,
+    ),
   ],
 );
 
@@ -635,10 +717,14 @@ export const emailMarketingSendStates = pgTable(
     lastSource: text("last_source").notNull(),
     createdAt: timestamp("created_at", {
       withTimezone: true,
-    }).notNull().defaultNow(),
+    })
+      .notNull()
+      .defaultNow(),
     updatedAt: timestamp("updated_at", {
       withTimezone: true,
-    }).notNull().defaultNow(),
+    })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
     index("IDX_email_marketing_send_state_last_attempt").on(
@@ -662,15 +748,21 @@ export const emailCampaignRecipients = pgTable(
     claimedAt: timestamp("claimed_at", { withTimezone: true }),
     claimExpiresAt: timestamp("claim_expires_at", { withTimezone: true }),
     lastError: text("last_error"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
     uniqueIndex("IDX_email_campaign_recipient_campaign_email_unique").on(
       table.campaignId,
       table.email,
     ),
-    uniqueIndex("IDX_email_campaign_recipient_delivery_key_unique").on(table.deliveryKey),
+    uniqueIndex("IDX_email_campaign_recipient_delivery_key_unique").on(
+      table.deliveryKey,
+    ),
     index("IDX_email_campaign_recipient_state_claim").on(
       table.campaignId,
       table.state,
@@ -689,7 +781,9 @@ export const adminAuditLogs = pgTable(
     resourceId: text("resource_id"),
     requestId: text("request_id").notNull(),
     outcome: text("outcome").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
     index("IDX_admin_audit_log_created_at").on(table.createdAt),
@@ -706,7 +800,9 @@ export const publicRateLimits = pgTable(
     windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
     count: integer("count").notNull().default(1),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
     uniqueIndex("IDX_public_rate_limit_bucket_unique").on(
@@ -720,7 +816,9 @@ export const publicRateLimits = pgTable(
 
 export const runtimeSettings = pgTable("runtime_setting", {
   key: text("key").primaryKey(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   value: jsonb("value").notNull(),
 });
 
@@ -729,65 +827,115 @@ export const runtimeSettings = pgTable("runtime_setting", {
 export const shopifyConnectors = pgTable("shopify_connector", {
   shopDomain: text("shop_domain").primaryKey(),
   enabled: boolean("enabled").notNull().default(false),
-  startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+  startedAt: timestamp("started_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   cursors: jsonb("cursors").notNull().default({}),
   lastWebhookAt: timestamp("last_webhook_at", { withTimezone: true }),
   lastSyncAt: timestamp("last_sync_at", { withTimezone: true }),
   lastRecoveryAt: timestamp("last_recovery_at", { withTimezone: true }),
   lastError: text("last_error"),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
-export const shopifyWebhooks = pgTable("shopify_webhook", {
-  id: text("id").primaryKey(),
-  shopDomain: text("shop_domain").notNull(),
-  topic: text("topic").notNull(),
-  payload: jsonb("payload").notNull(),
-  state: text("state").notNull().default("pending"),
-  attempts: integer("attempts").notNull().default(0),
-  nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }).notNull().defaultNow(),
-  lastError: text("last_error"),
-  receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
-  processedAt: timestamp("processed_at", { withTimezone: true }),
-}, t => [index("shopify_webhook_ready").on(t.state, t.nextAttemptAt)]);
-export const shopifyObjects = pgTable("shopify_object", {
-  id: text("id").primaryKey(),
-  shopDomain: text("shop_domain").notNull(),
-  kind: text("kind").notNull(),
-  externalId: text("external_id").notNull(),
-  payload: jsonb("payload").notNull(),
-  sourceUpdatedAt: timestamp("source_updated_at", { withTimezone: true }).notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-}, t => [uniqueIndex("shopify_object_source").on(t.shopDomain, t.kind, t.externalId)]);
-export const shopifyRecoveries = pgTable("shopify_recovery", {
-  id: text("id").primaryKey(),
-  shopDomain: text("shop_domain").notNull(),
-  kind: text("kind").notNull(),
-  sourceKey: text("source_key").notNull(),
-  cartKey: text("cart_key"),
-  email: text("email"),
-  customerId: text("customer_id"),
-  state: text("state").notNull().default("watching"),
-  snapshot: jsonb("snapshot").notNull().default({}),
-  lastActivityAt: timestamp("last_activity_at", { withTimezone: true }).notNull().defaultNow(),
-  nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }).notNull().defaultNow(),
-  emittedAt: timestamp("emitted_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, t => [uniqueIndex("shopify_recovery_source").on(t.shopDomain, t.kind, t.sourceKey), index("shopify_recovery_ready").on(t.state,t.nextAttemptAt), index("shopify_recovery_email").on(t.shopDomain,t.email)]);
-export const shopifyCommands = pgTable("shopify_command", {
-  id: text("id").primaryKey(),
-  shopDomain: text("shop_domain").notNull(),
-  kind: text("kind").notNull(),
-  payload: jsonb("payload").notNull(),
-  result: jsonb("result"),
-  state: text("state").notNull().default("pending"),
-  attempts: integer("attempts").notNull().default(0),
-  nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }).notNull().defaultNow(),
-  lastError: text("last_error"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, t => [index("shopify_command_ready").on(t.state,t.nextAttemptAt)]);
+export const shopifyWebhooks = pgTable(
+  "shopify_webhook",
+  {
+    id: text("id").primaryKey(),
+    shopDomain: text("shop_domain").notNull(),
+    topic: text("topic").notNull(),
+    payload: jsonb("payload").notNull(),
+    state: text("state").notNull().default("pending"),
+    attempts: integer("attempts").notNull().default(0),
+    nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    lastError: text("last_error"),
+    receivedAt: timestamp("received_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    processedAt: timestamp("processed_at", { withTimezone: true }),
+  },
+  (t) => [index("shopify_webhook_ready").on(t.state, t.nextAttemptAt)],
+);
+export const shopifyObjects = pgTable(
+  "shopify_object",
+  {
+    id: text("id").primaryKey(),
+    shopDomain: text("shop_domain").notNull(),
+    kind: text("kind").notNull(),
+    externalId: text("external_id").notNull(),
+    payload: jsonb("payload").notNull(),
+    sourceUpdatedAt: timestamp("source_updated_at", {
+      withTimezone: true,
+    }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("shopify_object_source").on(t.shopDomain, t.kind, t.externalId),
+  ],
+);
+export const shopifyRecoveries = pgTable(
+  "shopify_recovery",
+  {
+    id: text("id").primaryKey(),
+    shopDomain: text("shop_domain").notNull(),
+    kind: text("kind").notNull(),
+    sourceKey: text("source_key").notNull(),
+    cartKey: text("cart_key"),
+    email: text("email"),
+    customerId: text("customer_id"),
+    state: text("state").notNull().default("watching"),
+    snapshot: jsonb("snapshot").notNull().default({}),
+    lastActivityAt: timestamp("last_activity_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    emittedAt: timestamp("emitted_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("shopify_recovery_source").on(
+      t.shopDomain,
+      t.kind,
+      t.sourceKey,
+    ),
+    index("shopify_recovery_ready").on(t.state, t.nextAttemptAt),
+    index("shopify_recovery_email").on(t.shopDomain, t.email),
+  ],
+);
+export const shopifyCommands = pgTable(
+  "shopify_command",
+  {
+    id: text("id").primaryKey(),
+    shopDomain: text("shop_domain").notNull(),
+    kind: text("kind").notNull(),
+    payload: jsonb("payload").notNull(),
+    result: jsonb("result"),
+    state: text("state").notNull().default("pending"),
+    attempts: integer("attempts").notNull().default(0),
+    nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    lastError: text("last_error"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("shopify_command_ready").on(t.state, t.nextAttemptAt)],
+);
 export const shopifyFormEvents = pgTable("shopify_form_event", {
   id: text("id").primaryKey(),
   formId: text("form_id").notNull(),
   eventType: text("event_type").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });

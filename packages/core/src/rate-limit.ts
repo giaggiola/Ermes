@@ -1,6 +1,10 @@
 import { createHmac } from "node:crypto";
 
-export function hashRateLimitKey(secret: string, kind: "email" | "ip", value: string): string {
+export function hashRateLimitKey(
+  secret: string,
+  kind: "email" | "ip",
+  value: string,
+): string {
   if (!secret) {
     throw new Error("Rate-limit hashing secret is required");
   }

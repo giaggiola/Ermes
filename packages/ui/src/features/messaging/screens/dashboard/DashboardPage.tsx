@@ -101,7 +101,9 @@ export default function DashboardPage() {
       );
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Could not download the designs.",
+        error instanceof Error
+          ? error.message
+          : "Could not download the designs.",
       );
     } finally {
       setIsDownloadingDesigns(false);
@@ -121,7 +123,9 @@ export default function DashboardPage() {
               variant="outline"
             >
               <Download className="size-4" />
-              {isDownloadingDesigns ? "Preparing download…" : "Download all designs"}
+              {isDownloadingDesigns
+                ? "Preparing download…"
+                : "Download all designs"}
             </Button>
             <div
               aria-label="Analytics date range"
@@ -402,7 +406,9 @@ function BreakdownCard({
   loading: boolean;
 }) {
   const rows =
-    kind === "domain" ? (analytics?.domains ?? []) : (analytics?.providers ?? []);
+    kind === "domain"
+      ? (analytics?.domains ?? [])
+      : (analytics?.providers ?? []);
   const title =
     kind === "domain" ? "Recipient domain health" : "Delivery provider health";
 
@@ -424,7 +430,9 @@ function BreakdownCard({
             <caption className="sr-only">{title}</caption>
             <TableHeader>
               <TableRow>
-                <TableHead>{kind === "domain" ? "Domain" : "Provider"}</TableHead>
+                <TableHead>
+                  {kind === "domain" ? "Domain" : "Provider"}
+                </TableHead>
                 <TableHead className="text-right">Sent</TableHead>
                 <TableHead className="text-right">Delivered</TableHead>
                 <TableHead className="text-right">Opened</TableHead>
@@ -467,10 +475,7 @@ function BreakdownCard({
                       {formatCountAndRate(row.bounced, row.bounce_rate)}
                     </TableCell>
                     <TableCell className="text-right">
-                      {formatCountAndRate(
-                        row.complained,
-                        row.complaint_rate,
-                      )}
+                      {formatCountAndRate(row.complained, row.complaint_rate)}
                     </TableCell>
                     {kind === "domain" ? (
                       <TableCell className="text-right">

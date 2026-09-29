@@ -149,8 +149,15 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Newsletter Welcome",
     previewText: "Your welcome code is inside",
     subject: "Welcome to {{store_name}} — your code is inside",
-    textContent: "Welcome to {{store_name}}\n\nHello {{first_name}}, thank you for joining us.\n\nYour welcome code is {{discount_code}} for {{discount_value}}% off. It expires {{discount_expires}}.\n\n{{store_url}}",
-    variables: [...commonVariables, ...editorialVariables, "discount_code", "discount_expires", "discount_value"],
+    textContent:
+      "Welcome to {{store_name}}\n\nHello {{first_name}}, thank you for joining us.\n\nYour welcome code is {{discount_code}} for {{discount_value}}% off. It expires {{discount_expires}}.\n\n{{store_url}}",
+    variables: [
+      ...commonVariables,
+      ...editorialVariables,
+      "discount_code",
+      "discount_expires",
+      "discount_value",
+    ],
   }),
   abandonedCart: template({
     body: `${heading("Still considering?", "Your edit is waiting", "Hello {{first_name}}, the pieces you chose are still in your bag. Take another look before they move on.")}<div style="margin:32px 0 28px;">${items}</div>${button("Return to your bag", "{{checkout_url}}")}`,
@@ -159,8 +166,15 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Abandoned Cart",
     previewText: "The pieces in your bag are still waiting",
     subject: "Still thinking it over?",
-    textContent: "Your edit is waiting\n\nHello {{first_name}}, the pieces you chose are still in your bag.\n\n{{#each items}}{{quantity}} × {{title}} — {{formatCurrency line_price ../currency}}\n{{/each}}\nReturn to your bag: {{checkout_url}}",
-    variables: [...commonVariables, "checkout_url", "currency", "items", "total"],
+    textContent:
+      "Your edit is waiting\n\nHello {{first_name}}, the pieces you chose are still in your bag.\n\n{{#each items}}{{quantity}} × {{title}} — {{formatCurrency line_price ../currency}}\n{{/each}}\nReturn to your bag: {{checkout_url}}",
+    variables: [
+      ...commonVariables,
+      "checkout_url",
+      "currency",
+      "items",
+      "total",
+    ],
   }),
   abandonedCheckout: template({
     body: `${heading("Nearly yours", "Complete your order", "Hello {{first_name}}, you were close. Your selection is saved so you can continue exactly where you left off.")}<div style="margin:32px 0 28px;">${items}</div>${button("Complete checkout", "{{checkout_url}}")}`,
@@ -169,8 +183,15 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Abandoned Checkout",
     previewText: "Your selection is saved",
     subject: "Your selection is almost yours",
-    textContent: "Complete your order\n\nHello {{first_name}}, your selection is saved.\n\n{{#each items}}{{quantity}} × {{title}} — {{formatCurrency line_price ../currency}}\n{{/each}}\nComplete checkout: {{checkout_url}}",
-    variables: [...commonVariables, "checkout_url", "currency", "items", "total"],
+    textContent:
+      "Complete your order\n\nHello {{first_name}}, your selection is saved.\n\n{{#each items}}{{quantity}} × {{title}} — {{formatCurrency line_price ../currency}}\n{{/each}}\nComplete checkout: {{checkout_url}}",
+    variables: [
+      ...commonVariables,
+      "checkout_url",
+      "currency",
+      "items",
+      "total",
+    ],
   }),
   orderConfirmation: template({
     body: `${heading("Order {{order_number}}", "Thank you for your order", "Hello {{first_name}}, we have received your order and will let you know as soon as it is on its way.")}<div style="margin:32px 0 8px;">${items}</div>${orderTotals}<div style="margin-top:28px;">${button("View your order", "{{order_status_url}}")}</div>`,
@@ -179,7 +200,8 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Order Confirmation",
     previewText: "We have received order {{order_number}}",
     subject: "Order {{order_number}} confirmed",
-    textContent: "Thank you for your order\n\nHello {{first_name}}, we have received order {{order_number}}.\n\n{{#each items}}{{quantity}} × {{title}} — {{formatCurrency line_price ../currency}}\n{{/each}}\nTotal: {{formatCurrency total currency}}\n\nView your order: {{order_status_url}}",
+    textContent:
+      "Thank you for your order\n\nHello {{first_name}}, we have received order {{order_number}}.\n\n{{#each items}}{{quantity}} × {{title}} — {{formatCurrency line_price ../currency}}\n{{/each}}\nTotal: {{formatCurrency total currency}}\n\nView your order: {{order_status_url}}",
     variables: orderVariables,
   }),
   orderShipped: template({
@@ -189,7 +211,8 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Order Shipped",
     previewText: "Order {{order_number}} is on its way",
     subject: "Your order is on its way",
-    textContent: "Your order is on its way\n\nHello {{first_name}}, order {{order_number}} has left the studio.\nTracking: {{tracking_number}}\n{{tracking_url}}",
+    textContent:
+      "Your order is on its way\n\nHello {{first_name}}, order {{order_number}} has left the studio.\nTracking: {{tracking_number}}\n{{tracking_url}}",
     variables: [...orderVariables, ...trackingVariables],
   }),
   outForDelivery: template({
@@ -199,7 +222,8 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Out for Delivery",
     previewText: "Your order is out for delivery",
     subject: "Your order is out for delivery",
-    textContent: "Out for delivery\n\nHello {{first_name}}, order {{order_number}} should be with you soon.\nTracking number: {{tracking_number}}\n\nTrack it: {{tracking_url}}",
+    textContent:
+      "Out for delivery\n\nHello {{first_name}}, order {{order_number}} should be with you soon.\nTracking number: {{tracking_number}}\n\nTrack it: {{tracking_url}}",
     variables: [...orderVariables, "estimated_delivery", ...trackingVariables],
   }),
   orderDelivered: template({
@@ -209,7 +233,8 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Order Delivered",
     previewText: "Order {{order_number}} has arrived",
     subject: "Your order has arrived",
-    textContent: "Delivered\n\nHello {{first_name}}, order {{order_number}} has arrived. We hope you love it.\n\n{{store_url}}",
+    textContent:
+      "Delivered\n\nHello {{first_name}}, order {{order_number}} has arrived. We hope you love it.\n\n{{store_url}}",
     variables: [...orderVariables, ...trackingVariables],
   }),
   deliveryFailed: template({
@@ -219,7 +244,8 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Delivery Failed",
     previewText: "An update about delivery of order {{order_number}}",
     subject: "An update about your delivery",
-    textContent: "We could not complete your delivery\n\nThe courier was unable to deliver order {{order_number}}.\nTracking number: {{tracking_number}}\nSee the latest details: {{tracking_url}}",
+    textContent:
+      "We could not complete your delivery\n\nThe courier was unable to deliver order {{order_number}}.\nTracking number: {{tracking_number}}\nSee the latest details: {{tracking_url}}",
     variables: [...orderVariables, ...trackingVariables],
   }),
   orderReturned: template({
@@ -229,7 +255,8 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Order Returned",
     previewText: "We have received your return",
     subject: "We have received your return",
-    textContent: "Your return has reached us\n\nHello {{first_name}}, we have received the return for order {{order_number}}.\n\n{{order_status_url}}",
+    textContent:
+      "Your return has reached us\n\nHello {{first_name}}, we have received the return for order {{order_number}}.\n\n{{order_status_url}}",
     variables: [...orderVariables, ...trackingVariables],
   }),
   giftCard: template({
@@ -239,8 +266,18 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Gift Card",
     previewText: "A gift card has arrived",
     subject: "A gift for you from {{gift_card_sender_name}}",
-    textContent: "Something lovely, just for you\n\n{{gift_card_message}}\n\nGift card: {{gift_card_code}}\nValue: {{formatCurrency gift_card_value currency}}\n\n{{gift_card_url}}",
-    variables: [...commonVariables, ...editorialVariables, "currency", "gift_card_code", "gift_card_message", "gift_card_sender_name", "gift_card_url", "gift_card_value"],
+    textContent:
+      "Something lovely, just for you\n\n{{gift_card_message}}\n\nGift card: {{gift_card_code}}\nValue: {{formatCurrency gift_card_value currency}}\n\n{{gift_card_url}}",
+    variables: [
+      ...commonVariables,
+      ...editorialVariables,
+      "currency",
+      "gift_card_code",
+      "gift_card_message",
+      "gift_card_sender_name",
+      "gift_card_url",
+      "gift_card_value",
+    ],
   }),
   backInStock: template({
     body: `${heading("Back in stock", "{{product_title}} has returned", "Hello {{first_name}}, the piece you asked us to watch is available again. Quantities may be limited.")}{{#if product_image_url}}<a href="{{product_url}}"><img src="{{product_image_url}}" width="542" alt="{{product_image_alt}}" style="display:block;width:100%;height:auto;margin:32px 0 24px;border:0;" /></a>{{/if}}<p style="margin:0 0 24px;color:${colors.muted};font-family:${bodyFont};font-size:14px;">{{variant_title}} · {{formatCurrency current_price currency}}</p>${button("View the piece", "{{product_url}}")}`,
@@ -249,8 +286,18 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Back in Stock",
     previewText: "The piece you were waiting for is back",
     subject: "Back in stock — {{product_title}}",
-    textContent: "{{product_title}} has returned\n\nHello {{first_name}}, the piece you asked us to watch is available again.\n\n{{product_url}}",
-    variables: [...commonVariables, "currency", "current_price", "product_image_alt", "product_image_url", "product_title", "product_url", "variant_title"],
+    textContent:
+      "{{product_title}} has returned\n\nHello {{first_name}}, the piece you asked us to watch is available again.\n\n{{product_url}}",
+    variables: [
+      ...commonVariables,
+      "currency",
+      "current_price",
+      "product_image_alt",
+      "product_image_url",
+      "product_title",
+      "product_url",
+      "variant_title",
+    ],
   }),
   priceDrop: template({
     body: `${heading("Price update", "A piece you saved is now less", "Hello {{first_name}}, {{product_title}} is now available at a new price.")}{{#if product_image_url}}<a href="{{product_url}}"><img src="{{product_image_url}}" width="542" alt="{{product_image_alt}}" style="display:block;width:100%;height:auto;margin:32px 0 24px;border:0;" /></a>{{/if}}<p style="margin:0 0 26px;font-family:${bodyFont};font-size:15px;"><span style="color:${colors.sale};">{{formatCurrency current_price currency}}</span> <span style="margin-left:8px;color:${colors.muted};text-decoration:line-through;">{{formatCurrency old_price currency}}</span></p>${button("View the piece", "{{product_url}}")}`,
@@ -259,8 +306,18 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Price Drop",
     previewText: "A piece you saved is now available at a new price",
     subject: "A new price for {{product_title}}",
-    textContent: "A piece you saved is now less\n\n{{product_title}} is now {{formatCurrency current_price currency}} (was {{formatCurrency old_price currency}}).\n\n{{product_url}}",
-    variables: [...commonVariables, "currency", "current_price", "old_price", "product_image_alt", "product_image_url", "product_title", "product_url"],
+    textContent:
+      "A piece you saved is now less\n\n{{product_title}} is now {{formatCurrency current_price currency}} (was {{formatCurrency old_price currency}}).\n\n{{product_url}}",
+    variables: [
+      ...commonVariables,
+      "currency",
+      "current_price",
+      "old_price",
+      "product_image_alt",
+      "product_image_url",
+      "product_title",
+      "product_url",
+    ],
   }),
   cartPriceDrop: template({
     body: `${heading("A piece from your bag", "Now on sale", "Hello {{first_name}}, something you considered is now available at a lower price.")}{{#if product_image_url}}<a href="{{checkout_url}}"><img src="{{product_image_url}}" width="542" alt="{{product_image_alt}}" style="display:block;width:100%;height:auto;margin:32px 0 24px;border:0;" /></a>{{/if}}<p style="margin:0 0 8px;color:${colors.ink};font-family:${headingFont};font-size:13px;letter-spacing:1px;text-transform:uppercase;">{{product_title}}</p>{{#if variant_title}}<p style="margin:0 0 14px;color:${colors.muted};font-family:${bodyFont};font-size:13px;">{{variant_title}}</p>{{/if}}<p style="margin:0 0 26px;font-family:${bodyFont};font-size:15px;"><span style="color:${colors.sale};">{{formatCurrency current_price currency}}</span> <span style="margin-left:8px;color:${colors.muted};text-decoration:line-through;">{{formatCurrency old_price currency}}</span></p>${button("Return to your bag", "{{checkout_url}}")}`,
@@ -269,8 +326,20 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Cart Item on Sale",
     previewText: "A piece from your bag is now on sale",
     subject: "A piece from your bag is now on sale",
-    textContent: "A piece from your bag is now on sale\n\nHello {{first_name}}, {{product_title}} is now {{formatCurrency current_price currency}} (was {{formatCurrency old_price currency}}).\n\nReturn to your bag: {{checkout_url}}",
-    variables: [...commonVariables, "checkout_url", "currency", "current_price", "old_price", "product_image_alt", "product_image_url", "product_title", "product_url", "variant_title"],
+    textContent:
+      "A piece from your bag is now on sale\n\nHello {{first_name}}, {{product_title}} is now {{formatCurrency current_price currency}} (was {{formatCurrency old_price currency}}).\n\nReturn to your bag: {{checkout_url}}",
+    variables: [
+      ...commonVariables,
+      "checkout_url",
+      "currency",
+      "current_price",
+      "old_price",
+      "product_image_alt",
+      "product_image_url",
+      "product_title",
+      "product_url",
+      "variant_title",
+    ],
   }),
   postPurchaseThreeDays: template({
     body: `${heading("From the studio", "A little care goes a long way", "Hello {{first_name}}, now that order {{order_number}} has arrived, here are a few simple ways to help your pieces stay beautiful.")}<div style="margin:32px 0 24px;">${itemsWithoutPrices}</div><div style="margin:0 0 28px;padding:24px;background:${colors.canvas};"><p style="margin:0 0 12px;color:${colors.ink};font-family:${headingFont};font-size:11px;letter-spacing:1.5px;text-transform:uppercase;">Care notes</p><p style="margin:0;color:${colors.ink};font-family:${bodyFont};font-size:14px;line-height:1.75;">Follow the care label for the exact fibre and construction.<br />Air pieces between wears and wash only when needed.<br />Store them away from direct light, folded or supported in their natural shape.</p></div>${button("Read our care guide", "{{care_guide_url}}")}`,
@@ -279,7 +348,8 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Post-delivery Care",
     previewText: "Simple care notes for your pieces",
     subject: "A little care goes a long way",
-    textContent: "A little care goes a long way\n\nHello {{first_name}}, now that order {{order_number}} has arrived, follow the care label, air pieces between wears, and store them away from direct light.\n\nRead our care guide: {{care_guide_url}}",
+    textContent:
+      "A little care goes a long way\n\nHello {{first_name}}, now that order {{order_number}} has arrived, follow the care label, air pieces between wears, and store them away from direct light.\n\nRead our care guide: {{care_guide_url}}",
     variables: [...orderVariables, "care_guide_url"],
   }),
   postPurchaseSevenDays: template({
@@ -289,8 +359,14 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Post-delivery Feedback",
     previewText: "One week on, we would love to hear from you",
     subject: "How does it feel?",
-    textContent: "How does it feel?\n\nHello {{first_name}}, we would love to hear how your order is becoming part of your world. Reply to this email to share your thoughts.\n\nAs a thank-you, use {{discount_code}} for {{discount_value}}% off before {{discount_expires}}.\n\n{{store_url}}",
-    variables: [...orderVariables, "discount_code", "discount_expires", "discount_value"],
+    textContent:
+      "How does it feel?\n\nHello {{first_name}}, we would love to hear how your order is becoming part of your world. Reply to this email to share your thoughts.\n\nAs a thank-you, use {{discount_code}} for {{discount_value}}% off before {{discount_expires}}.\n\n{{store_url}}",
+    variables: [
+      ...orderVariables,
+      "discount_code",
+      "discount_expires",
+      "discount_value",
+    ],
   }),
   referralInvitation: template({
     body: `${heading("A private invitation", "For someone you know", "Hello {{first_name}}, if someone comes to mind, you may share this private invitation with them. They will receive {{friend_discount_percentage}}% off their first order, and we will send the same thank-you to you once their order is complete.")}<div style="margin:32px 0;padding:26px;border:1px solid ${colors.ink};text-align:center;"><p style="margin:0 0 10px;color:${colors.muted};font-family:${headingFont};font-size:10px;letter-spacing:2px;text-transform:uppercase;">Private code</p><p style="margin:0 0 10px;color:${colors.ink};font-family:${bodyFont};font-size:25px;letter-spacing:3px;">{{referral_code}}</p><p style="margin:0;color:${colors.muted};font-family:${bodyFont};font-size:13px;line-height:1.6;">{{friend_discount_percentage}}% off orders of {{formatCurrency friend_minimum_purchase currency}} or more</p></div>${button("Share the invitation", "{{share_url}}")}`,
@@ -299,7 +375,8 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Private Referral Invitation",
     previewText: "A private invitation, if someone comes to mind",
     subject: "A private invitation from {{store_name}}",
-    textContent: "For someone you know\n\nHello {{first_name}}, share code {{referral_code}} for {{friend_discount_percentage}}% off an order of {{formatCurrency friend_minimum_purchase currency}} or more. Once their order is complete, we will send the same thank-you to you.\n\n{{share_url}}",
+    textContent:
+      "For someone you know\n\nHello {{first_name}}, share code {{referral_code}} for {{friend_discount_percentage}}% off an order of {{formatCurrency friend_minimum_purchase currency}} or more. Once their order is complete, we will send the same thank-you to you.\n\n{{share_url}}",
     variables: [
       ...commonVariables,
       "advocate_discount_percentage",
@@ -317,7 +394,8 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Referral Thank-you",
     previewText: "A private thank-you from {{store_name}}",
     subject: "A thank-you from {{store_name}}",
-    textContent: "A thank-you from {{store_name}}\n\nHello {{first_name}}, someone you invited has placed an order. Your private code is {{reward_code}} for {{advocate_discount_percentage}}% off an order of {{formatCurrency minimum_purchase currency}} or more. It is valid until {{formatDate reward_expires_at}}.\n\n{{reward_url}}",
+    textContent:
+      "A thank-you from {{store_name}}\n\nHello {{first_name}}, someone you invited has placed an order. Your private code is {{reward_code}} for {{advocate_discount_percentage}}% off an order of {{formatCurrency minimum_purchase currency}} or more. It is valid until {{formatDate reward_expires_at}}.\n\n{{reward_url}}",
     variables: [
       ...commonVariables,
       "advocate_discount_percentage",
@@ -335,7 +413,15 @@ export const MEDUSA_EMAIL_TEMPLATES = {
     name: "Win-back 30 Days",
     previewText: "Come and see what is new at {{store_name}}",
     subject: "A little has changed since your last visit",
-    textContent: "Come and see what is new\n\nHello {{first_name}}, it has been a little while. Discover the latest from {{store_name}}.\n\nUse {{discount_code}} for {{discount_value}}% off before {{discount_expires}}.\n\n{{store_url}}",
-    variables: [...commonVariables, ...editorialVariables, "discount_code", "discount_expires", "discount_value", "last_order_date"],
+    textContent:
+      "Come and see what is new\n\nHello {{first_name}}, it has been a little while. Discover the latest from {{store_name}}.\n\nUse {{discount_code}} for {{discount_value}}% off before {{discount_expires}}.\n\n{{store_url}}",
+    variables: [
+      ...commonVariables,
+      ...editorialVariables,
+      "discount_code",
+      "discount_expires",
+      "discount_value",
+      "last_order_date",
+    ],
   }),
 } as const;

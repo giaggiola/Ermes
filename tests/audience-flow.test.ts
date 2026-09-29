@@ -200,7 +200,10 @@ test("standard flow recipes are safe drafts with valid, testable paths", () => {
   );
 
   for (const recipe of STANDARD_FLOW_RECIPES) {
-    assert.equal(medusaEventTypeSchema.safeParse(recipe.triggerEvent).success, true);
+    assert.equal(
+      medusaEventTypeSchema.safeParse(recipe.triggerEvent).success,
+      true,
+    );
     assert.deepEqual(validateFlowSteps(recipe.steps), {
       errors: [],
       valid: true,
@@ -253,9 +256,7 @@ test("standard flow recipes are safe drafts with valid, testable paths", () => {
         (step) =>
           step.type === "email" &&
           step.step_status === "disabled" &&
-          recipe.templates.some(
-            (template) => template.id === step.template_id,
-          ),
+          recipe.templates.some((template) => template.id === step.template_id),
       ),
     );
   }
@@ -263,26 +264,20 @@ test("standard flow recipes are safe drafts with valid, testable paths", () => {
   const postDelivery = STANDARD_FLOW_RECIPES.find(
     (recipe) => recipe.key === "post-delivery-follow-up",
   );
-  assert.deepEqual(
-    simulateFlowSteps(postDelivery?.steps ?? [], {})[0],
-    {
-      delay_ms: 3 * 24 * 60 * 60 * 1000,
-      duration: 3,
-      path: "0",
-      type: "delay",
-      unit: "days",
-    },
-  );
-  assert.deepEqual(
-    simulateFlowSteps(postDelivery?.steps ?? [], {})[2],
-    {
-      delay_ms: 4 * 24 * 60 * 60 * 1000,
-      duration: 4,
-      path: "2",
-      type: "delay",
-      unit: "days",
-    },
-  );
+  assert.deepEqual(simulateFlowSteps(postDelivery?.steps ?? [], {})[0], {
+    delay_ms: 3 * 24 * 60 * 60 * 1000,
+    duration: 3,
+    path: "0",
+    type: "delay",
+    unit: "days",
+  });
+  assert.deepEqual(simulateFlowSteps(postDelivery?.steps ?? [], {})[2], {
+    delay_ms: 4 * 24 * 60 * 60 * 1000,
+    duration: 4,
+    path: "2",
+    type: "delay",
+    unit: "days",
+  });
   const postDeliveryEmails = postDelivery?.steps.filter(
     (step) => step.type === "email",
   );
@@ -328,9 +323,7 @@ test("standard flow recipes are safe drafts with valid, testable paths", () => {
     const email = recipe.steps.find((step) => step.type === "email");
     assert.equal(email?.skip_recently_emailed, true);
     assert.equal(email?.skip_recently_emailed_hours, 16);
-    assert.ok(
-      email?.skip_if_event_types_since_start?.includes("order.placed"),
-    );
+    assert.ok(email?.skip_if_event_types_since_start?.includes("order.placed"));
   }
 
   const abandonedCart = STANDARD_FLOW_RECIPES.find(
@@ -353,9 +346,7 @@ test("standard flow recipes are safe drafts with valid, testable paths", () => {
     mode: "after_duration",
     unit: "days",
   });
-  const winBackEmail = winBack?.steps.find(
-    (step) => step.type === "email",
-  );
+  const winBackEmail = winBack?.steps.find((step) => step.type === "email");
   assert.ok(
     winBackEmail?.skip_if_event_types_since_start?.includes("order.placed"),
   );

@@ -1,6 +1,11 @@
 import type { ReactNode } from "react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../../components/ui/card";
 
 export function MetricCard({
   detail,
@@ -16,7 +21,9 @@ export function MetricCard({
   return (
     <Card className="rounded-lg py-4">
       <CardHeader className="flex-row items-center justify-between gap-2 px-4">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
+        <CardTitle className="text-sm font-medium text-muted-foreground">
+          {label}
+        </CardTitle>
         {icon}
       </CardHeader>
       <CardContent className="px-4">

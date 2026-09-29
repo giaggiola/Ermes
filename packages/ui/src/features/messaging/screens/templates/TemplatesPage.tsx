@@ -38,23 +38,26 @@ import {
   SheetHeader,
   SheetTitle,
 } from "../../../../components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../../../components/ui/tabs";
 import { Textarea } from "../../../../components/ui/textarea";
-import { EmptyState, ErrorState, LoadingState } from "../../components/admin/empty-state";
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "../../components/admin/empty-state";
 import {
   HtmlPreview,
   type PreviewDevice,
 } from "../../components/admin/html-preview";
 import { adminFetch, jsonBody } from "../../admin-api";
-import type {
-  EmailTemplate,
-  TemplatePreview,
-} from "../../admin-types";
+import type { EmailTemplate, TemplatePreview } from "../../admin-types";
 import { useMessagingCompatibility } from "../../contract";
-import {
-  useAdminPatch,
-  useEmailTemplates,
-} from "../../use-admin";
+import { useAdminPatch, useEmailTemplates } from "../../use-admin";
 import { displayTemplateName } from "./template-labels";
 
 const templateSchema = z.object({
@@ -120,7 +123,8 @@ export default function TemplatesPage() {
   const [previewMode, setPreviewMode] = useState<"draft" | "rendered">(
     "rendered",
   );
-  const [renderedPreview, setRenderedPreview] = useState<TemplatePreview | null>(null);
+  const [renderedPreview, setRenderedPreview] =
+    useState<TemplatePreview | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewPending, setPreviewPending] = useState(false);
   const [testPending, setTestPending] = useState(false);
@@ -174,7 +178,9 @@ export default function TemplatesPage() {
           error instanceof Error ? error.message : "Preview failed",
         );
         if (announce) {
-          toast.error(error instanceof Error ? error.message : "Preview failed");
+          toast.error(
+            error instanceof Error ? error.message : "Preview failed",
+          );
         }
       } finally {
         if (requestId === previewRequest.current) setPreviewPending(false);
@@ -225,7 +231,9 @@ export default function TemplatesPage() {
       if (announce) toast.success("Template saved");
       return templateId;
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Template save failed");
+      toast.error(
+        error instanceof Error ? error.message : "Template save failed",
+      );
       return null;
     }
   }
@@ -293,9 +301,7 @@ export default function TemplatesPage() {
   }
 
   const previewHtml =
-    previewMode === "rendered"
-      ? (renderedPreview?.preview.html ?? "")
-      : html;
+    previewMode === "rendered" ? (renderedPreview?.preview.html ?? "") : html;
   const previewSubject =
     previewMode === "rendered" && renderedPreview
       ? renderedPreview.preview.subject
@@ -327,7 +333,10 @@ export default function TemplatesPage() {
     return (
       <div className="grid gap-4 p-6">
         <EmptyState message="This email template could not be found." />
-        <Button className="w-fit" onClick={() => router.push("/messaging/templates")}>
+        <Button
+          className="w-fit"
+          onClick={() => router.push("/messaging/templates")}
+        >
           <ArrowLeft className="size-4" />
           Back to templates
         </Button>
@@ -398,13 +407,20 @@ export default function TemplatesPage() {
               >
                 <Rocket className="size-4" />
                 <span className="hidden md:inline">
-                  {selected?.published_version_id ? "Publish changes" : "Publish"}
+                  {selected?.published_version_id
+                    ? "Publish changes"
+                    : "Publish"}
                 </span>
                 <span className="md:hidden">Publish</span>
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button aria-label="More template actions" size="icon-sm" type="button" variant="outline">
+                  <Button
+                    aria-label="More template actions"
+                    size="icon-sm"
+                    type="button"
+                    variant="outline"
+                  >
                     <MoreHorizontal className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -420,30 +436,44 @@ export default function TemplatesPage() {
                   <SheetHeader className="border-b pr-12">
                     <SheetTitle>Preview &amp; test</SheetTitle>
                     <SheetDescription>
-                      Render this template with sample data or send it to an inbox.
+                      Render this template with sample data or send it to an
+                      inbox.
                     </SheetDescription>
                   </SheetHeader>
                   <div className="grid gap-6 overflow-y-auto p-4">
                     <section className="grid gap-3">
                       <div>
-                        <h2 className="text-sm font-medium">Personalized preview</h2>
+                        <h2 className="text-sm font-medium">
+                          Personalized preview
+                        </h2>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Saves the working draft, then refreshes variables with sample data.
+                          Saves the working draft, then refreshes variables with
+                          sample data.
                         </p>
                       </div>
                       <Button
-                        disabled={previewPending || isSaving || (!compatibility.canEdit && (!selected || isDirty))}
+                        disabled={
+                          previewPending ||
+                          isSaving ||
+                          (!compatibility.canEdit && (!selected || isDirty))
+                        }
                         onClick={() => void renderPreview()}
                         type="button"
                         variant="outline"
                       >
-                        {previewPending ? <RefreshCw className="size-4 animate-spin" /> : <Eye className="size-4" />}
+                        {previewPending ? (
+                          <RefreshCw className="size-4 animate-spin" />
+                        ) : (
+                          <Eye className="size-4" />
+                        )}
                         {previewPending ? "Rendering…" : "Render sample"}
                       </Button>
                     </section>
                     <section className="grid gap-3 border-t pt-5">
                       <div>
-                        <h2 className="text-sm font-medium">Send a test email</h2>
+                        <h2 className="text-sm font-medium">
+                          Send a test email
+                        </h2>
                         <p className="mt-1 text-xs text-muted-foreground">
                           Unsaved changes are saved before the test is sent.
                         </p>
@@ -456,7 +486,9 @@ export default function TemplatesPage() {
                         value={testEmail}
                       />
                       <Button
-                        disabled={!compatibility.canEdit || testPending || !testEmail}
+                        disabled={
+                          !compatibility.canEdit || testPending || !testEmail
+                        }
                         onClick={() => void sendTest()}
                         type="button"
                       >
@@ -472,236 +504,239 @@ export default function TemplatesPage() {
         }
       >
         <div className="flex h-full min-h-0 min-w-0 flex-col overflow-y-auto xl:flex-row xl:overflow-hidden">
-            <section className="flex w-full shrink-0 flex-col border-r border-border bg-background xl:h-full xl:w-[420px]">
-              <div className="grid gap-6 overflow-y-auto p-4">
-                <section className="grid gap-4">
-                  <div>
-                    <h2 className="text-sm font-semibold">Message details</h2>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      The subject and preview text appear above the email canvas.
-                    </p>
-                  </div>
-                  <label className="grid gap-2 text-sm font-medium">
-                    Subject
-                    <Input
-                      disabled={!compatibility.canEdit}
-                      placeholder="Welcome to Your store"
-                      {...form.register("subject")}
-                    />
-                    {form.formState.errors.subject ? (
-                      <span className="text-xs text-destructive">
-                        {form.formState.errors.subject.message}
-                      </span>
-                    ) : null}
-                  </label>
-                  <label className="grid gap-2 text-sm font-medium">
-                    Preview text
-                    <Input
-                      disabled={!compatibility.canEdit}
-                      maxLength={180}
-                      placeholder="A short inbox preview shown after the subject"
-                      {...form.register("preview_text")}
-                    />
-                  </label>
-                  <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
-                    <label className="grid gap-2 text-sm font-medium">
-                      Category
-                      <Input
-                        disabled={!compatibility.canEdit}
-                        placeholder="marketing"
-                        {...form.register("category")}
-                      />
-                    </label>
-                    <Label className="h-9 px-2">
-                      <input
-                        className="size-4 accent-foreground"
-                        disabled={!compatibility.canEdit}
-                        type="checkbox"
-                        {...form.register("is_active")}
-                      />
-                      Active
-                    </Label>
-                  </div>
-                </section>
-
-                <section className="grid gap-3">
-                  <div>
-                    <h2 className="text-sm font-semibold">Content</h2>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Changes appear immediately in the draft preview.
-                    </p>
-                  </div>
-                  <Tabs
-                    onValueChange={(value) =>
-                      setEditorTab(value as "design" | "source")
-                    }
-                    value={editorTab}
-                  >
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger
-                        disabled={editorKind !== "visual_v1"}
-                        value="design"
-                      >
-                        <Palette className="size-4" />
-                        Design
-                      </TabsTrigger>
-                      <TabsTrigger value="source">
-                        <Code2 className="size-4" />
-                        HTML
-                      </TabsTrigger>
-                    </TabsList>
-                    <TabsContent className="mt-3" value="design">
-                      <RichTextEditor
-                        content={html}
-                        onChange={(value) =>
-                          form.setValue("html_content", value, {
-                            shouldDirty: true,
-                            shouldValidate: true,
-                          })
-                        }
-                        onDocumentChange={(root) =>
-                          form.setValue(
-                            "document",
-                            { kind: "tiptap", root, schema_version: 1 },
-                            { shouldDirty: true },
-                          )
-                        }
-                        placeholder="Write the email…"
-                      />
-                    </TabsContent>
-                    <TabsContent className="mt-3" value="source">
-                      {editorKind === "visual_v1" ? (
-                        <div className="mb-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
-                          HTML is compiled from the visual document when you save.
-                          Edit the Design tab to preserve round-trip safety.
-                        </div>
-                      ) : null}
-                      <Textarea
-                        className="min-h-80 resize-y font-mono text-xs"
-                        disabled={
-                          !compatibility.canEdit || editorKind === "visual_v1"
-                        }
-                        {...form.register("html_content")}
-                      />
-                      {form.formState.errors.html_content ? (
-                        <span className="mt-2 block text-xs text-destructive">
-                          {form.formState.errors.html_content.message}
-                        </span>
-                      ) : null}
-                    </TabsContent>
-                  </Tabs>
-                </section>
-
+          <section className="flex w-full shrink-0 flex-col border-r border-border bg-background xl:h-full xl:w-[420px]">
+            <div className="grid gap-6 overflow-y-auto p-4">
+              <section className="grid gap-4">
+                <div>
+                  <h2 className="text-sm font-semibold">Message details</h2>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    The subject and preview text appear above the email canvas.
+                  </p>
+                </div>
                 <label className="grid gap-2 text-sm font-medium">
-                  Plain-text fallback
-                  <Textarea
-                    className="min-h-32 resize-y font-mono text-xs"
-                    disabled={!compatibility.canEdit || editorKind === "visual_v1"}
-                    {...form.register("text_content")}
+                  Subject
+                  <Input
+                    disabled={!compatibility.canEdit}
+                    placeholder="Welcome to Your store"
+                    {...form.register("subject")}
+                  />
+                  {form.formState.errors.subject ? (
+                    <span className="text-xs text-destructive">
+                      {form.formState.errors.subject.message}
+                    </span>
+                  ) : null}
+                </label>
+                <label className="grid gap-2 text-sm font-medium">
+                  Preview text
+                  <Input
+                    disabled={!compatibility.canEdit}
+                    maxLength={180}
+                    placeholder="A short inbox preview shown after the subject"
+                    {...form.register("preview_text")}
                   />
                 </label>
-
-              </div>
-            </section>
-
-            <section className="flex min-h-[640px] min-w-0 flex-1 flex-col bg-muted/40 xl:min-h-0">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-card px-3 py-2">
-                <div className="flex items-center gap-1">
-                  <Button
-                    aria-label="Desktop preview"
-                    onClick={() => setPreviewDevice("desktop")}
-                    size="icon-sm"
-                    type="button"
-                    variant={previewDevice === "desktop" ? "default" : "ghost"}
-                  >
-                    <Monitor className="size-4" />
-                  </Button>
-                  <Button
-                    aria-label="Mobile preview"
-                    onClick={() => setPreviewDevice("mobile")}
-                    size="icon-sm"
-                    type="button"
-                    variant={previewDevice === "mobile" ? "default" : "ghost"}
-                  >
-                    <Smartphone className="size-4" />
-                  </Button>
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+                  <label className="grid gap-2 text-sm font-medium">
+                    Category
+                    <Input
+                      disabled={!compatibility.canEdit}
+                      placeholder="marketing"
+                      {...form.register("category")}
+                    />
+                  </label>
+                  <Label className="h-9 px-2">
+                    <input
+                      className="size-4 accent-foreground"
+                      disabled={!compatibility.canEdit}
+                      type="checkbox"
+                      {...form.register("is_active")}
+                    />
+                    Active
+                  </Label>
                 </div>
-                <div className="flex items-center gap-1 rounded-md border p-0.5 text-xs">
-                  <button
-                    className={`rounded px-2 py-1 ${
-                      previewMode === "draft"
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground"
-                    }`}
-                    onClick={() => setPreviewMode("draft")}
-                    type="button"
-                  >
-                    Working HTML
-                  </button>
-                  <button
-                    className={`rounded px-2 py-1 ${
-                      previewMode === "rendered"
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground"
-                    } disabled:cursor-not-allowed disabled:opacity-50`}
-                    disabled={!renderedPreview}
-                    onClick={() => setPreviewMode("rendered")}
-                    type="button"
-                  >
-                    Rendered sample
-                  </button>
-                </div>
-              </div>
+              </section>
 
-              <div className="border-b border-border bg-card px-4 py-3">
-                <div className="flex min-w-0 items-baseline gap-2">
-                  <span className="shrink-0 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Subject
-                  </span>
-                  <p className="truncate text-sm font-medium">
-                    {previewSubject || "Untitled email"}
+              <section className="grid gap-3">
+                <div>
+                  <h2 className="text-sm font-semibold">Content</h2>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Changes appear immediately in the draft preview.
                   </p>
                 </div>
-                {previewText ? (
-                  <p className="mt-1 truncate text-xs text-muted-foreground">
-                    {previewText}
-                  </p>
-                ) : null}
-                {previewMode === "rendered" ? (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Sample preview: names, products, images, prices, discounts,
-                    and tracking details are illustrative. Live flow emails use
-                    the Shopify event data for that customer and order.
-                  </p>
-                ) : null}
-              </div>
-
-              <div className="flex min-h-0 flex-1 items-start justify-center overflow-auto p-4 sm:p-8">
-                {previewMode === "rendered" && previewPending ? (
-                  <LoadingState label="Rendering template with sample data" />
-                ) : previewMode === "rendered" && previewError ? (
-                  <div className="grid max-w-md gap-3 rounded-lg border bg-card p-5 text-sm">
-                    <p className="font-medium">The rendered preview is unavailable</p>
-                    <p className="text-muted-foreground">{previewError}</p>
-                    <Button
-                      className="w-fit"
-                      onClick={() => void loadRenderedPreview(selected.id)}
-                      type="button"
-                      variant="outline"
+                <Tabs
+                  onValueChange={(value) =>
+                    setEditorTab(value as "design" | "source")
+                  }
+                  value={editorTab}
+                >
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger
+                      disabled={editorKind !== "visual_v1"}
+                      value="design"
                     >
-                      <RefreshCw className="size-4" />
-                      Try again
-                    </Button>
-                  </div>
-                ) : (
-                  <HtmlPreview
-                    device={previewDevice}
-                    html={previewHtml}
-                    title={`${previewSubject || "Untitled email"} preview`}
-                  />
-                )}
+                      <Palette className="size-4" />
+                      Design
+                    </TabsTrigger>
+                    <TabsTrigger value="source">
+                      <Code2 className="size-4" />
+                      HTML
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent className="mt-3" value="design">
+                    <RichTextEditor
+                      content={html}
+                      onChange={(value) =>
+                        form.setValue("html_content", value, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        })
+                      }
+                      onDocumentChange={(root) =>
+                        form.setValue(
+                          "document",
+                          { kind: "tiptap", root, schema_version: 1 },
+                          { shouldDirty: true },
+                        )
+                      }
+                      placeholder="Write the email…"
+                    />
+                  </TabsContent>
+                  <TabsContent className="mt-3" value="source">
+                    {editorKind === "visual_v1" ? (
+                      <div className="mb-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+                        HTML is compiled from the visual document when you save.
+                        Edit the Design tab to preserve round-trip safety.
+                      </div>
+                    ) : null}
+                    <Textarea
+                      className="min-h-80 resize-y font-mono text-xs"
+                      disabled={
+                        !compatibility.canEdit || editorKind === "visual_v1"
+                      }
+                      {...form.register("html_content")}
+                    />
+                    {form.formState.errors.html_content ? (
+                      <span className="mt-2 block text-xs text-destructive">
+                        {form.formState.errors.html_content.message}
+                      </span>
+                    ) : null}
+                  </TabsContent>
+                </Tabs>
+              </section>
+
+              <label className="grid gap-2 text-sm font-medium">
+                Plain-text fallback
+                <Textarea
+                  className="min-h-32 resize-y font-mono text-xs"
+                  disabled={
+                    !compatibility.canEdit || editorKind === "visual_v1"
+                  }
+                  {...form.register("text_content")}
+                />
+              </label>
+            </div>
+          </section>
+
+          <section className="flex min-h-[640px] min-w-0 flex-1 flex-col bg-muted/40 xl:min-h-0">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-card px-3 py-2">
+              <div className="flex items-center gap-1">
+                <Button
+                  aria-label="Desktop preview"
+                  onClick={() => setPreviewDevice("desktop")}
+                  size="icon-sm"
+                  type="button"
+                  variant={previewDevice === "desktop" ? "default" : "ghost"}
+                >
+                  <Monitor className="size-4" />
+                </Button>
+                <Button
+                  aria-label="Mobile preview"
+                  onClick={() => setPreviewDevice("mobile")}
+                  size="icon-sm"
+                  type="button"
+                  variant={previewDevice === "mobile" ? "default" : "ghost"}
+                >
+                  <Smartphone className="size-4" />
+                </Button>
               </div>
-            </section>
+              <div className="flex items-center gap-1 rounded-md border p-0.5 text-xs">
+                <button
+                  className={`rounded px-2 py-1 ${
+                    previewMode === "draft"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground"
+                  }`}
+                  onClick={() => setPreviewMode("draft")}
+                  type="button"
+                >
+                  Working HTML
+                </button>
+                <button
+                  className={`rounded px-2 py-1 ${
+                    previewMode === "rendered"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground"
+                  } disabled:cursor-not-allowed disabled:opacity-50`}
+                  disabled={!renderedPreview}
+                  onClick={() => setPreviewMode("rendered")}
+                  type="button"
+                >
+                  Rendered sample
+                </button>
+              </div>
+            </div>
+
+            <div className="border-b border-border bg-card px-4 py-3">
+              <div className="flex min-w-0 items-baseline gap-2">
+                <span className="shrink-0 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Subject
+                </span>
+                <p className="truncate text-sm font-medium">
+                  {previewSubject || "Untitled email"}
+                </p>
+              </div>
+              {previewText ? (
+                <p className="mt-1 truncate text-xs text-muted-foreground">
+                  {previewText}
+                </p>
+              ) : null}
+              {previewMode === "rendered" ? (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Sample preview: names, products, images, prices, discounts,
+                  and tracking details are illustrative. Live flow emails use
+                  the Shopify event data for that customer and order.
+                </p>
+              ) : null}
+            </div>
+
+            <div className="flex min-h-0 flex-1 items-start justify-center overflow-auto p-4 sm:p-8">
+              {previewMode === "rendered" && previewPending ? (
+                <LoadingState label="Rendering template with sample data" />
+              ) : previewMode === "rendered" && previewError ? (
+                <div className="grid max-w-md gap-3 rounded-lg border bg-card p-5 text-sm">
+                  <p className="font-medium">
+                    The rendered preview is unavailable
+                  </p>
+                  <p className="text-muted-foreground">{previewError}</p>
+                  <Button
+                    className="w-fit"
+                    onClick={() => void loadRenderedPreview(selected.id)}
+                    type="button"
+                    variant="outline"
+                  >
+                    <RefreshCw className="size-4" />
+                    Try again
+                  </Button>
+                </div>
+              ) : (
+                <HtmlPreview
+                  device={previewDevice}
+                  html={previewHtml}
+                  title={`${previewSubject || "Untitled email"} preview`}
+                />
+              )}
+            </div>
+          </section>
         </div>
       </EditorWorkspace>
     </form>

@@ -31,7 +31,10 @@ interface SendRenderedEmailInput {
   unsubscribeUrl?: string;
 }
 
-export async function sendRenderedEmail(service: MessagingService, input: SendRenderedEmailInput) {
+export async function sendRenderedEmail(
+  service: MessagingService,
+  input: SendRenderedEmailInput,
+) {
   const { apiKey } = await deliveryCredentials();
   const runtime = await service.getRuntimeSettings();
   const senderName = runtime.emailSenderName;
@@ -68,9 +71,10 @@ export async function sendRenderedEmail(service: MessagingService, input: SendRe
     };
   }
   if (claimed.claim === "busy") {
-    throw new Error(`Delivery ${input.idempotencyKey} is already being processed`);
+    throw new Error(
+      `Delivery ${input.idempotencyKey} is already being processed`,
+    );
   }
-
 
   if (input.messageKind === "marketing") {
     const source = input.flowId
@@ -206,7 +210,9 @@ export function buildEmailForStep(
   const subjectTemplate = step.subject_override ?? String(template.subject);
   let html = renderHandlebarsTemplate(String(template.html_content), context);
   const text =
-    typeof template.text_content === "string" ? renderHandlebarsTemplate(template.text_content, context) : undefined;
+    typeof template.text_content === "string"
+      ? renderHandlebarsTemplate(template.text_content, context)
+      : undefined;
 
   if (step.enable_utm) {
     html = addUtmParameters(html, {

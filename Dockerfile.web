@@ -48,11 +48,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/package-lock.json ./package-lock.
 COPY --from=builder --chown=nextjs:nodejs /app/LICENSE /app/THIRD_PARTY_NOTICES.md ./
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/packages ./packages
-COPY --from=builder --chown=nextjs:nodejs /app/packages/core/package.json ./packages/core/package.json
-COPY --from=builder --chown=nextjs:nodejs /app/packages/core/dist ./packages/core/dist
-COPY --from=builder --chown=nextjs:nodejs /app/packages/db/package.json ./packages/db/package.json
-COPY --from=builder --chown=nextjs:nodejs /app/packages/db/dist ./packages/db/dist
-COPY --from=builder --chown=nextjs:nodejs /app/packages/db/drizzle ./packages/db/drizzle
 
 USER nextjs
 

@@ -29,7 +29,13 @@ const NODE_ICONS: Record<string, LucideIcon> = {
   trigger: Zap,
 };
 
-export function NodeDetailPanel({ selectedNode, templates, onClose, onUpdateNode, flowId }: NodeDetailPanelProps) {
+export function NodeDetailPanel({
+  selectedNode,
+  templates,
+  onClose,
+  onUpdateNode,
+  flowId,
+}: NodeDetailPanelProps) {
   if (!selectedNode) {
     return null;
   }
@@ -41,25 +47,56 @@ export function NodeDetailPanel({ selectedNode, templates, onClose, onUpdateNode
   const renderPanelContent = () => {
     switch (selectedNode.type) {
       case "trigger":
-        return <TriggerDetailPanel data={selectedNode.data as never} onChange={handleDataChange} />;
+        return (
+          <TriggerDetailPanel
+            data={selectedNode.data as never}
+            onChange={handleDataChange}
+          />
+        );
       case "email":
-        return <EmailDetailPanel data={selectedNode.data as never} templates={templates} onChange={handleDataChange} flowId={flowId} />;
+        return (
+          <EmailDetailPanel
+            data={selectedNode.data as never}
+            templates={templates}
+            onChange={handleDataChange}
+            flowId={flowId}
+          />
+        );
       case "delay":
-        return <DelayDetailPanel data={selectedNode.data as never} onChange={handleDataChange} />;
+        return (
+          <DelayDetailPanel
+            data={selectedNode.data as never}
+            onChange={handleDataChange}
+          />
+        );
       case "condition":
-        return <ConditionDetailPanel data={selectedNode.data as never} onChange={handleDataChange} />;
+        return (
+          <ConditionDetailPanel
+            data={selectedNode.data as never}
+            onChange={handleDataChange}
+          />
+        );
       case "discount":
-        return <DiscountDetailPanel data={selectedNode.data as never} onChange={handleDataChange} />;
+        return (
+          <DiscountDetailPanel
+            data={selectedNode.data as never}
+            onChange={handleDataChange}
+          />
+        );
       case "end":
         return (
           <div className="p-4">
-            <p className="text-sm text-muted-foreground">This marks the end of the flow. No configuration needed.</p>
+            <p className="text-sm text-muted-foreground">
+              This marks the end of the flow. No configuration needed.
+            </p>
           </div>
         );
       default:
         return (
           <div className="p-4">
-            <p className="text-sm text-muted-foreground">Select a node to configure it.</p>
+            <p className="text-sm text-muted-foreground">
+              Select a node to configure it.
+            </p>
           </div>
         );
     }
@@ -92,16 +129,22 @@ export function NodeDetailPanel({ selectedNode, templates, onClose, onUpdateNode
       <div className="flex items-center justify-between border-b border-border bg-muted px-4 py-3">
         <div className="flex items-center gap-2">
           <NodeIcon className="size-4 text-muted-foreground" />
-          <h3 className="text-sm font-medium text-foreground">{getNodeTitle()}</h3>
+          <h3 className="text-sm font-medium text-foreground">
+            {getNodeTitle()}
+          </h3>
         </div>
-        <Button aria-label="Close inspector" variant="ghost" size="icon-sm" onClick={onClose}>
+        <Button
+          aria-label="Close inspector"
+          variant="ghost"
+          size="icon-sm"
+          onClick={onClose}
+        >
           <X className="size-4" />
         </Button>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">{renderPanelContent()}</div>
-
     </aside>
   );
 }

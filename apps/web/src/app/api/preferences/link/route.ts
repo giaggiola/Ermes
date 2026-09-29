@@ -1,7 +1,7 @@
 import { deliveryCredentials } from "@ermes/db";
 import { createHash } from "node:crypto";
 
-import { NextResponse, type NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { Resend } from "resend";
 
 import {
@@ -17,27 +17,33 @@ import { enforcePublicRateLimit } from "@/lib/public-security";
 export const dynamic = "force-dynamic";
 
 const genericResponse = {
-  message: "If that address is subscribed, a secure preferences link will arrive shortly.",
+  message:
+    "If that address is subscribed, a secure preferences link will arrive shortly.",
   success: true,
 };
 
 export async function POST(request: NextRequest) {
   const body = await parseBody(request);
-  const email = typeof body.email === "string" ? normalizeEmail(body.email) : "";
+  const email =
+    typeof body.email === "string" ? normalizeEmail(body.email) : "";
   if (!email || !isValidEmail(email)) {
-    return redirectOrJson(request, { ...genericResponse, status: "link-sent" }, "/preferences");
+    return redirectOrJson(
+      request,
+      { ...genericResponse, status: "link-sent" },
+      "/preferences",
+    );
   }
 
-  const rateLimited = await enforcePublicRateLimit(request, "preference-link", email);
+  const rateLimited = await enforcePublicRateLimit(
+    request,
+    "preference-link",
+    email,
+  );
   if (rateLimited) return rateLimited;
   const service = getMessagingService();
   const subscriber = (await service.listEmailSubscribers({ email }))[0];
   const delivery = await deliveryCredentials().catch(() => null);
-  if (
-    subscriber &&
-    process.env.PREFERENCE_TOKEN_SECRET &&
-    delivery
-  ) {
+  if (subscriber && process.env.PREFERENCE_TOKEN_SECRET && delivery) {
     const runtime = await service.getRuntimeSettings();
     const token = createPreferenceToken({
       email,
@@ -47,7 +53,10 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.APP_URL ?? "http://localhost:3025";
     const url = `${baseUrl}/preferences?token=${encodeURIComponent(token)}`;
     const hour = Math.floor(Date.now() / (60 * 60 * 1000));
-    const targetHash = createHash("sha256").update(email).digest("hex").slice(0, 24);
+    const targetHash = createHash("sha256")
+      .update(email)
+      .digest("hex")
+      .slice(0, 24);
     const senderName = runtime.emailSenderName;
     const senderEmail = runtime.emailFrom;
     await new Resend(delivery.apiKey).emails
@@ -62,5 +71,9 @@ export async function POST(request: NextRequest) {
       )
       .catch(() => undefined);
   }
-  return redirectOrJson(request, { ...genericResponse, status: "link-sent" }, "/preferences");
+  return redirectOrJson(
+    request,
+    { ...genericResponse, status: "link-sent" },
+    "/preferences",
+  );
 }

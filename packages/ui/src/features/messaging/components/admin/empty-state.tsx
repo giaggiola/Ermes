@@ -3,7 +3,11 @@ import { AlertTriangle, LoaderCircle, RefreshCw } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import { MessagingAdminError } from "../../admin-api";
 
-export function EmptyState({ message = "No records yet." }: { message?: string }) {
+export function EmptyState({
+  message = "No records yet.",
+}: {
+  message?: string;
+}) {
   return (
     <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
       {message}
@@ -11,7 +15,11 @@ export function EmptyState({ message = "No records yet." }: { message?: string }
   );
 }
 
-export function LoadingState({ label = "Loading messaging data" }: { label?: string }) {
+export function LoadingState({
+  label = "Loading messaging data",
+}: {
+  label?: string;
+}) {
   return (
     <div
       aria-live="polite"
@@ -33,12 +41,9 @@ export function ErrorState({
   message?: string;
   onRetry?: () => void;
 }) {
-  const adminError =
-    error instanceof MessagingAdminError ? error : null;
+  const adminError = error instanceof MessagingAdminError ? error : null;
   const description =
-    message ??
-    error?.message ??
-    "Messaging data could not be loaded.";
+    message ?? error?.message ?? "Messaging data could not be loaded.";
   const title =
     adminError?.status === 429
       ? "Messaging is rate limited"

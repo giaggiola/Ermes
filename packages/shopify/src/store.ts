@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
-import { getPool, getMessagingService } from "@ermes/db";
+import { getPool } from "@ermes/db";
 import {
   commerceEventEnvelopeSchema,
   type CommerceEventEnvelope,

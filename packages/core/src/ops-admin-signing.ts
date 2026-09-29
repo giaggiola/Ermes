@@ -18,7 +18,9 @@ export function createOpsAdminSignature(input: OpsAdminSignatureInput): string {
   return `v1=${digest}`;
 }
 
-export function canonicalOpsAdminRequest(input: OpsAdminSignatureInput): string {
+export function canonicalOpsAdminRequest(
+  input: OpsAdminSignatureInput,
+): string {
   const bodyHash = createHash("sha256").update(input.body).digest("hex");
   return [
     "v1",

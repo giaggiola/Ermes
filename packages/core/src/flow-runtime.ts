@@ -239,13 +239,11 @@ export function simulateFlowSteps(
     if (step.type === "email") {
       result.push({
         path,
-        skip_if_event_types_since_start:
-          step.skip_if_event_types_since_start,
+        skip_if_event_types_since_start: step.skip_if_event_types_since_start,
         skip_if_event_types_since_start_order_scoped:
           step.skip_if_event_types_since_start_order_scoped,
         skip_recently_emailed: step.skip_recently_emailed,
-        skip_recently_emailed_hours:
-          step.skip_recently_emailed_hours,
+        skip_recently_emailed_hours: step.skip_recently_emailed_hours,
         step_status: step.step_status ?? "live",
         template_id: step.template_id,
         type: step.type,
@@ -297,10 +295,7 @@ export function validateFlowSteps(steps: FlowStep[]): FlowValidationReport {
         if (!step.code_prefix?.trim()) {
           errors.push(`Discount step ${path} needs a code prefix`);
         }
-        if (
-          !Number.isFinite(step.discount_value) ||
-          step.discount_value <= 0
-        ) {
+        if (!Number.isFinite(step.discount_value) || step.discount_value <= 0) {
           errors.push(`Discount step ${path} needs a positive value`);
         }
       }

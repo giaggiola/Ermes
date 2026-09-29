@@ -31,11 +31,9 @@ test(
     const db = getDb();
     const service = new MessagingService(db);
     const email = `opaque-link-${Date.now()}@example.com`;
-    const link = await service.createEmailPreferenceLink(
-      email,
-      "unsubscribe",
-      { expiresInSeconds: 60 },
-    );
+    const link = await service.createEmailPreferenceLink(email, "unsubscribe", {
+      expiresInSeconds: 60,
+    });
 
     assert.match(link.token, /^[A-Za-z0-9_-]{32}$/);
     assert.equal(link.token.includes(email), false);
@@ -77,19 +75,19 @@ test(
     const senderEmail = `sender-${Date.now()}@example.com`;
     await service.updateRuntimeSettings({
       emailFrom: senderEmail,
-      emailLogoUrl: "https://cdn.example.com/eilish-email-logo.png",
+      emailLogoUrl: "https://cdn.example.com/store-email-logo.png",
       emailSenderName: "Messaging Test",
     });
     const runtime = await service.getRuntimeSettings();
     assert.equal(runtime.emailFrom, senderEmail);
     assert.equal(
       runtime.emailLogoUrl,
-      "https://cdn.example.com/eilish-email-logo.png",
+      "https://cdn.example.com/store-email-logo.png",
     );
     assert.equal(runtime.emailSenderName, "Messaging Test");
     assert.equal(runtime.source, "database");
     assert.deepEqual(await service.getEmailTemplateBrandContext(runtime), {
-      email_logo_url: "https://cdn.example.com/eilish-email-logo.png",
+      email_logo_url: "https://cdn.example.com/store-email-logo.png",
       store_name: "Messaging Test",
       store_url: process.env.STOREFRONT_URL ?? "https://example.com",
     });
@@ -167,10 +165,7 @@ test(
       ),
     );
     assert.equal(runAttempts.filter((attempt) => attempt.created).length, 1);
-    assert.equal(
-      new Set(runAttempts.map((attempt) => attempt.run.id)).size,
-      1,
-    );
+    assert.equal(new Set(runAttempts.map((attempt) => attempt.run.id)).size, 1);
     assert.deepEqual(runAttempts[0].run.steps_snapshot, [
       { type: "email", template_id: templateId },
     ]);
@@ -222,10 +217,7 @@ test(
         }),
       ),
     );
-    assert.equal(
-      smartSendingClaims.filter((claim) => claim.allowed).length,
-      1,
-    );
+    assert.equal(smartSendingClaims.filter((claim) => claim.allowed).length, 1);
     assert.equal(
       (
         await service.claimMarketingSendWindow({
@@ -305,9 +297,9 @@ test(
       false,
     );
     assert.equal(
-      (
-        await service.listDueScheduledEmailCampaigns(scheduledAt)
-      ).some((candidate) => candidate.id === campaign.id),
+      (await service.listDueScheduledEmailCampaigns(scheduledAt)).some(
+        (candidate) => candidate.id === campaign.id,
+      ),
       true,
     );
     await service.updateEmailCampaigns({
@@ -496,10 +488,7 @@ test(
       (await service.retrieveSignupForm(formId)).draft_version_id,
       form.draft_version_id,
     );
-    await service.deleteSignupFormVersion(
-      formId,
-      String(candidateSnapshot.id),
-    );
+    await service.deleteSignupFormVersion(formId, String(candidateSnapshot.id));
 
     await service.updateSignupForms({
       document: {
@@ -555,7 +544,9 @@ test(
     );
     assert.equal(deletion.deleted, true);
     assert.deepEqual(
-      (await service.listSignupFormVersions(formId)).map((version) => version.id),
+      (await service.listSignupFormVersions(formId)).map(
+        (version) => version.id,
+      ),
       [republished.id],
     );
   },
@@ -573,8 +564,7 @@ test(
         10 * 365 * 24 * 60 * 60 * 1000 +
         Math.floor(Math.random() * 1_000_000_000),
     );
-    const at = (seconds: number) =>
-      new Date(base.getTime() + seconds * 1000);
+    const at = (seconds: number) => new Date(base.getTime() + seconds * 1000);
     const gmail = `analytics-${suffix}@gmail.com`;
     const outlook = `analytics-${suffix}@outlook.com`;
     const messageOne = `analytics_resend_one_${suffix}`;
@@ -690,19 +680,16 @@ test(
       unsubscribed: 1,
     });
     assert.equal(analytics.daily.length, 1);
-    assert.deepEqual(
-      analytics.daily[0],
-      {
-        bounced: 1,
-        clicked: 1,
-        complained: 1,
-        date: analytics.daily[0].date,
-        delivered: 2,
-        opened: 1,
-        sent: 3,
-        unsubscribed: 1,
-      },
-    );
+    assert.deepEqual(analytics.daily[0], {
+      bounced: 1,
+      clicked: 1,
+      complained: 1,
+      date: analytics.daily[0].date,
+      delivered: 2,
+      opened: 1,
+      sent: 3,
+      unsubscribed: 1,
+    });
 
     const gmailMetrics = analytics.domains.find(
       (row) => row.domain === "gmail.com",
@@ -845,12 +832,21 @@ test(
     assert.equal(first.created_flow_ids.includes(welcomeFlowId), false);
     assert.equal(first.created_template_ids.includes(welcomeTemplateId), false);
     assert.equal(first.existing_flow_ids.includes(welcomeFlowId), false);
-    assert.equal(first.existing_template_ids.includes(welcomeTemplateId), false);
+    assert.equal(
+      first.existing_template_ids.includes(welcomeTemplateId),
+      false,
+    );
 
     const catalogue = await service.getStandardFlowRecipeCatalogue();
     assert.equal(catalogue.length, 17);
-    assert.equal(catalogue.every((recipe) => recipe.flow_installed), true);
-    assert.equal(catalogue.every((recipe) => recipe.template_installed), true);
+    assert.equal(
+      catalogue.every((recipe) => recipe.flow_installed),
+      true,
+    );
+    assert.equal(
+      catalogue.every((recipe) => recipe.template_installed),
+      true,
+    );
 
     const installedFlows = await Promise.all(
       catalogue.map((recipe) => service.retrieveEmailFlow(recipe.flow_id)),
@@ -859,12 +855,10 @@ test(
       const recipe = catalogue[index];
       assert.equal(flow.status, "draft");
       assert.equal(flow.message_kind, recipe.message_kind);
-      const emailSteps = (
-        flow.steps as Array<Record<string, unknown>>
-      ).filter((step) => step.type === "email");
-      assert.ok(
-        emailSteps.some((step) => step.step_status === "disabled"),
+      const emailSteps = (flow.steps as Array<Record<string, unknown>>).filter(
+        (step) => step.type === "email",
       );
+      assert.ok(emailSteps.some((step) => step.step_status === "disabled"));
       if (flow.message_kind === "marketing" && recipe.key !== "welcome") {
         assert.ok(
           emailSteps.every(
@@ -922,10 +916,13 @@ test(
 
     const versionCountsBefore = new Map(
       await Promise.all(
-        catalogue.map(async (recipe) => [
-          recipe.flow_id,
-          (await service.listEmailFlowVersions(recipe.flow_id)).length,
-        ] as const),
+        catalogue.map(
+          async (recipe) =>
+            [
+              recipe.flow_id,
+              (await service.listEmailFlowVersions(recipe.flow_id)).length,
+            ] as const,
+        ),
       ),
     );
     const second = await service.installStandardFlowDrafts();
@@ -952,10 +949,13 @@ test(
 
     const versionCountsAfterRepair = new Map(
       await Promise.all(
-        catalogue.map(async (recipe) => [
-          recipe.flow_id,
-          (await service.listEmailFlowVersions(recipe.flow_id)).length,
-        ] as const),
+        catalogue.map(
+          async (recipe) =>
+            [
+              recipe.flow_id,
+              (await service.listEmailFlowVersions(recipe.flow_id)).length,
+            ] as const,
+        ),
       ),
     );
     const third = await service.installStandardFlowDrafts();

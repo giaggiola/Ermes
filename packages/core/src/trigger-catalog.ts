@@ -12,11 +12,7 @@ import type { MessageKind } from "./events.js";
  */
 
 export type TriggerSource =
-  | "newsletter"
-  | "order"
-  | "product"
-  | "customer"
-  | "referral";
+  "newsletter" | "order" | "product" | "customer" | "referral";
 
 export interface TriggerDefinition {
   /** Canonical `trigger_event` persisted on a flow (matches getActiveFlowsForEvent). */
@@ -48,7 +44,8 @@ export const TRIGGER_CATALOG: TriggerDefinition[] = [
   {
     value: "newsletter.subscribed",
     label: "Subscribed to Newsletter",
-    description: "When someone subscribes to the newsletter or is added to the list.",
+    description:
+      "When someone subscribes to the newsletter or is added to the list.",
     source: "newsletter",
     messageKind: "marketing",
     recommended: true,
@@ -56,7 +53,8 @@ export const TRIGGER_CATALOG: TriggerDefinition[] = [
   {
     value: "order.placed",
     label: "Placed Order",
-    description: "When a customer completes an order. Use for thank-yous and post-purchase.",
+    description:
+      "When a customer completes an order. Use for thank-yous and post-purchase.",
     source: "order",
     messageKind: "transactional",
     recommended: true,
@@ -64,7 +62,8 @@ export const TRIGGER_CATALOG: TriggerDefinition[] = [
   {
     value: "cart.abandoned",
     label: "Abandoned Cart",
-    description: "When a known shopper leaves a cart before entering checkout details.",
+    description:
+      "When a known shopper leaves a cart before entering checkout details.",
     source: "order",
     messageKind: "marketing",
     timed: true,
@@ -73,7 +72,8 @@ export const TRIGGER_CATALOG: TriggerDefinition[] = [
   {
     value: "checkout.abandoned",
     label: "Abandoned Checkout",
-    description: "When a shopper enters checkout details but does not place the order.",
+    description:
+      "When a shopper enters checkout details but does not place the order.",
     source: "order",
     messageKind: "marketing",
     timed: true,
@@ -132,7 +132,8 @@ export const TRIGGER_CATALOG: TriggerDefinition[] = [
   {
     value: "product.price-drop",
     label: "Price Drop",
-    description: "When a watched product's price drops below the saved reference price.",
+    description:
+      "When a watched product's price drops below the saved reference price.",
     source: "product",
     messageKind: "marketing",
   },
@@ -147,34 +148,40 @@ export const TRIGGER_CATALOG: TriggerDefinition[] = [
   {
     value: "customer.inactive",
     label: "Customer Inactive",
-    description: "When a customer has been inactive for a while. Use for win-back flows.",
+    description:
+      "When a customer has been inactive for a while. Use for win-back flows.",
     source: "customer",
     messageKind: "marketing",
   },
   {
     value: "referral.invitation_ready",
     label: "Referral Invitation Ready",
-    description: "When an eligible delivered Shopify order is ready for a private invitation.",
+    description:
+      "When an eligible delivered Shopify order is ready for a private invitation.",
     source: "referral",
     messageKind: "marketing",
   },
   {
     value: "referral.invitation_cancelled",
     label: "Referral Invitation Cancelled",
-    description: "When an invitation must be suppressed after its source order changes.",
+    description:
+      "When an invitation must be suppressed after its source order changes.",
     source: "referral",
     messageKind: "marketing",
   },
   {
     value: "referral.reward_issued",
     label: "Referral Reward Issued",
-    description: "When a referred order clears review and its advocate reward is ready.",
+    description:
+      "When a referred order clears review and its advocate reward is ready.",
     source: "referral",
     messageKind: "transactional",
   },
 ];
 
-const triggerIndex = new Map(TRIGGER_CATALOG.map((trigger) => [trigger.value, trigger]));
+const triggerIndex = new Map(
+  TRIGGER_CATALOG.map((trigger) => [trigger.value, trigger]),
+);
 
 /** Look up a trigger definition by its canonical value. */
 export function triggerByValue(value: string): TriggerDefinition | undefined {

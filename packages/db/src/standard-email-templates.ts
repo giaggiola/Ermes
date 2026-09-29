@@ -50,7 +50,7 @@ const legacyTemplateUpgrades: ReadonlyArray<{
 ];
 
 // Hashes of the last shipped built-in HTML. They let us improve untouched
-// Eilish templates in place without overwriting any studio edits.
+// built-in templates in place without overwriting merchant edits.
 const previousBuiltInHtmlHashes: Readonly<Record<string, string>> = {
   tpl_placeholder_abandoned_cart_v1:
     "6900636fbad5f8e841fbd968fa3e7eb78690ae1dc61a6be553ea7dad85a7a2bb",
@@ -88,7 +88,7 @@ const previousBuiltInHtmlHashes: Readonly<Record<string, string>> = {
 
 // Hashes of the built-in HTML immediately before global email branding was
 // added. Keep these separate from the older upgrade hashes so either shipped
-// built-in revision can move forward without touching studio-authored HTML.
+// built-in revision can move forward without touching merchant-authored HTML.
 const preBrandingBuiltInHtmlHashes: Readonly<Record<string, string>> = {
   tpl_eilish_cart_price_drop_v1:
     "329d656931aa4646b1e8626ecc293a0bc6e818616d645b12b71cb58fb603cf8c",
@@ -141,8 +141,7 @@ function isPreviousUntouchedBuiltIn(template: EmailTemplateRecord) {
 
 function isUntouchedLegacyPlaceholder(template: EmailTemplateRecord) {
   const name = typeof template.name === "string" ? template.name : "";
-  const subject =
-    typeof template.subject === "string" ? template.subject : "";
+  const subject = typeof template.subject === "string" ? template.subject : "";
   const html =
     typeof template.html_content === "string" ? template.html_content : "";
   const text =

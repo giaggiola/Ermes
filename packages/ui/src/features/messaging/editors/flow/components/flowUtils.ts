@@ -27,7 +27,10 @@ export interface FlowStep {
   utm_campaign?: string;
   ab_test_enabled?: boolean;
   ab_test_flag?: string;
-  ab_variants?: Record<string, { template_id: string; subject_override?: string }>;
+  ab_variants?: Record<
+    string,
+    { template_id: string; subject_override?: string }
+  >;
   // Delay step fields
   duration?: number;
   unit?: "minutes" | "hours" | "days";
@@ -58,7 +61,10 @@ let nodeIdCounter = 0;
 const getUniqueNodeId = (prefix: string) => `${prefix}_${nodeIdCounter++}`;
 
 // Convert JSON steps to React Flow nodes and edges (supports branching)
-export function stepsToFlow(triggerEvent: string, steps: FlowStep[]): { nodes: Node[]; edges: Edge[] } {
+export function stepsToFlow(
+  triggerEvent: string,
+  steps: FlowStep[],
+): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
   nodeIdCounter = 0;
@@ -102,7 +108,12 @@ export function stepsToFlow(triggerEvent: string, steps: FlowStep[]): { nodes: N
         sourceHandle: sourceHandle,
         type: "smoothstep",
         animated: true,
-        style: sourceHandle === "false" ? { stroke: "#e11d48" } : sourceHandle === "true" ? { stroke: "#16a34a" } : undefined,
+        style:
+          sourceHandle === "false"
+            ? { stroke: "#e11d48" }
+            : sourceHandle === "true"
+              ? { stroke: "#16a34a" }
+              : undefined,
       };
       edges.push(edge);
 
@@ -112,18 +123,33 @@ export function stepsToFlow(triggerEvent: string, steps: FlowStep[]): { nodes: N
       currentY += 150;
 
       // Handle condition branches
-      if (step.type === "condition" && (step.true_branch?.length || step.false_branch?.length)) {
+      if (
+        step.type === "condition" &&
+        (step.true_branch?.length || step.false_branch?.length)
+      ) {
         let maxBranchY = currentY;
 
         // Process true branch (to the left)
         if (step.true_branch && step.true_branch.length > 0) {
-          const trueBranchResult = processSteps(step.true_branch, nodeId, "true", currentX - 200, currentY);
+          const trueBranchResult = processSteps(
+            step.true_branch,
+            nodeId,
+            "true",
+            currentX - 200,
+            currentY,
+          );
           maxBranchY = Math.max(maxBranchY, trueBranchResult.maxY);
         }
 
         // Process false branch (to the right)
         if (step.false_branch && step.false_branch.length > 0) {
-          const falseBranchResult = processSteps(step.false_branch, nodeId, "false", currentX + 200, currentY);
+          const falseBranchResult = processSteps(
+            step.false_branch,
+            nodeId,
+            "false",
+            currentX + 200,
+            currentY,
+          );
           maxBranchY = Math.max(maxBranchY, falseBranchResult.maxY);
         }
 
@@ -157,17 +183,20 @@ export function stepsToFlow(triggerEvent: string, steps: FlowStep[]): { nodes: N
   return { nodes, edges };
 }
 
-
-function normalizeConditionStep(step: FlowStep): { match: "all" | "any"; conditions: FlowConditionClause[] } {
-  const conditions = Array.isArray(step.conditions) && step.conditions.length > 0
-    ? step.conditions
-    : [
-        {
-          field: step.field || "",
-          operator: step.operator || "equals",
-          value: step.value || "",
-        },
-      ];
+function normalizeConditionStep(step: FlowStep): {
+  match: "all" | "any";
+  conditions: FlowConditionClause[];
+} {
+  const conditions =
+    Array.isArray(step.conditions) && step.conditions.length > 0
+      ? step.conditions
+      : [
+          {
+            field: step.field || "",
+            operator: step.operator || "equals",
+            value: step.value || "",
+          },
+        ];
 
   return {
     match: step.match === "any" ? "any" : "all",
@@ -175,16 +204,20 @@ function normalizeConditionStep(step: FlowStep): { match: "all" | "any"; conditi
   };
 }
 
-function normalizeConditionData(data: Omit<FlowStep, "type">): { match: "all" | "any"; conditions: FlowConditionClause[] } {
-  const conditions = Array.isArray(data.conditions) && data.conditions.length > 0
-    ? data.conditions
-    : [
-        {
-          field: data.field || "",
-          operator: data.operator || "equals",
-          value: data.value || "",
-        },
-      ];
+function normalizeConditionData(data: Omit<FlowStep, "type">): {
+  match: "all" | "any";
+  conditions: FlowConditionClause[];
+} {
+  const conditions =
+    Array.isArray(data.conditions) && data.conditions.length > 0
+      ? data.conditions
+      : [
+          {
+            field: data.field || "",
+            operator: data.operator || "equals",
+            value: data.value || "",
+          },
+        ];
 
   return {
     match: data.match === "any" ? "any" : "all",
@@ -228,7 +261,11 @@ function getNodeDataFromStep(step: FlowStep): Record<string, unknown> {
       };
     case "condition": {
       const group = normalizeConditionStep(step);
-      const first = group.conditions[0] ?? { field: "", operator: "equals", value: "" };
+      const first = group.conditions[0] ?? {
+        field: "",
+        operator: "equals",
+        value: "",
+      };
       return {
         conditions: group.conditions,
         field: first.field,
@@ -253,18 +290,28 @@ function getNodeDataFromStep(step: FlowStep): Record<string, unknown> {
 }
 
 // Convert React Flow nodes and edges back to JSON steps (supports branching)
-export function flowToSteps(nodes: Node[], edges: Edge[]): { triggerEvent: string; steps: FlowStep[] } {
+export function flowToSteps(
+  nodes: Node[],
+  edges: Edge[],
+): { triggerEvent: string; steps: FlowStep[] } {
   const triggerNode = nodes.find((n) => n.type === "trigger");
-  const triggerEvent = (triggerNode?.data as { trigger_event?: string } | undefined)?.trigger_event || "newsletter.subscribed";
+  const triggerEvent =
+    (triggerNode?.data as { trigger_event?: string } | undefined)
+      ?.trigger_event || "newsletter.subscribed";
 
   // Build adjacency map with source handle info
   // Map: sourceNodeId -> { handle: targetNodeId }
-  const adjacencyWithHandles = new Map<string, Map<string | undefined, string>>();
+  const adjacencyWithHandles = new Map<
+    string,
+    Map<string | undefined, string>
+  >();
   edges.forEach((edge) => {
     if (!adjacencyWithHandles.has(edge.source)) {
       adjacencyWithHandles.set(edge.source, new Map());
     }
-    adjacencyWithHandles.get(edge.source)!.set(edge.sourceHandle || undefined, edge.target);
+    adjacencyWithHandles
+      .get(edge.source)!
+      .set(edge.sourceHandle || undefined, edge.target);
   });
 
   // Track visited nodes to avoid infinite loops
@@ -307,7 +354,8 @@ export function flowToSteps(nodes: Node[], edges: Edge[]): { triggerEvent: strin
 
   // Start from trigger's first connected node
   const triggerEdges = adjacencyWithHandles.get(triggerNode?.id || "trigger");
-  const firstNodeId = triggerEdges?.get(undefined) || triggerEdges?.values().next().value;
+  const firstNodeId =
+    triggerEdges?.get(undefined) || triggerEdges?.values().next().value;
 
   const steps = firstNodeId ? buildStepsFrom(firstNodeId) : [];
 
@@ -331,7 +379,11 @@ function nodeToStep(
 
     while (currentId && !visited.has(currentId)) {
       const branchNode = nodes.find((n) => n.id === currentId);
-      if (!branchNode || branchNode.type === "end" || branchNode.type === "trigger") {
+      if (
+        !branchNode ||
+        branchNode.type === "end" ||
+        branchNode.type === "trigger"
+      ) {
         break;
       }
 
@@ -371,8 +423,7 @@ function nodeToStep(
         sender_email_override: data.sender_email_override,
         skip_recently_emailed: data.skip_recently_emailed,
         skip_recently_emailed_hours: data.skip_recently_emailed_hours,
-        skip_if_event_types_since_start:
-          data.skip_if_event_types_since_start,
+        skip_if_event_types_since_start: data.skip_if_event_types_since_start,
         skip_if_event_types_since_start_order_scoped:
           data.skip_if_event_types_since_start_order_scoped,
         enable_utm: data.enable_utm,
@@ -400,7 +451,11 @@ function nodeToStep(
       const trueBranchStart = conditionEdges?.get("true");
       const falseBranchStart = conditionEdges?.get("false");
       const group = normalizeConditionData(data);
-      const first = group.conditions[0] ?? { field: "", operator: "equals", value: "" };
+      const first = group.conditions[0] ?? {
+        field: "",
+        operator: "equals",
+        value: "",
+      };
 
       return {
         step_id: node.id,
@@ -432,7 +487,10 @@ function nodeToStep(
 }
 
 // Create initial nodes for a new flow
-export function createInitialFlow(triggerEvent: string): { nodes: Node[]; edges: Edge[] } {
+export function createInitialFlow(triggerEvent: string): {
+  nodes: Node[];
+  edges: Edge[];
+} {
   return {
     nodes: [
       {

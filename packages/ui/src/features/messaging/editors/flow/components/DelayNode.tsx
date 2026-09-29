@@ -4,7 +4,13 @@ import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { Clock } from "lucide-react";
 
 import { Input } from "../../../../../components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../../components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../../components/ui/select";
 
 export interface DelayNodeData {
   duration: number;
@@ -21,7 +27,11 @@ export function DelayNode({ data, selected }: NodeProps) {
         selected ? "border-primary" : "border-border"
       }`}
     >
-      <Handle type="target" position={Position.Top} className="!size-3 !border-2 !border-background !bg-orange-500" />
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="!size-3 !border-2 !border-background !bg-orange-500"
+      />
 
       <div className="flex items-center gap-2 rounded-t-md border-b border-border bg-muted px-3 py-2">
         <Clock className="size-4 text-orange-500" />
@@ -33,13 +43,21 @@ export function DelayNode({ data, selected }: NodeProps) {
           <Input
             type="number"
             value={nodeData.duration || 1}
-            onChange={(e) => nodeData.onDataChange?.({ duration: parseInt(e.target.value) || 1 })}
+            onChange={(e) =>
+              nodeData.onDataChange?.({
+                duration: parseInt(e.target.value) || 1,
+              })
+            }
             className="w-20"
             min={1}
           />
           <Select
             value={nodeData.unit || "days"}
-            onValueChange={(value) => nodeData.onDataChange?.({ unit: value as "minutes" | "hours" | "days" })}
+            onValueChange={(value) =>
+              nodeData.onDataChange?.({
+                unit: value as "minutes" | "hours" | "days",
+              })
+            }
           >
             <SelectTrigger className="flex-1">
               <SelectValue />
@@ -53,7 +71,11 @@ export function DelayNode({ data, selected }: NodeProps) {
         </div>
       </div>
 
-      <Handle type="source" position={Position.Bottom} className="!size-3 !border-2 !border-background !bg-orange-500" />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        className="!size-3 !border-2 !border-background !bg-orange-500"
+      />
     </div>
   );
 }

@@ -42,21 +42,27 @@ export function evaluateSegmentRules(
               .toLowerCase()
               .includes(String(condition.value ?? "").toLowerCase());
       case "equals":
-        return normalizeComparable(actual) === normalizeComparable(condition.value);
+        return (
+          normalizeComparable(actual) === normalizeComparable(condition.value)
+        );
       case "exists":
         return actual !== undefined && actual !== null && actual !== "";
       case "greater_than":
         return Number(actual) > Number(condition.value);
       case "in":
         return Array.isArray(condition.value)
-          ? condition.value.map(normalizeComparable).includes(normalizeComparable(actual))
+          ? condition.value
+              .map(normalizeComparable)
+              .includes(normalizeComparable(actual))
           : false;
       case "less_than":
         return Number(actual) < Number(condition.value);
       case "not_contains":
         return !evaluate({ ...condition, operator: "contains" });
       case "not_equals":
-        return normalizeComparable(actual) !== normalizeComparable(condition.value);
+        return (
+          normalizeComparable(actual) !== normalizeComparable(condition.value)
+        );
       default:
         return false;
     }

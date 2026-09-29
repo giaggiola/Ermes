@@ -3,7 +3,7 @@ import test from "node:test";
 import { readFileSync, readdirSync } from "node:fs";
 import { createAdminTransport } from "../packages/ui/src/transport.ts";
 
-test("the same UI transport supports standalone Ermes and authenticated Ops routes", async () => {
+test("the same UI transport supports standalone and embedded applications", async () => {
   const calls: string[] = [];
   const fetcher: typeof fetch = async (input, init) => {
     calls.push(String(input));
@@ -14,18 +14,18 @@ test("the same UI transport supports standalone Ermes and authenticated Ops rout
     apiBase: "/api/admin",
     fetch: fetcher,
   });
-  const ops = createAdminTransport({
+  const embedded = createAdminTransport({
     apiBase: "/api/messaging",
     fetch: fetcher,
   });
   await standalone("email-flows");
-  await ops("email-flows");
+  await embedded("email-flows");
   assert.deepEqual(calls, [
     "/api/admin/email-flows",
     "/api/messaging/email-flows",
   ]);
   assert.throws(() =>
-    createAdminTransport({ apiBase: "https://private-ops.invalid" }),
+    createAdminTransport({ apiBase: "https://private-admin.invalid" }),
   );
   assert.throws(() => standalone("../settings"));
 });
@@ -38,7 +38,7 @@ test("shared UI contains no imports from the host app or private services", () =
     assert.doesNotMatch(source, /from\s+["']@\//, String(name));
     assert.doesNotMatch(
       source,
-      /macchitella\.xyz|eilishstudio\.com|seafileApi/,
+      /from\s+["'](?:@ermes\/(?:db|shopify)|node:)|process\.env\./,
       String(name),
     );
   }

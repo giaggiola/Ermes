@@ -189,9 +189,7 @@ try {
   assert.match(configuration, /Replace EVERY https:\/\/ermes.example.com/);
   assert.doesNotMatch(configuration, /synthetic-shopify-secret|client_secret/);
   if (process.env.ERMES_SHOPIFY_FIXTURE === "true") {
-    await page
-      .getByRole("button", { name: "Connect store" })
-      .click();
+    await page.getByRole("button", { name: "Connect store" }).click();
     await expect(
       page.getByRole("heading", { name: "Review your store details." }),
     ).toBeVisible();

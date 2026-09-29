@@ -5,7 +5,12 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "../../../../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../../components/ui/card";
 import { Input } from "../../../../components/ui/input";
 import { Textarea } from "../../../../components/ui/textarea";
 import { adminFetch, jsonBody } from "../../admin-api";
@@ -159,7 +164,9 @@ export default function SegmentsPage() {
       toast.success(selected ? "Segment updated" : "Segment created");
       reset();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Segment save failed");
+      toast.error(
+        error instanceof Error ? error.message : "Segment save failed",
+      );
     }
   }
 

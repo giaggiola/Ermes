@@ -56,8 +56,7 @@ export function getFlowReentryDecision(input: {
   if (input.mode === "after_duration") {
     const duration = Number(input.duration ?? 0);
     const unit = input.unit ?? "days";
-    const multiplier =
-      unit === "hours" ? 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
+    const multiplier = unit === "hours" ? 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
     const thresholdTime = new Date(
       (input.nowMs ?? Date.now()) - duration * multiplier,
     );
@@ -91,8 +90,7 @@ export function resolveFlowMessageKind(
   flowMessageKind: unknown,
   fallback: MessageKind,
 ): MessageKind {
-  return flowMessageKind === "transactional" ||
-    flowMessageKind === "marketing"
+  return flowMessageKind === "transactional" || flowMessageKind === "marketing"
     ? flowMessageKind
     : fallback;
 }

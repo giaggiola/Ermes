@@ -14,7 +14,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ valid: false });
   }
 
-  const subscribers = await getMessagingService().listEmailSubscribers({ email: claims.email });
+  const subscribers = await getMessagingService().listEmailSubscribers({
+    email: claims.email,
+  });
   const subscriber = subscribers[0] ?? null;
 
   return NextResponse.json({
@@ -28,7 +30,10 @@ export async function POST(request: NextRequest) {
     const body = await parseBody(request);
     const token = typeof body.token === "string" ? body.token : "";
     const claims = readToken(token);
-    const marketingEmail = body.marketing_email === "true" || body.marketing_email === true || body.marketing_email === "on";
+    const marketingEmail =
+      body.marketing_email === "true" ||
+      body.marketing_email === true ||
+      body.marketing_email === "on";
 
     if (!claims) {
       return redirectOrJson(

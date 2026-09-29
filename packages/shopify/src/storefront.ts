@@ -1,6 +1,6 @@
 import { randomUUID, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
-import { getMessagingService, getPool, installationRow } from "@ermes/db";
+import { getMessagingService, installationRow } from "@ermes/db";
 import { isDisposableEmail, isValidEmail } from "@ermes/core/validation";
 import { opaqueKey } from "./security.js";
 import { bindCart } from "./recovery.js";

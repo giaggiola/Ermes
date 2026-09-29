@@ -52,7 +52,12 @@ function FlowCanvasInner({
     (changes: Parameters<typeof onNodesChange>[0]) => {
       onNodesChange(changes);
       // Measuring or selecting a node does not change the saved flow.
-      if (!changes.some((change) => change.type !== "dimensions" && change.type !== "select")) return;
+      if (
+        !changes.some(
+          (change) => change.type !== "dimensions" && change.type !== "select",
+        )
+      )
+        return;
       // Defer callback to get updated nodes
       setTimeout(() => {
         setNodes((nds) => {
@@ -119,7 +124,8 @@ function FlowCanvasInner({
     data: {
       ...node.data,
       templates,
-      onDataChange: (updates: Record<string, unknown>) => updateNodeData(node.id, updates),
+      onDataChange: (updates: Record<string, unknown>) =>
+        updateNodeData(node.id, updates),
     },
   }));
 
@@ -163,7 +169,13 @@ function FlowCanvasInner({
           data = { duration: 1, unit: "days" };
           break;
         case "condition":
-          data = { conditions: [{ field: "", operator: "equals", value: "" }], field: "", match: "all", operator: "equals", value: "" };
+          data = {
+            conditions: [{ field: "", operator: "equals", value: "" }],
+            field: "",
+            match: "all",
+            operator: "equals",
+            value: "",
+          };
           break;
         case "discount":
           data = {
@@ -184,7 +196,8 @@ function FlowCanvasInner({
         position,
         data: {
           ...data,
-          onDataChange: (updates: Record<string, unknown>) => updateNodeData(newNode.id, updates),
+          onDataChange: (updates: Record<string, unknown>) =>
+            updateNodeData(newNode.id, updates),
         },
       };
 
@@ -194,7 +207,13 @@ function FlowCanvasInner({
         return newNodes;
       });
     },
-    [screenToFlowPosition, templates, setNodes, onNodesChangeCallback, updateNodeData],
+    [
+      screenToFlowPosition,
+      templates,
+      setNodes,
+      onNodesChangeCallback,
+      updateNodeData,
+    ],
   );
 
   return (
@@ -220,7 +239,12 @@ function FlowCanvasInner({
         }}
         style={{ backgroundColor: "#e5e7eb" }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#9ca3af" />
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={20}
+          size={1}
+          color="#9ca3af"
+        />
         <Controls />
       </ReactFlow>
     </div>

@@ -36,7 +36,9 @@ export interface SendCampaignRecipientJob {
 let boss: PgBoss | undefined;
 let bossStartPromise: Promise<PgBoss> | undefined;
 
-export async function getBoss(connectionString = process.env.DATABASE_URL): Promise<PgBoss> {
+export async function getBoss(
+  connectionString = process.env.DATABASE_URL,
+): Promise<PgBoss> {
   if (!connectionString) {
     throw new Error("DATABASE_URL is required for pg-boss");
   }
@@ -44,7 +46,11 @@ export async function getBoss(connectionString = process.env.DATABASE_URL): Prom
   if (!boss) {
     boss = new PgBoss({ connectionString });
     bossStartPromise = boss.start().then(async (startedBoss) => {
-      await Promise.all(Object.values(queueNames).map((queueName) => startedBoss.createQueue(queueName)));
+      await Promise.all(
+        Object.values(queueNames).map((queueName) =>
+          startedBoss.createQueue(queueName),
+        ),
+      );
       return startedBoss;
     });
   }
@@ -58,11 +64,11 @@ export async function sendJob(
   options: Record<string, unknown> = {},
 ): Promise<string | undefined> {
   const bossInstance = await getBoss();
-  return (await (bossInstance as unknown as { send: (name: string, data: unknown, options?: unknown) => Promise<string> }).send(
-    queueName,
-    data,
-    options,
-  )) as string | undefined;
+  return (await (
+    bossInstance as unknown as {
+      send: (name: string, data: unknown, options?: unknown) => Promise<string>;
+    }
+  ).send(queueName, data, options)) as string | undefined;
 }
 
 export async function stopBoss(): Promise<void> {

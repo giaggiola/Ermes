@@ -29,7 +29,10 @@ export function verifyEilishSignature(input: VerifySignatureInput): boolean {
     return false;
   }
 
-  if (input.maxAgeSeconds !== undefined && isStaleTimestamp(input.timestamp, input.maxAgeSeconds)) {
+  if (
+    input.maxAgeSeconds !== undefined &&
+    isStaleTimestamp(input.timestamp, input.maxAgeSeconds)
+  ) {
     return false;
   }
 
@@ -37,7 +40,11 @@ export function verifyEilishSignature(input: VerifySignatureInput): boolean {
   const actualDigest = parseSignature(input.signature);
   const expectedDigest = parseSignature(expected);
 
-  if (!actualDigest || !expectedDigest || actualDigest.byteLength !== expectedDigest.byteLength) {
+  if (
+    !actualDigest ||
+    !expectedDigest ||
+    actualDigest.byteLength !== expectedDigest.byteLength
+  ) {
     return false;
   }
 

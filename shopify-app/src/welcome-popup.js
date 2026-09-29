@@ -18,7 +18,9 @@ import { createCartRecovery } from "./cart-recovery.mjs";
     try {
       if (supplied) window.sessionStorage.setItem(previewStorageKey, supplied);
       return supplied || window.sessionStorage.getItem(previewStorageKey);
-    } catch { return supplied; }
+    } catch {
+      return supplied;
+    }
   })();
   const previewBanner = (label) => {
     let banner = document.getElementById("ermes-popup-preview-banner");
@@ -26,15 +28,21 @@ import { createCartRecovery } from "./cart-recovery.mjs";
     banner = document.createElement("div");
     banner.id = "ermes-popup-preview-banner";
     banner.setAttribute("role", "status");
-    banner.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:2147483647;background:#172554;color:white;padding:12px 16px;font:14px/1.4 sans-serif;display:flex;gap:16px;align-items:center;justify-content:space-between";
+    banner.style.cssText =
+      "position:fixed;top:0;left:0;right:0;z-index:2147483647;background:#172554;color:white;padding:12px 16px;font:14px/1.4 sans-serif;display:flex;gap:16px;align-items:center;justify-content:space-between";
     const text = document.createElement("span");
     text.textContent = label;
     const exit = document.createElement("button");
     exit.type = "button";
     exit.textContent = "Exit preview";
-    exit.style.cssText = "background:white;color:#172554;border:0;border-radius:4px;padding:8px 12px;cursor:pointer;white-space:nowrap";
+    exit.style.cssText =
+      "background:white;color:#172554;border:0;border-radius:4px;padding:8px 12px;cursor:pointer;white-space:nowrap";
     exit.addEventListener("click", () => {
-      try { window.sessionStorage.removeItem(previewStorageKey); } catch { /* No storage. */ }
+      try {
+        window.sessionStorage.removeItem(previewStorageKey);
+      } catch {
+        /* No storage. */
+      }
       const url = new URL(location.href);
       url.searchParams.delete(previewParam);
       location.replace(url.toString());
@@ -45,14 +53,21 @@ import { createCartRecovery } from "./cart-recovery.mjs";
 
   // Load Shopify's supported consent API; absence still means no forwarding.
   const privacyReady = new Promise((resolve) => {
-    if (window.Shopify?.customerPrivacy || !window.Shopify?.loadFeatures) return resolve();
+    if (window.Shopify?.customerPrivacy || !window.Shopify?.loadFeatures)
+      return resolve();
     const timer = window.setTimeout(resolve, 1500);
     try {
-      window.Shopify.loadFeatures([{ name: "consent-tracking-api", version: "0.1" }], () => {
-        window.clearTimeout(timer);
-        resolve();
-      });
-    } catch { window.clearTimeout(timer); resolve(); }
+      window.Shopify.loadFeatures(
+        [{ name: "consent-tracking-api", version: "0.1" }],
+        () => {
+          window.clearTimeout(timer);
+          resolve();
+        },
+      );
+    } catch {
+      window.clearTimeout(timer);
+      resolve();
+    }
   });
   const cartRecovery = createCartRecovery({ window, document, fetch });
   if (!previewToken) void privacyReady.then(() => cartRecovery.start());
@@ -65,7 +80,9 @@ import { createCartRecovery } from "./cart-recovery.mjs";
 
   const visitorId = () => {
     try {
-      if (window.Shopify?.customerPrivacy?.analyticsProcessingAllowed?.() !== true) {
+      if (
+        window.Shopify?.customerPrivacy?.analyticsProcessingAllowed?.() !== true
+      ) {
         window.__ermesMessagingVisitorId ||= randomId();
         return window.__ermesMessagingVisitorId;
       }
@@ -154,8 +171,7 @@ import { createCartRecovery } from "./cart-recovery.mjs";
         : styles.fontWeight === "medium"
           ? "500"
           : "400",
-    letterSpacing:
-      styles.letterSpacing == null ? "" : px(styles.letterSpacing),
+    letterSpacing: styles.letterSpacing == null ? "" : px(styles.letterSpacing),
     lineHeight: styles.lineHeight || "1.4",
     marginBottom: px(styles.marginBottom ?? fallbackMarginBottom),
     marginTop: px(styles.marginTop ?? 0),
@@ -238,11 +254,9 @@ import { createCartRecovery } from "./cart-recovery.mjs";
         element = document.createElement("input");
         element.autocomplete =
           block.type === "email_input" ? "email" : "given-name";
-        element.name =
-          block.type === "email_input" ? "email" : "first_name";
+        element.name = block.type === "email_input" ? "email" : "first_name";
         element.placeholder =
-          block.text ||
-          (block.type === "email_input" ? "Email" : "First name");
+          block.text || (block.type === "email_input" ? "Email" : "First name");
         element.required = block.type === "email_input";
         element.type = block.type === "email_input" ? "email" : "text";
         applyStyles(element, fieldStyles(styles, theme));
@@ -254,8 +268,7 @@ import { createCartRecovery } from "./cart-recovery.mjs";
         checkbox.name = "consent";
         checkbox.required = true;
         checkbox.type = "checkbox";
-        copy.textContent =
-          block.text || "I agree to receive marketing emails.";
+        copy.textContent = block.text || "I agree to receive marketing emails.";
         element.append(checkbox, copy);
         applyStyles(element, {
           alignItems: "flex-start",
@@ -277,8 +290,7 @@ import { createCartRecovery } from "./cart-recovery.mjs";
         element.textContent = block.text || "Subscribe";
         element.type = "submit";
         applyStyles(element, {
-          background:
-            styles.background || theme.buttonBackground || "#111111",
+          background: styles.background || theme.buttonBackground || "#111111",
           border: "none",
           borderRadius: px(styles.radius ?? theme.buttonRadius ?? 0),
           color: styles.color || theme.buttonColor || "#ffffff",
@@ -288,9 +300,7 @@ import { createCartRecovery } from "./cart-recovery.mjs";
           fontWeight: "600",
           height: "44px",
           letterSpacing:
-            styles.letterSpacing == null
-              ? "0.06em"
-              : px(styles.letterSpacing),
+            styles.letterSpacing == null ? "0.06em" : px(styles.letterSpacing),
           marginBottom: px(styles.marginBottom ?? 0),
           marginTop: px(styles.marginTop ?? 0),
           width: styles.fullWidth === false ? "auto" : "100%",
@@ -332,22 +342,24 @@ import { createCartRecovery } from "./cart-recovery.mjs";
     const step = (signupDocument.steps || []).find(
       (candidate) => candidate.kind === kind,
     );
-    const blocks = step?.blocks || (kind === "already_subscribed"
-      ? [
-          {
-            id: "fallback_already_subscribed_heading",
-            type: "heading",
-            text: "You're already on the list",
-            styles: { align: "center", fontSize: 20, fontWeight: "medium" },
-          },
-          {
-            id: "fallback_already_subscribed_text",
-            type: "text",
-            text: "No need to sign up again — we'll keep you posted.",
-            styles: { align: "center", color: "#666666" },
-          },
-        ]
-      : []);
+    const blocks =
+      step?.blocks ||
+      (kind === "already_subscribed"
+        ? [
+            {
+              id: "fallback_already_subscribed_heading",
+              type: "heading",
+              text: "You're already on the list",
+              styles: { align: "center", fontSize: 20, fontWeight: "medium" },
+            },
+            {
+              id: "fallback_already_subscribed_text",
+              type: "text",
+              text: "No need to sign up again — we'll keep you posted.",
+              styles: { align: "center", color: "#666666" },
+            },
+          ]
+        : []);
     blocks.forEach((block) => {
       const element = renderBlock(block, signupDocument.styles || {});
       if (element) form.append(element);
@@ -392,7 +404,11 @@ import { createCartRecovery } from "./cart-recovery.mjs";
     });
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(previewToken ? error.detail || "Popup preview is unavailable." : "Newsletter signup is unavailable.");
+      throw new Error(
+        previewToken
+          ? error.detail || "Popup preview is unavailable."
+          : "Newsletter signup is unavailable.",
+      );
     }
     const payload = await response.json();
     const form = payload?.form;
@@ -427,7 +443,12 @@ import { createCartRecovery } from "./cart-recovery.mjs";
         visitor: currentVisitorId,
       });
     } catch (error) {
-      if (previewToken) previewBanner(error instanceof Error ? error.message : "Popup preview is unavailable.");
+      if (previewToken)
+        previewBanner(
+          error instanceof Error
+            ? error.message
+            : "Popup preview is unavailable.",
+        );
       console.warn("[Ermes welcome popup]", error);
       return;
     }
@@ -435,7 +456,9 @@ import { createCartRecovery } from "./cart-recovery.mjs";
     const previewMode = Boolean(signupForm.preview);
     const isolatedPreview = designMode || previewMode;
     if (previewMode) {
-      previewBanner(`Popup preview: ${signupForm.preview.name}. Popup analytics and subscriptions are off.`);
+      previewBanner(
+        `Popup preview: ${signupForm.preview.name}. Popup analytics and subscriptions are off.`,
+      );
       const cleanUrl = new URL(location.href);
       cleanUrl.searchParams.delete(previewParam);
       window.history.replaceState(window.history.state, "", cleanUrl);
@@ -470,40 +493,53 @@ import { createCartRecovery } from "./cart-recovery.mjs";
     analyticsContext.impression_id = viewEventId;
     const analyticsAllowed = () => {
       try {
-        return window.Shopify?.customerPrivacy?.analyticsProcessingAllowed?.() === true;
-      } catch { return false; }
+        return (
+          window.Shopify?.customerPrivacy?.analyticsProcessingAllowed?.() ===
+          true
+        );
+      } catch {
+        return false;
+      }
     };
     const publish = (eventType, eventId, details = {}) => {
       if (isolatedPreview) return;
       try {
         // Shopify gates its pixel on analytics consent. Publish only after Ermes
         // has accepted the event so the pixel can link it without a second count.
-        Promise.resolve(window.Shopify?.analytics?.publish?.("ermes:signup_form", {
-          event_id: eventId,
-          event_type: eventType,
-          form_id: signupForm.id,
-          visitor_id: currentVisitorId,
-          device: currentDevice,
-          impression_id: viewEventId,
-          details,
-        })).catch(() => undefined);
-      } catch { /* Analytics must never interrupt subscription or dismissal. */ }
+        Promise.resolve(
+          window.Shopify?.analytics?.publish?.("ermes:signup_form", {
+            event_id: eventId,
+            event_type: eventType,
+            form_id: signupForm.id,
+            visitor_id: currentVisitorId,
+            device: currentDevice,
+            impression_id: viewEventId,
+            details,
+          }),
+        ).catch(() => undefined);
+      } catch {
+        /* Analytics must never interrupt subscription or dismissal. */
+      }
     };
     const track = (eventType, eventId, details = {}) =>
-      isolatedPreview ? Promise.resolve() : fetch(analyticsEndpoint, {
-        body: JSON.stringify({
-          ...analyticsContext,
-          analytics_allowed: analyticsAllowed(),
-          details,
-          event_id: eventId,
-          event_type: eventType,
-        }),
-        headers: { "content-type": "application/json" },
-        keepalive: true,
-        method: "POST",
-      }).then((response) => {
-        if (response.ok) publish(eventType, eventId, details);
-      }).catch(() => undefined);
+      isolatedPreview
+        ? Promise.resolve()
+        : fetch(analyticsEndpoint, {
+            body: JSON.stringify({
+              ...analyticsContext,
+              analytics_allowed: analyticsAllowed(),
+              details,
+              event_id: eventId,
+              event_type: eventType,
+            }),
+            headers: { "content-type": "application/json" },
+            keepalive: true,
+            method: "POST",
+          })
+            .then((response) => {
+              if (response.ok) publish(eventType, eventId, details);
+            })
+            .catch(() => undefined);
 
     if (
       !isolatedPreview &&
@@ -524,15 +560,10 @@ import { createCartRecovery } from "./cart-recovery.mjs";
     if (
       !isolatedPreview &&
       ((includedPaths.length &&
-        !includedPaths.some((path) =>
-          location.pathname.startsWith(path),
-        )) ||
-        excludedPaths.some((path) =>
-          location.pathname.startsWith(path),
-        ) ||
+        !includedPaths.some((path) => location.pathname.startsWith(path))) ||
+        excludedPaths.some((path) => location.pathname.startsWith(path)) ||
         !devices.includes(currentDevice) ||
-        (targeting.hide_when_logged_in &&
-          customerLoggedIn))
+        (targeting.hide_when_logged_in && customerLoggedIn))
     ) {
       return;
     }
@@ -545,12 +576,9 @@ import { createCartRecovery } from "./cart-recovery.mjs";
     const popupSession = createPopupSessionState();
     const isPersistentlySuppressed = () =>
       !isolatedPreview &&
-      ((targeting.hide_after_submit !== false &&
-        storedFlag(submittedKey)) ||
-        Math.max(
-          storedUntil(storageKey),
-          storedUntil(closedUntilKey),
-        ) > Date.now());
+      ((targeting.hide_after_submit !== false && storedFlag(submittedKey)) ||
+        Math.max(storedUntil(storageKey), storedUntil(closedUntilKey)) >
+          Date.now());
     if (!popupSession.canOpen(isPersistentlySuppressed())) {
       return;
     }
@@ -582,7 +610,9 @@ import { createCartRecovery } from "./cart-recovery.mjs";
     const closeButtonDevices = Array.isArray(targeting.close_button_devices)
       ? targeting.close_button_devices
       : ["desktop", "mobile"];
-    const outsideDismissDevices = Array.isArray(targeting.dismiss_on_outside_devices)
+    const outsideDismissDevices = Array.isArray(
+      targeting.dismiss_on_outside_devices,
+    )
       ? targeting.dismiss_on_outside_devices
       : ["desktop", "mobile"];
     root.dataset.formType = formType;
@@ -642,10 +672,7 @@ import { createCartRecovery } from "./cart-recovery.mjs";
     honeypot.type = "text";
     form.append(honeypot);
 
-    const cooldownDays = Math.max(
-      0,
-      number(targeting.cooldown_days, 30),
-    );
+    const cooldownDays = Math.max(0, number(targeting.cooldown_days, 30));
     let previousFocus = null;
     let impressionRecorded = false;
     let clickRecorded = false;
@@ -653,7 +680,12 @@ import { createCartRecovery } from "./cart-recovery.mjs";
     const diagnosticsRecorded = new Set();
     const recordDiagnostic = (eventType, details = {}) => {
       const key = `${eventType}:${(details.reasons || []).join(",")}:${details.http_status || ""}`;
-      if (isolatedPreview || !impressionRecorded || diagnosticsRecorded.has(key)) return;
+      if (
+        isolatedPreview ||
+        !impressionRecorded ||
+        diagnosticsRecorded.has(key)
+      )
+        return;
       diagnosticsRecorded.add(key);
       void track(eventType, randomId(), details);
     };
@@ -664,10 +696,7 @@ import { createCartRecovery } from "./cart-recovery.mjs";
     };
 
     const open = () => {
-      if (
-        !root.hidden ||
-        !popupSession.canOpen(isPersistentlySuppressed())
-      ) {
+      if (!root.hidden || !popupSession.canOpen(isPersistentlySuppressed())) {
         return;
       }
       previousFocus = document.activeElement;
@@ -685,7 +714,8 @@ import { createCartRecovery } from "./cart-recovery.mjs";
 
     const close = (remember = true, dismissalEvent = null) => {
       if (root.hidden) return;
-      if (dismissalEvent && !submissionComplete) recordDiagnostic(dismissalEvent);
+      if (dismissalEvent && !submissionComplete)
+        recordDiagnostic(dismissalEvent);
       popupSession.dismiss();
       root.hidden = true;
       if (teaser instanceof HTMLElement) teaser.hidden = true;
@@ -695,14 +725,18 @@ import { createCartRecovery } from "./cart-recovery.mjs";
     };
 
     if (closeButton instanceof HTMLButtonElement) {
-      closeButton.addEventListener("click", () => close(true, "dismissed_close"));
+      closeButton.addEventListener("click", () =>
+        close(true, "dismissed_close"),
+      );
     }
     if (
       formType === "popup" &&
       backdrop instanceof HTMLElement &&
       outsideDismissDevices.includes(currentDevice)
     ) {
-      backdrop.addEventListener("click", () => close(true, "dismissed_backdrop"));
+      backdrop.addEventListener("click", () =>
+        close(true, "dismissed_backdrop"),
+      );
     }
     if (teaserOpen instanceof HTMLButtonElement) {
       teaserOpen.addEventListener("click", open);
@@ -756,7 +790,9 @@ import { createCartRecovery } from "./cart-recovery.mjs";
         return close();
       }
       if (!form.checkValidity()) {
-        recordDiagnostic("validation_failed", { reasons: validationReasons(form) });
+        recordDiagnostic("validation_failed", {
+          reasons: validationReasons(form),
+        });
         form.reportValidity();
         return;
       }
@@ -766,7 +802,10 @@ import { createCartRecovery } from "./cart-recovery.mjs";
       message.textContent = "";
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), 20000);
-      let failure = { reasons: ["network_error"], submission_event_id: submissionEventId };
+      let failure = {
+        reasons: ["network_error"],
+        submission_event_id: submissionEventId,
+      };
       try {
         const recoveryContext = await cartRecovery.signupContext();
         const response = await fetch(subscribeEndpoint, {
@@ -779,7 +818,8 @@ import { createCartRecovery } from "./cart-recovery.mjs";
             device: analyticsContext.device,
             email,
             consent: true,
-            first_name: String(values.get("first_name") || "").trim() || undefined,
+            first_name:
+              String(values.get("first_name") || "").trim() || undefined,
             form_id: signupForm.id,
             form_version_id: analyticsContext.form_version_id,
             page_path: analyticsContext.page_path,
@@ -792,16 +832,33 @@ import { createCartRecovery } from "./cart-recovery.mjs";
         });
         const payload = await response.json().catch(() => ({}));
         if (!response.ok) {
-          failure = { ...failure, reasons: [responseFailure(response.status)], http_status: response.status };
-          throw new Error(typeof payload.detail === "string" ? payload.detail : "Please try again.");
+          failure = {
+            ...failure,
+            reasons: [responseFailure(response.status)],
+            http_status: response.status,
+          };
+          throw new Error(
+            typeof payload.detail === "string"
+              ? payload.detail
+              : "Please try again.",
+          );
         }
         if (payload.success !== true) {
-          failure = { ...failure, reasons: ["invalid_response"], http_status: response.status };
-          throw new Error("We could not confirm your subscription. Please try again.");
+          failure = {
+            ...failure,
+            reasons: ["invalid_response"],
+            http_status: response.status,
+          };
+          throw new Error(
+            "We could not confirm your subscription. Please try again.",
+          );
         }
         submissionComplete = true;
-        if (payload.recovery_identity_token) cartRecovery.remember(payload.recovery_identity_token);
-        publish("submitted", submissionEventId, { already_subscribed: Boolean(payload.already_subscribed) });
+        if (payload.recovery_identity_token)
+          cartRecovery.remember(payload.recovery_identity_token);
+        publish("submitted", submissionEventId, {
+          already_subscribed: Boolean(payload.already_subscribed),
+        });
         renderStep(
           form,
           signupDocument,
@@ -812,11 +869,14 @@ import { createCartRecovery } from "./cart-recovery.mjs";
         rememberFlag(submittedKey);
         window.setTimeout(() => close(false), 3000);
       } catch (error) {
-        if (controller.signal.aborted) failure = { ...failure, reasons: ["timeout"] };
+        if (controller.signal.aborted)
+          failure = { ...failure, reasons: ["timeout"] };
         if (!submissionComplete) recordDiagnostic("submit_failed", failure);
-        message.textContent =
-          controller.signal.aborted ? "The request timed out. Please try again." :
-            error instanceof Error ? error.message : "Please try again.";
+        message.textContent = controller.signal.aborted
+          ? "The request timed out. Please try again."
+          : error instanceof Error
+            ? error.message
+            : "Please try again.";
         if (submit instanceof HTMLButtonElement) submit.disabled = false;
       } finally {
         window.clearTimeout(timeout);
@@ -863,7 +923,8 @@ import { createCartRecovery } from "./cart-recovery.mjs";
       const onScroll = () => {
         const available =
           document.documentElement.scrollHeight - window.innerHeight;
-        const progress = available > 0 ? (window.scrollY / available) * 100 : 100;
+        const progress =
+          available > 0 ? (window.scrollY / available) * 100 : 100;
         if (progress >= threshold) {
           window.removeEventListener("scroll", onScroll);
           markTriggerMet("scroll");

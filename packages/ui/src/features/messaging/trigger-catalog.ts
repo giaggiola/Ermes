@@ -1,33 +1,17 @@
-type MessageKind = "marketing" | "transactional";
+import type {
+  TriggerDefinition,
+  TriggerSource,
+} from "@ermes/core/trigger-catalog";
 
-export type TriggerSource =
-  | "newsletter"
-  | "order"
-  | "product"
-  | "customer"
-  | "referral";
-
-export interface TriggerDefinition {
-  value: string;
-  label: string;
-  description: string;
-  source: TriggerSource;
-  messageKind: MessageKind;
-  timed?: boolean;
-  recommended?: boolean;
-}
-
-export const TRIGGER_SOURCE_LABELS: Record<TriggerSource, string> = {
-  newsletter: "Newsletter & Lists",
-  order: "Orders",
-  product: "Products",
-  customer: "Customers",
-  referral: "Referrals",
-};
+export type {
+  TriggerDefinition,
+  TriggerSource,
+} from "@ermes/core/trigger-catalog";
+export { TRIGGER_SOURCE_LABELS } from "@ermes/core/trigger-catalog";
 
 // This array is populated from Messaging's versioned contract. Keeping the same
 // array identity lets existing editor components import it without maintaining a
-// second catalogue in the Ops bundle.
+// second catalogue in the host application.
 export const TRIGGER_CATALOG: TriggerDefinition[] = [];
 
 export function setTriggerCatalogue(catalogue: TriggerDefinition[]) {

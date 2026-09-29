@@ -11,9 +11,14 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const body = await parseBody(request);
-    const email = typeof body.email === "string" ? normalizeEmail(body.email) : "";
+    const email =
+      typeof body.email === "string" ? normalizeEmail(body.email) : "";
 
-    const rateLimited = await enforcePublicRateLimit(request, "subscribe", email);
+    const rateLimited = await enforcePublicRateLimit(
+      request,
+      "subscribe",
+      email,
+    );
     if (rateLimited) return rateLimited;
 
     return NextResponse.json(

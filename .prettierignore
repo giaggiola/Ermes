@@ -1,0 +1,20 @@
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+dist/
+**/dist/
+coverage/
+artifacts/
+backups/
+*.tsbuildinfo
+package-lock.json
+shopify-app/package-lock.json
+# Preserve generated migrations and byte-exact upgrade fixtures.
+packages/db/drizzle/
+tests/fixtures/legacy-welcome.html
+# Preserve the generated extension bundle and third-party legal notices.
+shopify-app/extensions/welcome-popup/assets/welcome-popup.js
+shopify-app/licenses/
+LICENSE
+THIRD_PARTY_NOTICES.md

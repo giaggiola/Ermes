@@ -8,6 +8,8 @@
     "lib": ["es2022"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,

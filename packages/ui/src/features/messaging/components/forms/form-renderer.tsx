@@ -9,7 +9,13 @@
 import type { CSSProperties, FormEvent, ReactNode } from "react";
 import { useEffect, useState } from "react";
 
-import type { BlockStyles, FormBlock, FormStyles, SignupFormDocument, StepKind } from "../../contracts/signup-form-schema";
+import type {
+  BlockStyles,
+  FormBlock,
+  FormStyles,
+  SignupFormDocument,
+  StepKind,
+} from "../../contracts/signup-form-schema";
 
 // Renders admin-authored HTML, sanitized with DOMPurify. dompurify is imported
 // dynamically so it never runs during SSR (it needs a real DOM); until it loads on the
@@ -45,7 +51,11 @@ export interface FormRendererProps {
   onEmailChange?: (value: string) => void;
   // Called on submit with the captured fields (read from the form via FormData, so it
   // works for both block fields and hand-authored HTML inputs by their `name`).
-  onSubmit?: (values: { email: string; first_name?: string; consent?: boolean }) => void;
+  onSubmit?: (values: {
+    email: string;
+    first_name?: string;
+    consent?: boolean;
+  }) => void;
   submitting?: boolean;
   error?: string | null;
   // Editor hook: wrap each rendered block (e.g. with selection/drag UI). The builder
@@ -71,8 +81,18 @@ const ALREADY_SUBSCRIBED_FALLBACK: FormBlock[] = [
   },
 ];
 
-function textStyle(styles: BlockStyles, theme: FormStyles, fallbackColor: string, fallbackSize: number): CSSProperties {
-  const weight = styles.fontWeight === "bold" ? 700 : styles.fontWeight === "medium" ? 500 : 400;
+function textStyle(
+  styles: BlockStyles,
+  theme: FormStyles,
+  fallbackColor: string,
+  fallbackSize: number,
+): CSSProperties {
+  const weight =
+    styles.fontWeight === "bold"
+      ? 700
+      : styles.fontWeight === "medium"
+        ? 500
+        : 400;
   return {
     textAlign: styles.align ?? "center",
     color: styles.color ?? theme.textColor ?? fallbackColor,
@@ -142,7 +162,12 @@ export function BlockView({
         />
       );
       return styles.href && interactive ? (
-        <a href={styles.href} target="_blank" rel="noreferrer" style={{ display: "block" }}>
+        <a
+          href={styles.href}
+          target="_blank"
+          rel="noreferrer"
+          style={{ display: "block" }}
+        >
           {img}
         </a>
       ) : (
@@ -152,13 +177,32 @@ export function BlockView({
 
     case "heading":
       return (
-        <div style={{ ...textStyle(styles, theme, theme.headingColor ?? theme.textColor ?? "#111111", 18), marginBottom: styles.marginBottom ?? 8 }}>
+        <div
+          style={{
+            ...textStyle(
+              styles,
+              theme,
+              theme.headingColor ?? theme.textColor ?? "#111111",
+              18,
+            ),
+            marginBottom: styles.marginBottom ?? 8,
+          }}
+        >
           {block.text}
         </div>
       );
 
     case "text":
-      return <p style={{ ...textStyle(styles, theme, theme.textColor ?? "#666666", 13), marginBottom: styles.marginBottom ?? 12 }}>{block.text}</p>;
+      return (
+        <p
+          style={{
+            ...textStyle(styles, theme, theme.textColor ?? "#666666", 13),
+            marginBottom: styles.marginBottom ?? 12,
+          }}
+        >
+          {block.text}
+        </p>
+      );
 
     case "email_input":
       return (
@@ -167,7 +211,7 @@ export function BlockView({
           name="email"
           required
           disabled={!interactive || submitting}
-          value={interactive ? email ?? "" : ""}
+          value={interactive ? (email ?? "") : ""}
           onChange={(event) => onEmailChange?.(event.target.value)}
           placeholder={block.text || "Email"}
           style={fieldStyle(styles, theme)}
@@ -201,7 +245,13 @@ export function BlockView({
             lineHeight: 1.4,
           }}
         >
-          <input type="checkbox" name="consent" required disabled={!interactive || submitting} style={{ marginTop: 3 }} />
+          <input
+            type="checkbox"
+            name="consent"
+            required
+            disabled={!interactive || submitting}
+            style={{ marginTop: 3 }}
+          />
           <span>{block.text || "I agree to receive marketing emails."}</span>
         </label>
       );
@@ -213,8 +263,14 @@ export function BlockView({
         <button
           type={interactive ? "submit" : "button"}
           disabled={submitting}
-          onMouseEnter={hover ? (e) => (e.currentTarget.style.background = hover) : undefined}
-          onMouseLeave={hover ? (e) => (e.currentTarget.style.background = bg) : undefined}
+          onMouseEnter={
+            hover
+              ? (e) => (e.currentTarget.style.background = hover)
+              : undefined
+          }
+          onMouseLeave={
+            hover ? (e) => (e.currentTarget.style.background = bg) : undefined
+          }
           style={{
             width: "100%",
             height: 44,
@@ -225,7 +281,10 @@ export function BlockView({
             fontFamily: styles.fontFamily ?? theme.fontFamily,
             fontSize: px(styles.fontSize) ?? 13,
             fontWeight: 600,
-            letterSpacing: styles.letterSpacing != null ? `${styles.letterSpacing}px` : "0.06em",
+            letterSpacing:
+              styles.letterSpacing != null
+                ? `${styles.letterSpacing}px`
+                : "0.06em",
             borderRadius: styles.radius ?? theme.buttonRadius ?? 0,
             marginTop: styles.marginTop ?? 0,
             marginBottom: styles.marginBottom ?? 0,
@@ -238,7 +297,15 @@ export function BlockView({
     }
 
     case "divider":
-      return <hr style={{ border: "none", borderTop: `${styles.borderWidth ?? 1}px solid ${styles.borderColor ?? "#e5e5e5"}`, margin: `${styles.size ?? 12}px 0` }} />;
+      return (
+        <hr
+          style={{
+            border: "none",
+            borderTop: `${styles.borderWidth ?? 1}px solid ${styles.borderColor ?? "#e5e5e5"}`,
+            margin: `${styles.size ?? 12}px 0`,
+          }}
+        />
+      );
 
     case "spacer":
       return <div style={{ height: styles.size ?? 16 }} />;
@@ -264,7 +331,9 @@ export function FormRenderer({
   renderBlock,
 }: FormRendererProps) {
   const current = doc.steps.find((candidate) => candidate.kind === step);
-  const blocks = current?.blocks ?? (step === "already_subscribed" ? ALREADY_SUBSCRIBED_FALLBACK : []);
+  const blocks =
+    current?.blocks ??
+    (step === "already_subscribed" ? ALREADY_SUBSCRIBED_FALLBACK : []);
   const styles = doc.styles ?? {};
   const htmlOptIn = doc.mode === "html" && step === "opt_in";
   const showImage =
@@ -272,9 +341,10 @@ export function FormRenderer({
     !htmlOptIn &&
     Boolean(styles.image_url) &&
     (device === "desktop" || styles.image_on_mobile === true);
-  const responsiveWidth = device === "mobile"
-    ? "min(100%, 21.25rem)"
-    : `min(100%, ${styles.width ?? 480}px)`;
+  const responsiveWidth =
+    device === "mobile"
+      ? "min(100%, 21.25rem)"
+      : `min(100%, ${styles.width ?? 480}px)`;
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -282,16 +352,32 @@ export function FormRenderer({
     const firstName = data.get("first_name");
     onSubmit?.({
       email: String(data.get("email") ?? ""),
-      first_name: typeof firstName === "string" && firstName.trim() ? firstName.trim() : undefined,
+      first_name:
+        typeof firstName === "string" && firstName.trim()
+          ? firstName.trim()
+          : undefined,
       consent: data.get("consent") != null ? true : undefined,
     });
   };
 
   const content = htmlOptIn ? (
     <div style={{ flex: 1 }}>
-      {doc.css ? <style>{doc.css.replace(/<\/style/gi, "<\\/style")}</style> : null}
+      {doc.css ? (
+        <style>{doc.css.replace(/<\/style/gi, "<\\/style")}</style>
+      ) : null}
       <HtmlContent html={doc.html ?? ""} />
-      {error ? <p style={{ color: "#e11d48", fontSize: 13, padding: "0 28px 12px", textAlign: "center" }}>{error}</p> : null}
+      {error ? (
+        <p
+          style={{
+            color: "#e11d48",
+            fontSize: 13,
+            padding: "0 28px 12px",
+            textAlign: "center",
+          }}
+        >
+          {error}
+        </p>
+      ) : null}
     </div>
   ) : (
     <div
@@ -304,15 +390,44 @@ export function FormRenderer({
       }}
     >
       {blocks
-        .filter((block) => !(device === "mobile" ? block.styles?.hideOnMobile : block.styles?.hideOnDesktop))
+        .filter(
+          (block) =>
+            !(device === "mobile"
+              ? block.styles?.hideOnMobile
+              : block.styles?.hideOnDesktop),
+        )
         .map((block) => {
           const node = (
-            <BlockView block={block} theme={styles} interactive={interactive} email={email} onEmailChange={onEmailChange} submitting={submitting} />
+            <BlockView
+              block={block}
+              theme={styles}
+              interactive={interactive}
+              email={email}
+              onEmailChange={onEmailChange}
+              submitting={submitting}
+            />
           );
-          if (renderBlock) return <div key={block.id}>{renderBlock(block, node)}</div>;
-          return <div key={block.id} style={{ display: "contents" }}>{node}</div>;
+          if (renderBlock)
+            return <div key={block.id}>{renderBlock(block, node)}</div>;
+          return (
+            <div key={block.id} style={{ display: "contents" }}>
+              {node}
+            </div>
+          );
         })}
-      {error ? <p style={{ color: "#e11d48", fontSize: 13, marginTop: 8, marginBottom: 0, textAlign: "center" }}>{error}</p> : null}
+      {error ? (
+        <p
+          style={{
+            color: "#e11d48",
+            fontSize: 13,
+            marginTop: 8,
+            marginBottom: 0,
+            textAlign: "center",
+          }}
+        >
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 
@@ -343,7 +458,10 @@ export function FormRenderer({
         />
       ) : null}
       {interactive && step === "opt_in" ? (
-        <form onSubmit={handleSubmit} style={{ display: htmlOptIn ? "block" : "flex", flex: 1 }}>
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: htmlOptIn ? "block" : "flex", flex: 1 }}
+        >
           {content}
         </form>
       ) : (

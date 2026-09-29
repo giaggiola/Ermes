@@ -25,8 +25,7 @@ export const STANDARD_FLOW_RECIPE_KEYS = [
   "win-back-30-days",
 ] as const;
 
-export type StandardFlowRecipeKey =
-  (typeof STANDARD_FLOW_RECIPE_KEYS)[number];
+export type StandardFlowRecipeKey = (typeof STANDARD_FLOW_RECIPE_KEYS)[number];
 
 export type StandardFlowRecipe = {
   description: string;
@@ -62,8 +61,7 @@ function disabledEmail(
     name,
     ...(options.skipIfEventTypesSinceStart
       ? {
-          skip_if_event_types_since_start:
-            options.skipIfEventTypesSinceStart,
+          skip_if_event_types_since_start: options.skipIfEventTypesSinceStart,
         }
       : {}),
     ...(options.orderScopedEventFilters
@@ -98,12 +96,7 @@ function emailRecipe(input: {
     ...recipe,
     flowId: `flow_medusa_${input.key.replaceAll("-", "_")}_v2`,
     steps: [
-      disabledEmail(
-        `${input.key}-email`,
-        input.name,
-        input.template.id,
-        step,
-      ),
+      disabledEmail(`${input.key}-email`, input.name, input.template.id, step),
     ],
     templates: [template],
   };
@@ -411,8 +404,7 @@ export function selectStandardFlowRecipes(
 
   const requested = new Set(keys);
   const unknown = [...requested].filter(
-    (key) =>
-      !STANDARD_FLOW_RECIPE_KEYS.includes(key as StandardFlowRecipeKey),
+    (key) => !STANDARD_FLOW_RECIPE_KEYS.includes(key as StandardFlowRecipeKey),
   );
   if (unknown.length > 0) {
     throw new Error(`Unknown standard flow recipe: ${unknown.join(", ")}`);

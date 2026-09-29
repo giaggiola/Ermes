@@ -19,7 +19,10 @@ function resolveMigrationsFolder(): string {
     resolve(process.cwd(), "packages/db/drizzle"),
     resolve(dirname(fileURLToPath(import.meta.url)), "../drizzle"),
   ].filter((path): path is string => Boolean(path));
-  return candidates.find((path) => existsSync(path)) ?? candidates[candidates.length - 1];
+  return (
+    candidates.find((path) => existsSync(path)) ??
+    candidates[candidates.length - 1]
+  );
 }
 
 // Apply pending migrations under a pg advisory lock so concurrent app boots (web +
@@ -30,11 +33,21 @@ export async function runMigrations(): Promise<void> {
   const client = await pool.connect();
   const db = drizzle(client);
 
-  await client.query("select pg_advisory_lock($1, $2)", [MIGRATION_LOCK_KEY_1, MIGRATION_LOCK_KEY_2]);
+  await client.query("select pg_advisory_lock($1, $2)", [
+    MIGRATION_LOCK_KEY_1,
+    MIGRATION_LOCK_KEY_2,
+  ]);
   try {
     await migrate(db, { migrationsFolder: resolveMigrationsFolder() });
     console.log("[db:migrate] migrations complete");
   } finally {
-    try { await client.query("select pg_advisory_unlock($1, $2)", [MIGRATION_LOCK_KEY_1, MIGRATION_LOCK_KEY_2]); } finally { client.release(); }
+    try {
+      await client.query("select pg_advisory_unlock($1, $2)", [
+        MIGRATION_LOCK_KEY_1,
+        MIGRATION_LOCK_KEY_2,
+      ]);
+    } finally {
+      client.release();
+    }
   }
 }

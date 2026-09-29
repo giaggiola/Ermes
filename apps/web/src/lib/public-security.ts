@@ -3,11 +3,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import { hashRateLimitKey, normalizeEmail } from "@ermes/core";
 import { getMessagingService } from "@ermes/db";
 
-type RateProfile = "impression" | "preference-link" | "subscribe" | "token-mutation" | "watch";
+type RateProfile =
+  "impression" | "preference-link" | "subscribe" | "token-mutation" | "watch";
 
 const profiles: Record<
   RateProfile,
-  { email?: { limit: number; windowSeconds: number }; ip: { limit: number; windowSeconds: number } }
+  {
+    email?: { limit: number; windowSeconds: number };
+    ip: { limit: number; windowSeconds: number };
+  }
 > = {
   impression: { ip: { limit: 120, windowSeconds: 60 * 60 } },
   "preference-link": {
@@ -46,7 +50,10 @@ export async function enforcePublicRateLimitIdentity(
   const secret = process.env.PREFERENCE_TOKEN_SECRET;
   if (!secret) {
     return process.env.NODE_ENV === "production"
-      ? NextResponse.json({ message: "Service temporarily unavailable" }, { status: 503 })
+      ? NextResponse.json(
+          { message: "Service temporarily unavailable" },
+          { status: 503 },
+        )
       : null;
   }
   const service = getMessagingService();

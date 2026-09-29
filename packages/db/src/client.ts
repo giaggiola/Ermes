@@ -7,7 +7,8 @@ let pool: Pool | undefined;
 
 export function getPool(config: PoolConfig = {}): Pool {
   if (!pool) {
-    const connectionString = config.connectionString ?? process.env.DATABASE_URL;
+    const connectionString =
+      config.connectionString ?? process.env.DATABASE_URL;
 
     if (!connectionString) {
       throw new Error("DATABASE_URL is required for Ermes database access");

@@ -12,7 +12,10 @@ export class MessagingAdminError extends Error {
   }
 }
 
-export async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
+export async function adminFetch<T>(
+  path: string,
+  init?: RequestInit,
+): Promise<T> {
   const response = await adminRequest(path, {
     ...init,
     headers: {

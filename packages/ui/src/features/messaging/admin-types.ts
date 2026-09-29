@@ -397,5 +397,8 @@ export interface TemplatePreview {
     subject: string;
     text: string | null;
   };
-  template: Pick<EmailTemplate, "category" | "id" | "is_active" | "name" | "variables">;
+  template: Pick<
+    EmailTemplate,
+    "category" | "id" | "is_active" | "name" | "variables"
+  >;
 }

@@ -21,7 +21,8 @@ export const webEnvSchema = z
 export function parseWebEnv(env: NodeJS.ProcessEnv = process.env) {
   const parsed = webEnvSchema.parse(env);
   if (env.NODE_ENV === "production") {
-    if (!/^[a-f0-9]{64}$/i.test(env.ERMES_ENCRYPTION_KEY ?? "")) throw new Error("ERMES_ENCRYPTION_KEY must be 64 hex characters");
+    if (!/^[a-f0-9]{64}$/i.test(env.ERMES_ENCRYPTION_KEY ?? ""))
+      throw new Error("ERMES_ENCRYPTION_KEY must be 64 hex characters");
     if (!env.APP_URL) throw new Error("APP_URL is required");
     if (!parsed.PREFERENCE_TOKEN_SECRET) {
       throw new Error("PREFERENCE_TOKEN_SECRET is required in production");

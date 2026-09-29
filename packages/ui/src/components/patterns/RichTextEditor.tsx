@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useEditor,
-  EditorContent,
-  type JSONContent,
-} from "@tiptap/react";
+import { useEditor, EditorContent, type JSONContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
@@ -62,7 +58,8 @@ export function RichTextEditor({
     },
     editorProps: {
       attributes: {
-        class: "min-h-[120px] min-w-0 max-w-none break-words p-3 text-sm focus:outline-none",
+        class:
+          "min-h-[120px] min-w-0 max-w-none break-words p-3 text-sm focus:outline-none",
       },
     },
     immediatelyRender: false,
@@ -89,7 +86,11 @@ export function RichTextEditor({
 
   const insertTable = useCallback(() => {
     if (!editor) return;
-    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+    editor
+      .chain()
+      .focus()
+      .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+      .run();
   }, [editor]);
 
   if (!editor) return null;
@@ -121,14 +122,18 @@ export function RichTextEditor({
         </ToolbarButton>
         <div className="mx-1 h-5 w-px bg-border" />
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+          }
           active={editor.isActive("heading", { level: 2 })}
           title="Heading 2"
         >
           <Heading2 className="h-3.5 w-3.5" />
         </ToolbarButton>
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
           active={editor.isActive("heading", { level: 3 })}
           title="Heading 3"
         >
@@ -150,10 +155,18 @@ export function RichTextEditor({
           <ListOrdered className="h-3.5 w-3.5" />
         </ToolbarButton>
         <div className="mx-1 h-5 w-px bg-border" />
-        <ToolbarButton onClick={setLink} active={editor.isActive("link")} title="Link">
+        <ToolbarButton
+          onClick={setLink}
+          active={editor.isActive("link")}
+          title="Link"
+        >
           <LinkIcon className="h-3.5 w-3.5" />
         </ToolbarButton>
-        <ToolbarButton onClick={insertTable} active={false} title="Insert Table">
+        <ToolbarButton
+          onClick={insertTable}
+          active={false}
+          title="Insert Table"
+        >
           <TableIcon className="h-3.5 w-3.5" />
         </ToolbarButton>
         <div className="mx-1 h-5 w-px bg-border" />

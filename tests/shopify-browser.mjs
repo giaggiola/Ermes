@@ -12,9 +12,7 @@ export async function checkShopifyBrowser({
   baseURL,
 }) {
   await page.goto("/onboarding");
-  await page
-    .getByRole("button", { name: "Shopify connection" })
-    .click();
+  await page.getByRole("button", { name: "Shopify connection" }).click();
   await page
     .getByRole("button", { name: "Review store details", exact: true })
     .click();

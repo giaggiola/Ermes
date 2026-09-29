@@ -10,20 +10,24 @@ import { toast } from "sonner";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent } from "../../../../components/ui/card";
 import { Input } from "../../../../components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../components/ui/select";
 import { adminFetch, jsonBody } from "../../admin-api";
-import type {
-  EmailTemplate,
-  TemplatePreview,
-} from "../../admin-types";
-import { EmptyState, ErrorState, LoadingState } from "../../components/admin/empty-state";
+import type { EmailTemplate, TemplatePreview } from "../../admin-types";
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "../../components/admin/empty-state";
 import { PageHeader } from "../../components/admin/page-header";
 import { StatusBadge } from "../../components/admin/status-badge";
 import { useMessagingCompatibility } from "../../contract";
-import {
-  useAdminCreate,
-  useEmailTemplates,
-} from "../../use-admin";
+import { useAdminCreate, useEmailTemplates } from "../../use-admin";
 import { displayTemplateName } from "./template-labels";
 
 const newTemplate = {
@@ -123,7 +127,14 @@ export default function TemplateLibraryPage() {
   }
 
   const categories = useMemo(
-    () => Array.from(new Set((templates.data ?? []).map((template) => template.category).filter((value): value is string => Boolean(value)))).sort(),
+    () =>
+      Array.from(
+        new Set(
+          (templates.data ?? [])
+            .map((template) => template.category)
+            .filter((value): value is string => Boolean(value)),
+        ),
+      ).sort(),
     [templates.data],
   );
   const rows = useMemo(() => {
@@ -131,9 +142,11 @@ export default function TemplateLibraryPage() {
     return (templates.data ?? []).filter((template) => {
       if (category !== "all" && template.category !== category) return false;
       if (!query) return true;
-      return [displayTemplateName(template.name), template.subject, template.category ?? ""].some((value) =>
-        value.toLowerCase().includes(query),
-      );
+      return [
+        displayTemplateName(template.name),
+        template.subject,
+        template.category ?? "",
+      ].some((value) => value.toLowerCase().includes(query));
     });
   }, [category, search, templates.data]);
 
@@ -154,7 +167,10 @@ export default function TemplateLibraryPage() {
       />
 
       {templates.error ? (
-        <ErrorState error={templates.error} onRetry={() => void templates.refetch()} />
+        <ErrorState
+          error={templates.error}
+          onRetry={() => void templates.refetch()}
+        />
       ) : templates.isPending ? (
         <LoadingState label="Loading email templates" />
       ) : (templates.data ?? []).length > 0 ? (
@@ -185,41 +201,56 @@ export default function TemplateLibraryPage() {
           </div>
           {rows.length > 0 ? (
             <div className="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
-          {rows.map((template) => (
-            <Link
-              className="group rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              href={`/messaging/templates/${encodeURIComponent(template.id)}`}
-              key={template.id}
-            >
-              <Card className="h-full cursor-pointer overflow-hidden rounded-lg py-0 transition-colors group-hover:border-foreground/30">
-                <TemplateThumbnail template={template} />
-                <CardContent className="grid gap-3 border-t p-4">
-                  <div className="flex min-w-0 items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <h2 className="truncate text-sm font-semibold group-hover:underline">
-                        {displayTemplateName(template.name)}
-                      </h2>
-                      <p className="mt-1 truncate text-xs text-muted-foreground">
-                        {template.subject}
-                      </p>
-                    </div>
-                    <StatusBadge
-                      label={!template.is_active ? "Disabled" : template.published_version_id ? "Published" : "Draft"}
-                      value={!template.is_active ? "paused" : template.published_version_id ? "active" : "draft"}
-                    />
-                  </div>
-                  <div className="flex min-w-0 items-center justify-between gap-3 text-xs text-muted-foreground">
-                    <span className="capitalize">
-                      {template.category ?? "uncategorized"}
-                    </span>
-                    {template.draft_version_id !== template.published_version_id ? (
-                      <span className="text-amber-600">Changes not published</span>
-                    ) : null}
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+              {rows.map((template) => (
+                <Link
+                  className="group rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  href={`/messaging/templates/${encodeURIComponent(template.id)}`}
+                  key={template.id}
+                >
+                  <Card className="h-full cursor-pointer overflow-hidden rounded-lg py-0 transition-colors group-hover:border-foreground/30">
+                    <TemplateThumbnail template={template} />
+                    <CardContent className="grid gap-3 border-t p-4">
+                      <div className="flex min-w-0 items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h2 className="truncate text-sm font-semibold group-hover:underline">
+                            {displayTemplateName(template.name)}
+                          </h2>
+                          <p className="mt-1 truncate text-xs text-muted-foreground">
+                            {template.subject}
+                          </p>
+                        </div>
+                        <StatusBadge
+                          label={
+                            !template.is_active
+                              ? "Disabled"
+                              : template.published_version_id
+                                ? "Published"
+                                : "Draft"
+                          }
+                          value={
+                            !template.is_active
+                              ? "paused"
+                              : template.published_version_id
+                                ? "active"
+                                : "draft"
+                          }
+                        />
+                      </div>
+                      <div className="flex min-w-0 items-center justify-between gap-3 text-xs text-muted-foreground">
+                        <span className="capitalize">
+                          {template.category ?? "uncategorized"}
+                        </span>
+                        {template.draft_version_id !==
+                        template.published_version_id ? (
+                          <span className="text-amber-600">
+                            Changes not published
+                          </span>
+                        ) : null}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
             </div>
           ) : (
             <Card className="rounded-lg">
@@ -232,9 +263,7 @@ export default function TemplateLibraryPage() {
       ) : (
         <Card className="rounded-lg">
           <CardContent className="grid min-h-72 place-items-center">
-            <EmptyState
-              message="No email templates yet. Create a blank template to get started."
-            />
+            <EmptyState message="No email templates yet. Create a blank template to get started." />
           </CardContent>
         </Card>
       )}

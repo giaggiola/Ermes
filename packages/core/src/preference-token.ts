@@ -91,9 +91,9 @@ export function verifyPreferenceToken(input: {
   }
 
   try {
-    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as Partial<
-      PreferenceTokenClaims
-    >;
+    const parsed = JSON.parse(
+      Buffer.from(payload, "base64url").toString("utf8"),
+    ) as Partial<PreferenceTokenClaims>;
     const now = input.now ?? Math.floor(Date.now() / 1000);
     if (
       parsed.v !== 1 ||
@@ -115,7 +115,9 @@ export function verifyPreferenceToken(input: {
 }
 
 function sign(payload: string, secret: string): string {
-  return createHmac("sha256", secret).update(`preference-token.v1.${payload}`).digest("base64url");
+  return createHmac("sha256", secret)
+    .update(`preference-token.v1.${payload}`)
+    .digest("base64url");
 }
 
 function safeEqual(actual: string, expected: string): boolean {

@@ -50,11 +50,11 @@ provider. A community project you can inspect, extend and run yourself.
 | Consent records, preferences and unsubscribe endpoints   | Available                                                       |
 | Encrypted integration credentials and a sending pause    | Available                                                       |
 | Image uploads and reusable image library                 | Available; requires your Cloudinary account                     |
-| Guided Shopify connection and store import              | Available for an app and store in the same Shopify organisation |
-| Shopify order/customer/product syncing                   | Available; resumable imports and signed webhooks                                                         |
-| Shopify abandoned-checkout ingestion and recovery checks | Available; current consent and purchase checks                                                         |
-| Storefront visitor identification and cart tracking      | Available for identified, consenting shoppers                                                         |
-| Signup form editor and storefront extension              | Available; published popup/flyout forms                                                         |
+| Guided Shopify connection and store import               | Available for an app and store in the same Shopify organisation |
+| Shopify order/customer/product syncing                   | Available; resumable imports and signed webhooks                |
+| Shopify abandoned-checkout ingestion and recovery checks | Available; current consent and purchase checks                  |
+| Storefront visitor identification and cart tracking      | Available for identified, consenting shoppers                   |
+| Signup form editor and storefront extension              | Available; published popup/flyout forms                         |
 | SMS, multiple stores and hosted Ermes accounts           | Not included                                                    |
 
 The preview supports one store and one owner account per installation. If you are
