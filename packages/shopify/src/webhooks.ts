@@ -36,7 +36,7 @@ export const WEBHOOK_TOPICS = new Set([
   "customers/create",
   "customers/update",
   "customers/delete",
-  "customers/email_marketing_consent/update",
+  "customers_email_marketing_consent/update",
   "products/create",
   "products/update",
   "products/delete",
@@ -64,7 +64,23 @@ export async function receiveWebhook(body: Buffer, headers: Headers) {
   if (!eventId || eventId.length > 200)
     throw new Error("Shopify event ID is required");
   if (!WEBHOOK_TOPICS.has(topic)) return { accepted: true, ignored: true };
-  const payload = JSON.parse(body.toString("utf8"));
+  const payload = JSON.parse(
+    body.toString("utf8"),
+    (_key, value, context?: { source?: string }) => {
+      // Shopify IDs are 64-bit integers. Node 22 exposes the original token so
+      // IDs above Number.MAX_SAFE_INTEGER retain every digit after signature verification.
+      if (
+        typeof value === "number" &&
+        Number.isInteger(value) &&
+        !Number.isSafeInteger(value)
+      ) {
+        if (!context?.source || !/^-?\d+$/.test(context.source))
+          throw new Error("Invalid Shopify numeric payload");
+        return context.source;
+      }
+      return value;
+    },
+  );
   if (!payload || typeof payload !== "object" || Array.isArray(payload))
     throw new Error("Invalid Shopify payload");
   const received = new Date(),
@@ -109,7 +125,10 @@ export async function processWebhook(client: ShopifyClient, row: Json) {
   const { topic, payload: p } = row,
     shop = client.credentials.shop;
   const id = p.admin_graphql_api_id || p.id || p.customer_id;
-  if (topic.startsWith("customers/")) {
+  if (
+    topic.startsWith("customers/") ||
+    topic === "customers_email_marketing_consent/update"
+  ) {
     const customerId = gid("Customer", id);
     if (!customerId)
       throw new Error("Shopify customer webhook has no identifier");

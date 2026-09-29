@@ -14,7 +14,7 @@ redirect_urls = ["https://ermes.example.com/onboarding"]
 api_version = "2026-07"
 
 [[webhooks.subscriptions]]
-topics = ["carts/create", "carts/update", "checkouts/create", "checkouts/update", "checkouts/delete", "orders/create", "orders/paid", "orders/updated", "orders/cancelled", "refunds/create", "fulfillments/create", "fulfillments/update", "customers/create", "customers/update", "customers/delete", "customers/email_marketing_consent/update", "products/create", "products/update", "products/delete", "inventory_levels/update", "inventory_levels/connect", "inventory_levels/disconnect", "app/uninstalled"]
+topics = ["carts/create", "carts/update", "checkouts/create", "checkouts/update", "checkouts/delete", "orders/create", "orders/paid", "orders/updated", "orders/cancelled", "refunds/create", "fulfillments/create", "fulfillments/update", "customers/create", "customers/update", "customers/delete", "customers_email_marketing_consent/update", "products/create", "products/update", "products/delete", "inventory_levels/update", "inventory_levels/connect", "inventory_levels/disconnect", "app/uninstalled"]
 uri = "/api/shopify/webhooks"
 
 [app_proxy]

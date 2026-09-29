@@ -21,6 +21,7 @@ import {
   syncProduct,
   syncResourcePage,
   receiveWebhook,
+  processWebhook,
   syncConsent,
   collectConsentChanges,
   storefrontForm,
@@ -649,5 +650,55 @@ test(
       0,
     );
     await assert.rejects(storefrontForm(shop), /Enable Shopify syncing/);
+  },
+);
+
+test(
+  "Shopify consent webhook preserves 64-bit IDs and immediately applies opt-outs",
+  enabled,
+  async () => {
+    // Topic and payload follow Shopify's 2026-07 webhook reference.
+    const email = "large-id-consent@example.com",
+      customerId = "706405506930370084";
+    const body = Buffer.from(
+      '{"customer_id":706405506930370084,"email_address":"large-id-consent@example.com","email_marketing_consent":{"state":"unsubscribed"}}',
+    );
+    const topic = "customers_email_marketing_consent/update";
+    const response = await receiveWebhook(
+      body,
+      new Headers({
+        "x-shopify-shop-domain": shop,
+        "x-shopify-topic": topic,
+        "x-shopify-event-id": "consent-large-id",
+        "x-shopify-hmac-sha256": createHmac("sha256", secret)
+          .update(body)
+          .digest("base64"),
+      }),
+    );
+    assert.equal(response.ignored, undefined);
+    const row = (
+      await query("SELECT * FROM shopify_webhook WHERE topic=$1", [topic])
+    ).rows[0];
+    assert.equal(row.payload.customer_id, customerId);
+    await getMessagingService().subscribeWithStatus(email, { source: "test" });
+    const fake = client((q, v) => {
+      assert.equal(v.id, `gid://shopify/Customer/${customerId}`);
+      return {
+        customer: customer(email, {
+          id: v.id,
+          defaultEmailAddress: {
+            emailAddress: email,
+            marketingState: "UNSUBSCRIBED",
+            marketingUpdatedAt: iso(),
+          },
+        }),
+      };
+    });
+    await processWebhook(fake, row);
+    assert.equal(
+      (await getMessagingService().listEmailSubscribers({ email }))[0]
+        .subscribed,
+      false,
+    );
   },
 );

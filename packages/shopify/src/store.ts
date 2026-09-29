@@ -95,6 +95,7 @@ export const emailOf = (value: unknown) =>
     : null;
 export const gid = (kind: string, value: unknown): string | null => {
   if (typeof value !== "string" && typeof value !== "number") return null;
+  if (typeof value === "number" && !Number.isSafeInteger(value)) return null;
   const text = String(value);
   return /^\d+$/.test(text)
     ? `gid://shopify/${kind}/${text}`
