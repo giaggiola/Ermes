@@ -50,7 +50,7 @@ provider. A community project you can inspect, extend and run yourself.
 | Consent records, preferences and unsubscribe endpoints   | Available                                                       |
 | Encrypted integration credentials and a sending pause    | Available                                                       |
 | Image uploads and reusable image library                 | Available; requires your Cloudinary account                     |
-| Shopify app credential verification                      | Available for an app and store in the same Shopify organisation |
+| Guided Shopify connection and store import              | Available for an app and store in the same Shopify organisation |
 | Shopify order/customer/product syncing                   | Available; resumable imports and signed webhooks                                                         |
 | Shopify abandoned-checkout ingestion and recovery checks | Available; current consent and purchase checks                                                         |
 | Storefront visitor identification and cart tracking      | Available for identified, consenting shoppers                                                         |
@@ -108,18 +108,20 @@ exact browser-facing origin. See [self-hosting](docs/self-hosting.md).
    12 characters. Registration closes automatically once the owner exists.
    Complete this step locally or through your SSH tunnel before exposing a new
    installation publicly.
-2. **Import your store from Shopify, or enter details manually.** Import the store
-   name, URL, timezone and suggested sender, then review before saving. Your logo
-   stays optional; verify the sender address with your email provider.
+2. **Connect Shopify with the guided setup.** Follow the in-page app checklist,
+   copy the supplied settings, and enter your store domain and app credentials.
+   **Connect store** verifies access and imports your store details in one action.
+   Review your sender, then choose **Save and start syncing**. Historical imports
+   never send emails; delivery stays paused. You can also set up manually.
 3. **Connect email delivery.** Verify your sending domain in Resend, then enter
    your API key. Configure the webhook at
    `https://your-ermes-domain/api/resend/webhook` and save its signing secret.
    A local-only installation can explore the UI without these credentials.
-4. **Connect Shopify and start syncing.** Follow the [Shopify guide](docs/shopify.md)
-   to configure your own app, permissions, webhooks and storefront extension.
-   Enter the app's client ID/secret and store domain, verify, then choose **Start
-   Shopify sync**. The app and store must belong to the same Shopify organisation.
-   Historical imports do not start welcome or order flows.
+4. **Enable live events and storefront forms.** Download the ready-made app
+   configuration from setup and follow the [Shopify guide](docs/shopify.md) to
+   publish it with the theme extension. Open Shopify's theme editor from Ermes,
+   enable **Ermes signup forms**, and save. Live callbacks need a public HTTPS
+   Ermes address. Your app and store must belong to the same Shopify organisation.
 5. **Explore with sending paused.** Create templates, organise subscribers and
    save your first flow as a draft. Credentials are encrypted before storage and
    are never displayed again; blank credential fields preserve saved values.
@@ -127,7 +129,7 @@ exact browser-facing origin. See [self-hosting](docs/self-hosting.md).
    enabling email delivery in setup. Published flows and due campaigns may then
    send real email. Test sends also require delivery to be enabled.
 
-![Ermes store onboarding](docs/images/onboarding-desktop.png)
+![Ermes guided Shopify setup](docs/images/shopify-onboarding.png)
 
 Read the [onboarding guide](docs/onboarding.md) for provider setup, configuration
 ownership and troubleshooting. Password reset, additional users and guided key

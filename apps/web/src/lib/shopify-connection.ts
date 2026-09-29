@@ -1,6 +1,9 @@
 import { getPool, installationRow } from "@ermes/db";
-import { merchantSettingsSchema } from "@ermes/core/installation";
-import { shopifyClient, READ_SCOPES } from "@ermes/shopify";
+import {
+  shopifyClient,
+  READ_SCOPES,
+  shopifyStoreProfile,
+} from "@ermes/shopify";
 
 /** Returns a reviewable profile; importing never saves sender settings or enables delivery. */
 export async function verifyShopifyConnection(importProfile = false) {
@@ -24,22 +27,6 @@ export async function verifyShopifyConnection(importProfile = false) {
     throw new Error(
       "Shopify settings changed during the request. Please try again.",
     );
-  const profile = importProfile
-    ? {
-        ...merchantSettingsSchema
-          .pick({ storeName: true, storefrontUrl: true, timezone: true })
-          .parse({
-            storeName: shop.name,
-            storefrontUrl: shop.primaryDomain?.url,
-            timezone: shop.ianaTimezone,
-          }),
-        senderName: String(shop.name),
-        senderEmail: merchantSettingsSchema.shape.senderEmail.safeParse(
-          shop.contactEmail,
-        ).success
-          ? String(shop.contactEmail)
-          : "",
-      }
-    : undefined;
+  const profile = importProfile ? shopifyStoreProfile(shop) : undefined;
   return { shopName: shop.name, scopes, ...(profile ? { profile } : {}) };
 }

@@ -7,7 +7,8 @@ import { createPreferenceToken } from "../packages/core/dist/index.js";
 
 // Run only against a fresh, disposable installation. Never enables sending.
 const baseURL = process.env.ERMES_TEST_URL;
-if (!baseURL) throw new Error("Set ERMES_TEST_URL to a disposable installation");
+if (!baseURL)
+  throw new Error("Set ERMES_TEST_URL to a disposable installation");
 const setupToken = process.env.ERMES_SETUP_TOKEN;
 const artifacts = process.env.ERMES_ARTIFACT_DIR ?? "/tmp/ermes-browser-smoke";
 await mkdir(artifacts, { recursive: true });
@@ -109,6 +110,29 @@ try {
     400,
   );
 
+  await expect(
+    page.getByRole("heading", { name: "Connect your Shopify store." }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Open Shopify Dev Dashboard" }),
+  ).toHaveAttribute("href", "https://dev.shopify.com/");
+  await page.screenshot({
+    path: `${artifacts}/shopify-connect-desktop.png`,
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert.ok(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+    "Shopify setup must fit mobile viewport",
+  );
+  await page.screenshot({
+    path: `${artifacts}/shopify-connect-mobile.png`,
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.getByRole("button", { name: "Set up manually for now" }).click();
   await page.locator('[name="storeName"]').fill("Acme Studio");
   await page.locator('[name="storefrontUrl"]').fill("https://example.test");
   await page.locator('[name="senderName"]').fill("The Acme team");
@@ -138,6 +162,7 @@ try {
     .locator('[name="resendApiKey"]')
     .fill("re_synthetic_browser_key_never_send");
   await page.getByRole("button", { name: "Save and continue" }).click();
+  await page.getByRole("button", { name: "1 Shopify", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Connect your Shopify store." }),
   ).toBeVisible();
@@ -148,8 +173,53 @@ try {
   await page
     .locator('[name="shopifyClientSecret"]')
     .fill("synthetic-shopify-secret-never-connect");
-  await page.getByRole("button", { name: "Save credentials" }).click();
-  await expect(page.getByRole("status")).toContainText("Settings saved");
+  await page
+    .getByText("App settings and configuration", { exact: true })
+    .click();
+  const downloadPromise = page.waitForEvent("download");
+  await page
+    .getByRole("button", { name: "Download app configuration" })
+    .click();
+  const download = await downloadPromise;
+  assert.equal(download.suggestedFilename(), "shopify.app.toml");
+  const stream = await download.createReadStream();
+  let configuration = "";
+  for await (const chunk of stream) configuration += chunk.toString();
+  assert.match(configuration, /client_id = "synthetic-client-id"/);
+  assert.match(configuration, /Replace EVERY https:\/\/ermes.example.com/);
+  assert.doesNotMatch(configuration, /synthetic-shopify-secret|client_secret/);
+  if (process.env.ERMES_SHOPIFY_FIXTURE === "true") {
+    await page
+      .getByRole("button", { name: "Connect store" })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: "Review your store details." }),
+    ).toBeVisible();
+    await expect(page.getByRole("status")).toContainText("Store connected");
+    await expect(page.locator('[name="senderEmail"]')).toHaveValue(
+      "hello@example.test",
+    );
+    await expect(page.locator('[name="storeName"]')).toHaveValue(
+      "Shopify fixture store",
+    );
+  } else {
+    // Without the synthetic Shopify server, exercise credential storage without real API requests.
+    assert.equal(
+      (
+        await owner.post("/api/onboarding", {
+          data: {
+            action: "integrations",
+            value: {
+              shopDomain: "synthetic-ermes.myshopify.com",
+              shopifyClientId: "synthetic-client-id",
+              shopifyClientSecret: "synthetic-shopify-secret-never-connect",
+            },
+          },
+        })
+      ).status(),
+      200,
+    );
+  }
   const status = await (await owner.get("/api/onboarding")).json();
   assert.equal(status.merchant.storeName, "Acme Studio");
   assert.equal(status.credentials.resendApiKey, true);
@@ -160,7 +230,9 @@ try {
     JSON.stringify(status),
     /re_synthetic|synthetic-shopify-secret/,
   );
-  await page.getByRole("button", { name: "Continue to image storage" }).click();
+  await page
+    .getByRole("button", { name: "4 Image storage", exact: true })
+    .click();
   await page.getByRole("button", { name: "Save and continue" }).click();
   await page.getByRole("link", { name: "Open your workspace" }).click();
   await expect(page).toHaveURL(/\/messaging$/);
@@ -267,7 +339,15 @@ try {
   assert.equal(unsubscribed.email_subscriber.subscribed, false);
   await page.goto("/messaging");
 
-  if (process.env.ERMES_SHOPIFY_FIXTURE === "true") await checkShopifyBrowser({page,context,owner,api,artifacts,baseURL});
+  if (process.env.ERMES_SHOPIFY_FIXTURE === "true")
+    await checkShopifyBrowser({
+      page,
+      context,
+      owner,
+      api,
+      artifacts,
+      baseURL,
+    });
   await page.goto("/messaging");
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);

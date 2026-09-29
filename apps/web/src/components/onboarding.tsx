@@ -1,23 +1,30 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect, type FormEvent } from "react";
+import {
+  ShopifySetupGuide,
+  ShopifyStorefrontSetup,
+  type ShopifySetupInfo,
+} from "./shopify-setup-guide";
 import type {
   InstallationStatus,
   MerchantSettings,
 } from "@ermes/core/installation";
 
 const steps = [
+  "Shopify",
   "Your store",
   "Email delivery",
-  "Shopify",
   "Image storage",
   "Ready to explore",
 ];
 export function Onboarding({
   initial,
+  shopifySetup,
   initialStep = 0,
 }: {
   initial: InstallationStatus;
+  shopifySetup: ShopifySetupInfo;
   initialStep?: number;
 }) {
   const [status, setStatus] = useState(initial),
@@ -25,7 +32,8 @@ export function Onboarding({
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [notice, setNotice] = useState(""),
-    [importRequested, setImportRequested] = useState(false),
+    [reviewingShopify, setReviewingShopify] = useState(false),
+    [clientId, setClientId] = useState(""),
     [merchant, setMerchant] = useState<MerchantSettings>(
       initial.merchant ?? {
         storeName: "",
@@ -37,7 +45,10 @@ export function Onboarding({
       },
     );
   useEffect(() => {
-    if (step !== 2 || !status.shopifyConnectorActive) return;
+    window.scrollTo({ top: 0 });
+  }, [step]);
+  useEffect(() => {
+    if (step !== 0 || !status.shopifyConnectorActive) return;
     const timer = setInterval(() => {
       void fetch("/api/onboarding")
         .then((r) => (r.ok ? r.json() : null))
@@ -66,22 +77,28 @@ export function Onboarding({
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
       const refreshed = await fetch("/api/onboarding");
+      if (!refreshed.ok)
+        throw new Error(
+          "Could not refresh setup. Reload the page to check the saved connection.",
+        );
       setStatus(await refreshed.json());
-      if (name === "import-shopify-store") {
+      if (name === "connect-shopify") {
         setMerchant((current) => ({
           ...current,
           ...result.profile,
           senderName: current.senderName || result.profile.senderName,
           senderEmail: current.senderEmail || result.profile.senderEmail,
         }));
-        setStep(0);
+        setReviewingShopify(true);
+        setClientId("");
+        setStep(1);
         setNotice(
-          "Store details imported. Review them below, then save to continue. Your sender and logo choices are kept.",
+          "Store connected. Review the imported details below. Your sender and logo choices are kept.",
         );
       } else
         setNotice(
-          name === "verify-shopify"
-            ? `Connected to ${result.shopName}.`
+          name === "merchant-and-sync"
+            ? "Store details saved. Shopify syncing has started."
             : "Settings saved.",
         );
       return true;
@@ -101,14 +118,15 @@ export function Onboarding({
     const form = event.currentTarget;
     const value = Object.fromEntries(
       [...new FormData(form)].filter(
-        ([, v]) => name === "merchant" || v !== "",
+        ([, v]) =>
+          name === "merchant" || name === "merchant-and-sync" || v !== "",
       ),
     );
     if (await action(name, value)) {
       if (name === "integrations") form.reset();
-      if (name === "integrations" && importRequested && step === 2) {
-        if (await action("import-shopify-store")) setImportRequested(false);
-      } else if (next !== undefined) setStep(next);
+      if (name === "merchant" || name === "merchant-and-sync")
+        setReviewingShopify(false);
+      if (next !== undefined) setStep(next);
     }
   }
   return (
@@ -150,42 +168,54 @@ export function Onboarding({
           <span>SETUP / {String(step + 1).padStart(2, "0")}</span>
           <Link href="/messaging">Explore workspace ↗</Link>
         </div>
-        {step === 0 && (
+        {step === 1 && (
           <section>
             <p className="eyebrow">MAKE IT YOURS</p>
-            <h2>Tell us about your store.</h2>
+            <h2>
+              {reviewingShopify
+                ? "Review your store details."
+                : "Tell us about your store."}
+            </h2>
             <p className="muted">
               These details personalise your emails. You can change them later.
             </p>
-            <div className="info-box">
-              <strong>Already on Shopify?</strong>
-              <p>
-                Import your store name, URL, timezone and a suggested sender.
-                Review everything before saving.
-              </p>
-              <button
-                className="secondary"
-                disabled={busy}
-                onClick={() => {
-                  if (
-                    status.credentials.shopifyClientId &&
-                    status.credentials.shopifyClientSecret &&
-                    status.shopDomain
-                  )
-                    void action("import-shopify-store");
-                  else {
-                    setImportRequested(true);
-                    setStep(2);
+            {!reviewingShopify && (
+              <div className="info-box">
+                <strong>Already on Shopify?</strong>
+                <p>
+                  Import your store name, URL, timezone and a suggested sender.
+                  Review everything before saving.
+                </p>
+                <button
+                  className="secondary"
+                  disabled={busy}
+                  onClick={() => {
+                    setStep(0);
                     setError("");
                     setNotice("");
-                  }
-                }}
-              >
-                Import from Shopify <span>→</span>
-              </button>
-            </div>
-            <p className="small">Or enter your details manually below.</p>
-            <form onSubmit={(event) => void submit(event, "merchant", 1)}>
+                  }}
+                >
+                  {status.shopifyVerifiedAt
+                    ? "Shopify connection"
+                    : "Connect Shopify"}{" "}
+                  <span>→</span>
+                </button>
+              </div>
+            )}
+            {!reviewingShopify && (
+              <p className="small">Or enter your details manually below.</p>
+            )}
+            <form
+              onSubmit={(event) =>
+                void submit(
+                  event,
+                  reviewingShopify && !status.shopifyConnectorActive
+                    ? "merchant-and-sync"
+                    : "merchant",
+                  2,
+                )
+              }
+            >
               <label>
                 Store name
                 <input
@@ -255,12 +285,25 @@ export function Onboarding({
                 </small>
               </label>
               <button className="primary" disabled={busy}>
-                Save and continue <span>→</span>
+                {busy
+                  ? "Saving…"
+                  : reviewingShopify && !status.shopifyConnectorActive
+                    ? "Save and start syncing"
+                    : "Save and continue"}{" "}
+                <span>→</span>
               </button>
+              {reviewingShopify && !status.shopifyConnectorActive && (
+                <p className="muted small">
+                  Import customers, products and the last 60 days of orders.
+                  Historical imports never send emails. New activity can start
+                  published flows; email delivery stays{" "}
+                  {status.deliveryEnabled ? "enabled" : "paused"}.
+                </p>
+              )}
             </form>
           </section>
         )}
-        {step === 1 && (
+        {step === 2 && (
           <section>
             <p className="eyebrow">DELIVER WITH CONFIDENCE</p>
             <h2>Connect your email provider.</h2>
@@ -276,15 +319,7 @@ export function Onboarding({
               </strong>
               <p>Saving credentials does not enable sending.</p>
             </div>
-            <form
-              onSubmit={(event) =>
-                void submit(
-                  event,
-                  "integrations",
-                  status.shopifyVerifiedAt ? 3 : 2,
-                )
-              }
-            >
+            <form onSubmit={(event) => void submit(event, "integrations", 3)}>
               <label>
                 Resend API key{" "}
                 <span className="optional">
@@ -334,121 +369,53 @@ export function Onboarding({
             </form>
           </section>
         )}
-        {step === 2 && (
+        {step === 0 && (
           <section>
             <p className="eyebrow">CONNECT YOUR COMMERCE</p>
             <h2>
-              {importRequested
-                ? "Connect Shopify to import your store."
+              {status.shopifyVerifiedAt
+                ? "Your Shopify connection."
                 : "Connect your Shopify store."}
             </h2>
             <p className="muted">
-              Use an app created in your Shopify organisation’s Dev Dashboard
-              and installed on your store.
+              One setup for your own store. Ermes checks access and imports your
+              store details so you can review them before syncing.
             </p>
-            <div className="info-box">
-              <strong>
-                {status.shopifyConnectorActive
-                  ? "Shopify syncing is active"
-                  : "Connect, then start syncing"}
-              </strong>
-              <p>
-                Import customers, products and the last 60 days of orders. New
-                activity can start published flows. Historical imports never
-                send emails.
-              </p>
-              <p>
-                <a
-                  href="https://github.com/giaggiola/Ermes/blob/main/docs/shopify.md"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Shopify app and storefront setup guide ↗
-                </a>
-              </p>
-            </div>
-            <form onSubmit={(event) => void submit(event, "integrations")}>
-              <label>
-                Shopify domain
-                <input
-                  name="shopDomain"
-                  placeholder="your-store.myshopify.com"
-                  defaultValue={status.shopDomain ?? ""}
-                  pattern="[a-z0-9][a-z0-9-]*\.myshopify\.com"
-                />
-              </label>
-              <label>
-                Client ID
-                <input
-                  name="shopifyClientId"
-                  autoComplete="off"
-                  placeholder={
-                    status.credentials.shopifyClientId
-                      ? "Saved — leave blank to keep"
-                      : "App client ID"
-                  }
-                />
-              </label>
-              <label>
-                Client secret
-                <input
-                  name="shopifyClientSecret"
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder={
-                    status.credentials.shopifyClientSecret
-                      ? "Saved — leave blank to keep"
-                      : "App client secret"
-                  }
-                />
-              </label>
-              <small>
-                Connection verification checks read_orders, read_customers and
-                read_products permissions. The app and store must belong to the
-                same organisation.
-              </small>
-              <div className="button-row">
-                <button className="primary" disabled={busy}>
-                  {importRequested
-                    ? "Save and import store details"
-                    : "Save credentials"}
-                </button>
-                <button
-                  className="secondary"
-                  type="button"
-                  disabled={busy || !status.credentials.shopifyClientSecret}
-                  onClick={() => void action("verify-shopify")}
-                >
-                  Verify connection
-                </button>
-              </div>
-            </form>
             {status.shopifyVerifiedAt && (
               <div className="info-box">
-                <strong>
-                  {status.shopifyConnectorActive
-                    ? "Syncing your store"
-                    : "Ready to sync"}
-                </strong>
+                <strong>{status.shopDomain}</strong>
                 <p>
-                  For live order and cart events, publish the app configuration
-                  with a public HTTPS Ermes address. Enable the Ermes theme
-                  embed to show published signup forms and identify consenting
-                  shoppers.
+                  {status.shopifyConnectorActive
+                    ? "Shopify syncing is active."
+                    : "Connected. Syncing is paused."}
                 </p>
                 <button
                   className="secondary"
                   disabled={busy}
-                  onClick={() =>
-                    void action("shopify-sync", {
-                      enabled: !status.shopifyConnectorActive,
-                    })
-                  }
+                  onClick={() => void action("connect-shopify", {})}
                 >
-                  {status.shopifyConnectorActive
-                    ? "Pause Shopify sync"
-                    : "Start Shopify sync"}
+                  {busy ? "Connecting…" : "Review store details"}
                 </button>
+                {status.merchant && (
+                  <button
+                    className="secondary"
+                    disabled={busy}
+                    onClick={() =>
+                      void action("shopify-sync", {
+                        enabled: !status.shopifyConnectorActive,
+                      })
+                    }
+                  >
+                    {status.shopifyConnectorActive
+                      ? "Pause Shopify sync"
+                      : "Start Shopify sync"}
+                  </button>
+                )}
+                <p>
+                  Historical imports never send emails. New activity can start
+                  published flows. Email delivery is{" "}
+                  {status.deliveryEnabled ? "enabled" : "paused"}.
+                </p>
                 {status.shopifySync && (
                   <div className="small">
                     <p>
@@ -492,19 +459,93 @@ export function Onboarding({
                 )}
               </div>
             )}
+            <details
+              className="shopify-connection"
+              key={status.shopifyVerifiedAt ? "connected" : "new"}
+              open={!status.shopifyVerifiedAt}
+            >
+              <summary>
+                {status.shopifyVerifiedAt
+                  ? "Connection settings and setup guide"
+                  : "Set up your Shopify app"}
+              </summary>
+              <ShopifySetupGuide info={shopifySetup} clientId={clientId} />
+              <form onSubmit={(event) => void submit(event, "connect-shopify")}>
+                <label>
+                  Shopify domain
+                  <input
+                    name="shopDomain"
+                    placeholder="your-store.myshopify.com"
+                    defaultValue={status.shopDomain ?? ""}
+                    required
+                    pattern="[a-zA-Z0-9][a-zA-Z0-9\-]*\.myshopify\.com"
+                    readOnly={Boolean(status.shopifySync)}
+                  />
+                  <small>Find this in Shopify under Settings → Domains.</small>
+                </label>
+                <label>
+                  Client ID
+                  <input
+                    name="shopifyClientId"
+                    autoComplete="off"
+                    value={clientId}
+                    onChange={(event) => setClientId(event.target.value)}
+                    required={!status.credentials.shopifyClientId}
+                    minLength={8}
+                    maxLength={256}
+                    placeholder={
+                      status.credentials.shopifyClientId
+                        ? "Saved — leave blank to keep"
+                        : "From your Shopify app’s Settings"
+                    }
+                  />
+                </label>
+                <label>
+                  Client secret
+                  <input
+                    name="shopifyClientSecret"
+                    type="password"
+                    autoComplete="new-password"
+                    required={!status.credentials.shopifyClientSecret}
+                    minLength={16}
+                    maxLength={512}
+                    placeholder={
+                      status.credentials.shopifyClientSecret
+                        ? "Saved — leave blank to keep"
+                        : "From your Shopify app’s Settings"
+                    }
+                  />
+                  <small>
+                    Encrypted before storage. Blank fields keep saved
+                    credentials.
+                  </small>
+                </label>
+                <button className="primary" disabled={busy}>
+                  {busy ? "Checking access and importing…" : "Connect store"}{" "}
+                  <span>→</span>
+                </button>
+                <p className="muted small">
+                  Checks permissions and imports store details in one step. Your
+                  app and store must belong to the same Shopify organisation.
+                </p>
+              </form>
+            </details>
+            {status.shopifyVerifiedAt && status.shopDomain && (
+              <ShopifyStorefrontSetup shopDomain={status.shopDomain} />
+            )}
             <button
               className="text-button"
               disabled={busy}
               onClick={() => {
-                setStep(importRequested ? 0 : 3);
-                setImportRequested(false);
+                setStep(status.shopifyVerifiedAt && status.merchant ? 3 : 1);
+                setReviewingShopify(false);
                 setError("");
                 setNotice("");
               }}
             >
-              {importRequested
-                ? "Enter store details manually →"
-                : "Continue to image storage →"}
+              {status.shopifyVerifiedAt && status.merchant
+                ? "Continue to image storage →"
+                : "Set up manually for now →"}
             </button>
           </section>
         )}
@@ -651,6 +692,9 @@ export function Onboarding({
                 Image storage credentials
               </p>
             </div>
+            {status.shopifyVerifiedAt && status.shopDomain && (
+              <ShopifyStorefrontSetup shopDomain={status.shopDomain} />
+            )}
             <div className="info-box">
               <strong>
                 {status.deliveryEnabled

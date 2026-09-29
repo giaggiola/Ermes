@@ -15,7 +15,16 @@ callbacks. Keep PostgreSQL private.
 
 ## 2. Create and install your own Shopify app
 
-Create the app in your organisation's Shopify Dev Dashboard. Request:
+The first setup screen in Ermes includes this checklist, copyable settings and a
+**Download app configuration** button. You only create the app once.
+
+1. Open [Shopify Dev Dashboard](https://dev.shopify.com/) in the organisation that
+   owns your store. Select **Create app → Start from Dev Dashboard** and name it
+   Ermes.
+2. Open **Versions**, create a version, and turn off embedding in Shopify admin.
+   Use the **App URL** shown in Ermes. Local installations use Shopify's default
+   app home until a public Ermes address is configured. Select API version
+   **2026-07** and add these access scopes:
 
 ```text
 read_orders,read_customers,write_customers,read_products,read_inventory,
@@ -25,12 +34,18 @@ read_discounts,write_discounts,write_app_proxy
 Orders include the normal last-60-days window. Ermes does not request
 `read_all_orders`. Customer and order access may require configuring protected
 customer data access in the Dev Dashboard. Grant access only for the store you
-intend to connect, then install the app on that store.
+intend to connect.
+
+3. Select **Release**, then **Install app**. Choose your store and approve access.
+4. Open the app's **Settings** to find the **Client ID** and **Client secret**.
+   Paste them and your `myshopify.com` domain into Ermes, then choose **Connect
+   store**. Ermes verifies all required permissions and imports store details in
+   one action. Failed checks preserve the previous saved connection.
 
 The read scopes support sync, checkout checks and product information.
 `write_customers` synchronises explicit newsletter subscriptions and opt-outs;
 discount access supports the discount step in flows. `write_app_proxy` supports
-the storefront extension. Starting sync checks these permissions.
+the storefront extension. Connecting and starting sync check these permissions.
 
 See Shopify's [client-credentials setup](https://shopify.dev/docs/apps/build/authentication-authorization/client-credentials-grant)
 and [protected customer data guidance](https://shopify.dev/docs/apps/launch/protected-customer-data).
@@ -46,6 +61,13 @@ cd shopify-app
 npm ci
 cp shopify.app.toml.example shopify.app.toml
 ```
+
+Alternatively, use **Download app configuration** in the Ermes setup guide and
+save it as `shopify-app/shopify.app.toml`. Enter the app client ID in the connection
+form before downloading to include it. Otherwise the download contains a client-ID
+placeholder. The generated configuration uses this installation's HTTPS `APP_URL`;
+local installations receive an explicitly marked example URL. No client secret is
+included. Both methods provide the webhook subscriptions and app-proxy settings.
 
 Edit the ignored `shopify.app.toml`:
 
@@ -76,10 +98,17 @@ Shopify documents [configuration](https://shopify.dev/docs/apps/build/cli-for-ap
 
 ## 4. Import store details and activate sync
 
-In Ermes setup, choose **Import from Shopify** or open the **Shopify** step. Save
-your `your-store.myshopify.com` domain, client ID and client secret. The server
-encrypts credentials; it never returns them or an Admin API access token to the
-browser. Tokens refresh automatically.
+New installations start on **Shopify**. Enter your `your-store.myshopify.com`
+domain and installed app credentials, then choose **Connect store**. This checks
+access and imports store details before saving the verified connection. The server
+encrypts credentials and never reads saved credential values or Admin API tokens
+back into the form. Tokens refresh automatically. Blank credential fields preserve
+saved values for the same store. **Set up manually for now** lets you explore Ermes
+without connecting Shopify.
+
+Existing connections show sync status and a **Review store details** button. The
+credentials and one-time setup guide are under **Connection settings and setup
+guide**.
 
 Import proposes the store name, primary storefront URL, timezone, sender name
 and public contact email. Review and save those details. Existing sender choices
@@ -87,7 +116,13 @@ are preserved. Add a logo manually or with your image library. A Shopify contact
 address does not establish permission to send through Resend: verify that domain
 separately.
 
-Choose **Verify connection**, then **Start Shopify sync**. The worker imports
+After reviewing your store and sender, choose **Save and start syncing**. This
+saves your reviewed details and activates Shopify imports; email delivery keeps its
+existing setting (paused on new installations). An already active connection uses
+**Save and continue**. Reopening the review alone never resumes paused syncing.
+You can also start or pause sync from the **Shopify** step after saving store details.
+
+The worker imports
 customers, products and recent order metadata in resumable pages. Existing customer
 opt-ins are imported without welcome emails. Existing local opt-outs, deleted
 profiles and delivery suppressions are preserved. Backfilled orders do not start
@@ -107,8 +142,10 @@ targeting and appearance, preview it, then publish. Autosaving edits preserves t
 previous published version until you publish again. The most recently published
 popup/flyout occupies the storefront overlay slot.
 
-In Shopify's theme editor, open **App embeds**, enable **Ermes signup forms**, and
-save the theme. Test in a separate storefront session that matches the form's
+Choose **Open Shopify theme editor** in Ermes setup. In **App embeds**, enable
+**Ermes signup forms** and save the theme. The extension must have been published
+with Shopify CLI first; the connection button does not upload theme code. Test in a
+separate storefront session that matches the form's
 device/page/login targeting and cooldown. Theme-editor previews do not subscribe
 customers or count impressions. Use Ermes' editor for draft previews.
 

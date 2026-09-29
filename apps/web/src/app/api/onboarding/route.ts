@@ -8,7 +8,11 @@ import {
 } from "@ermes/db";
 import { authenticateBrowser } from "@/lib/session";
 import { verifyShopifyConnection } from "@/lib/shopify-connection";
-import { setConnectorEnabled } from "@ermes/shopify";
+import {
+  connectShopify,
+  setConnectorEnabled,
+  shopifyAppConfiguration,
+} from "@ermes/shopify";
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
@@ -33,6 +37,29 @@ export async function POST(request: NextRequest) {
     const { action, value } = JSON.parse(raw);
     if (action === "merchant")
       return NextResponse.json(await saveMerchant(value));
+    if (action === "connect-shopify")
+      return NextResponse.json(await connectShopify(value));
+    if (action === "shopify-app-config") {
+      if (value?.clientId !== undefined && typeof value.clientId !== "string")
+        throw new Error("Enter a valid Shopify app client ID");
+      return NextResponse.json({
+        configuration: shopifyAppConfiguration(
+          process.env.APP_URL,
+          value?.clientId,
+        ),
+      });
+    }
+    if (action === "merchant-and-sync") {
+      await saveMerchant(value);
+      try {
+        await setConnectorEnabled(true);
+      } catch (error) {
+        throw new Error(
+          `Store details saved. Sync could not start: ${error instanceof Error ? error.message : "Please try again."}`,
+        );
+      }
+      return NextResponse.json(await installationStatus());
+    }
     if (action === "integrations")
       return NextResponse.json(await saveIntegrations(value));
     if (action === "import-shopify-store")

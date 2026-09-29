@@ -13,14 +13,28 @@ A setup key is optional. If the operator has set `ERMES_SETUP_TOKEN` in `.env`,
 the form also asks for that key. Normal login always uses email and password.
 Password recovery and additional users are not available yet.
 
-## 2. Add store and sender details
+## 2. Connect Shopify and review your store
 
-Choose **Import from Shopify** to connect your app and review its store name, URL,
-timezone and suggested sender. Importing does not save or enable delivery. You can
-also enter your store name, HTTPS storefront URL, sender name, sender email, timezone
-and optional HTTPS logo URL. The store name and URL personalise template content;
-the sender name and address identify outgoing email. The timezone is stored with
-your profile; existing campaign scheduling uses explicit dates and UTC storage.
+New installations open on the **Shopify** step. Follow the in-page checklist to
+create an app in your store's Shopify organisation, configure and release a
+version, and install it. Copyable scopes, the app URL and a ready-made configuration
+download are included. See [Shopify setup](shopify.md) for full instructions.
+
+Enter the store domain and the app's client ID/secret, then choose **Connect store**.
+Ermes verifies access, saves the encrypted credentials only after successful checks,
+and imports the store name, URL, timezone and suggested sender for review. A failed
+connection preserves previous credentials. Existing sender and logo choices are kept.
+
+Review the details, confirm the sender address you intend to verify with your email
+provider, and choose **Save and start syncing**. This imports customers, products and
+the last 60 days of orders without historical welcome/order emails. New activity can
+start published flows. Email delivery stays paused on a new installation.
+
+You can choose **Set up manually for now** and enter your store and sender details
+without Shopify. Existing installations open on their store settings; use the
+**Shopify** tab to reconnect, review imported details or inspect sync progress.
+The timezone is stored with your profile; existing campaign scheduling uses explicit
+dates and UTC storage.
 
 ## 3. Configure email delivery
 
@@ -40,19 +54,21 @@ exploring the workspace, not end-to-end provider delivery.
 Saving keys does not send email. Empty credential fields preserve saved values.
 You can skip provider setup while exploring templates and draft flows.
 
-## 4. Prepare Shopify credentials
+## 4. Enable live events and storefront forms
 
-Follow [Shopify setup](shopify.md) to create your app, configure the required
-permissions, publish webhook subscriptions and install the theme extension.
-Save your `myshopify.com` domain and the installed app's client ID/secret, then
-choose **Verify connection** and **Start Shopify sync**. Import progress, cached
-record counts, the latest webhook, checkout scanning and retry errors appear here.
+Follow [Shopify setup](shopify.md#3-publish-the-app-configuration-and-extension)
+to publish the supplied webhook configuration and theme extension using Shopify
+CLI. Shopify needs a public HTTPS Ermes address for live callbacks and storefront
+requests. A connection test confirms API access; it does not confirm webhook
+reachability or that the theme extension is enabled.
 
-The app and store must belong to the same Shopify organisation for the
-[client-credentials grant](https://shopify.dev/docs/apps/build/authentication-authorization/client-credentials-grant).
-Sync activation is separate from email delivery. Customers/products and the last
-60 days of orders import without starting historical automations. New events can
-start published flows. Checkout recovery considers activity since activation.
+Choose **Open Shopify theme editor** from setup, enable **Ermes signup forms** in
+**App embeds**, and save. Publish a popup or flyout in Ermes to display it.
+
+The **Shopify** step shows import progress, counts, the latest webhook, checkout
+scanning and retry errors. Use **Pause Shopify sync** and **Start Shopify sync**
+independently from email delivery. Reconnecting or reviewing details preserves the
+current sync state. Checkout recovery considers activity since activation.
 
 ## 5. Connect image storage
 
@@ -108,7 +124,7 @@ simply replacing it; an explicit re-encryption workflow is required first.
 
 Shopify uses short-lived access tokens held only in server memory. Different-organisation
 OAuth installs need a future authorization-code flow; this version uses your own app.
-Starting sync verifies the complete permission set listed in the Shopify guide.
+Connecting and starting sync verify the complete permission set listed in the Shopify guide.
 Pause Shopify ingestion and outbound email delivery independently in setup.
 
 Resend's sender domain must be verified separately. The owner acknowledges that
@@ -123,9 +139,9 @@ and one-click POST routes stay available independently of sending.
   `docker compose up -d web` to return to email-and-password setup.
 - **Request origin is not allowed:** make `APP_URL` match the exact address open in
   your browser and run `docker compose up -d web worker`.
-- **Shopify verification fails:** check the domain, app installation, scopes and
+- **Shopify connection fails:** check the domain, app installation, scopes and
   that the app/store belong to the same organisation.
-- **No Shopify activity after verification:** choose **Start Shopify sync**, check
+- **No Shopify activity after connecting:** choose **Start Shopify sync**, check
   the worker and confirm the published webhook destination is reachable over HTTPS.
   For signup forms, also enable the Ermes theme embed and publish a popup/flyout.
 - **Email delivery is disabled:** configure your sender and Resend key, verify the

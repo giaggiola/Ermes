@@ -8,3 +8,5 @@ export * from "./commands.js";
 export * from "./worker.js";
 export * from "./configuration.js";
 export * from "./storefront.js";
+export * from "./onboarding.js";
+export * from "./app-configuration.js";

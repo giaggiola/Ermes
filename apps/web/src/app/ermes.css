@@ -265,6 +265,77 @@ small {
 .info-box .secondary {
   margin-top: 14px;
 }
+.info-box .secondary + .secondary {
+  margin-left: 8px;
+}
+.shopify-connection {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-top: 24px;
+}
+.shopify-connection summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.shopify-guide ol {
+  list-style: decimal;
+  padding-left: 20px;
+  margin-top: 20px;
+}
+.shopify-guide li + li {
+  margin-top: 22px;
+}
+.shopify-guide strong {
+  font-size: 13px;
+}
+.shopify-guide p,
+.shopify-guide a {
+  font-size: 12px;
+  line-height: 1.7;
+  margin-top: 8px;
+}
+.shopify-guide p {
+  color: var(--muted-foreground);
+}
+.shopify-guide a,
+.shopify-guide button:not(.secondary),
+.info-box p a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.shopify-settings {
+  margin-top: 12px;
+  padding: 14px;
+  background: var(--muted);
+  border-radius: calc(var(--radius) - 4px);
+}
+.setup-copy-field {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-top: 16px;
+}
+.setup-copy-field button {
+  font-size: 12px;
+  cursor: pointer;
+}
+.setup-copy-field input,
+.setup-copy-field textarea {
+  grid-column: 1 / -1;
+  min-width: 0;
+  width: 100%;
+}
+.setup-copy-field textarea {
+  border: 1px solid var(--input);
+  border-radius: calc(var(--radius) - 4px);
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.7;
+  background: var(--background);
+  resize: vertical;
+}
 .setup-main .checkbox-label {
   display: flex;
   flex-direction: row;
